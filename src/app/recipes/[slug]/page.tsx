@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getRecipeBySlug, getRelatedRecipes } from "@/lib/firebase/recipes";
+import { getRecipeBySlug, getRelatedRecipes, getAllRecipeSlugs } from "@/lib/firebase/recipes";
 import { SAMPLE_RECIPES } from "@/lib/sampleData";
-import { SITE_NAME, AUTHOR_NAME } from "@/lib/site";
+import { SITE_NAME, AUTHOR_NAME, SITE_URL } from "@/lib/site";
 import { getCategoryLabel } from "@/lib/constants";
 import { RecipePageClient } from "./RecipePageClient";
 import type { Recipe } from "@/types";
+
+export const revalidate = 3600;
 
 async function getRecipe(slug: string): Promise<Recipe | null> {
   try {
@@ -35,16 +37,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: recipe.seo?.metaTitle || recipe.title,
     description: recipe.seo?.metaDescription || recipe.description,
+    alternates: { canonical: `/recipes/${recipe.slug}` },
     openGraph: {
       title: recipe.title,
       description: recipe.description,
       type: "article",
       siteName: SITE_NAME,
+      url: `/recipes/${recipe.slug}`,
     },
   };
 }
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  try {
+    const slugs = await getAllRecipeSlugs();
+    if (slugs.length > 0) return slugs.map((slug) => ({ slug }));
+  } catch (error) {
+    console.error("[recipes/[slug]] could not load slugs from Firestore, using sample data:", error);
+  }
   return SAMPLE_RECIPES.map((r) => ({ slug: r.slug }));
 }
 
@@ -61,8 +71,10 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
     "@type": "Recipe",
     name: recipe.title,
     description: recipe.description,
+    url: `${SITE_URL}/recipes/${recipe.slug}`,
     image: recipe.heroImage || undefined,
     author: { "@type": "Person", name: AUTHOR_NAME },
+    publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     datePublished: recipe.publishedAt?.toISOString(),
     prepTime: `PT${recipe.prepTime}M`,
     cookTime: `PT${recipe.cookTime}M`,

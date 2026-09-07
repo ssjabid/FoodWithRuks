@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
@@ -17,7 +18,18 @@ import { PageTransition } from "@/components/shared/PageTransition";
 import { ScrollProgress } from "@/components/shared/ScrollProgress";
 import { StaggerContainer, StaggerItem } from "@/components/shared/StaggerReveal";
 import { formatDate, formatCookTime } from "@/lib/utils";
+import { getCategoryLabel } from "@/lib/constants";
+import { isInstagramUrl } from "@/components/recipe/InstagramEmbed";
+import { Skeleton } from "@/components/ui/Skeleton";
 import type { Recipe } from "@/types";
+
+const InstagramEmbed = dynamic(
+  () => import("@/components/recipe/InstagramEmbed").then((m) => m.InstagramEmbed),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="mx-auto h-[480px] w-full max-w-[328px] rounded-[var(--radius-lg)]" />,
+  }
+);
 
 interface RecipePageClientProps {
   recipe: Recipe;
@@ -33,16 +45,23 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
       <ScrollProgress />
       <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="max-w-4xl">
-          {/* Hero placeholder */}
-          <div className="mb-8">
-            <FoodPlaceholder className="w-full h-64 sm:h-80 rounded-[var(--radius-lg)]" />
-          </div>
+          {/* Hero: Instagram reel (when provided) beside the placeholder */}
+          {isInstagramUrl(recipe.instagramUrl) ? (
+            <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_360px] items-start">
+              <FoodPlaceholder className="w-full h-64 sm:h-80 lg:h-full lg:min-h-[480px] rounded-[var(--radius-lg)]" />
+              <InstagramEmbed url={recipe.instagramUrl} />
+            </div>
+          ) : (
+            <div className="mb-8">
+              <FoodPlaceholder className="w-full h-64 sm:h-80 rounded-[var(--radius-lg)]" />
+            </div>
+          )}
 
           {/* Recipe Header */}
           <header className="mb-8">
             <div className="flex flex-wrap gap-2 mb-3">
               {recipe.category.map((cat) => (
-                <Badge key={cat}>{cat}</Badge>
+                <Badge key={cat}>{getCategoryLabel(cat)}</Badge>
               ))}
               {recipe.dietaryTags.map((tag) => (
                 <Badge key={tag} variant="accent">{tag}</Badge>
@@ -98,7 +117,7 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
 
           {/* Ingredients */}
           <section id="ingredients" className="mb-10">
-            <h2 className="font-bold tracking-tight text-2xl sm:text-3xl text-[var(--color-text-primary)] mb-6">
+            <h2 className="font-semibold tracking-tight text-2xl sm:text-3xl text-[var(--color-text-primary)] mb-6">
               Ingredients
             </h2>
             <IngredientList
@@ -110,7 +129,7 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
 
           {/* Instructions */}
           <section className="mb-10">
-            <h2 className="font-bold tracking-tight text-2xl sm:text-3xl text-[var(--color-text-primary)] mb-6">
+            <h2 className="font-semibold tracking-tight text-2xl sm:text-3xl text-[var(--color-text-primary)] mb-6">
               Instructions
             </h2>
             <div className="space-y-4">
@@ -124,7 +143,7 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
           {recipe.tips && (
             <section className="mb-10">
               <div className="p-6 rounded-[var(--radius-lg)] bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20">
-                <h3 className="font-bold tracking-tight text-xl text-[var(--color-text-primary)] mb-2">
+                <h3 className="font-semibold tracking-tight text-xl text-[var(--color-text-primary)] mb-2">
                   Tips & Notes
                 </h3>
                 <p className="text-[var(--color-text-primary)] leading-relaxed">{recipe.tips}</p>
@@ -138,7 +157,7 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
               <motion.button
                 onClick={() => setNutritionOpen(!nutritionOpen)}
                 whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 font-bold tracking-tight text-xl text-[var(--color-text-primary)] mb-4"
+                className="flex items-center gap-2 font-semibold tracking-tight text-xl text-[var(--color-text-primary)] mb-4"
               >
                 Nutrition Information
                 <motion.svg
@@ -177,7 +196,7 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
         {/* Related Recipes */}
         {relatedRecipes.length > 0 && (
           <section className="mt-16 related-recipes">
-            <h2 className="font-bold tracking-tight text-2xl sm:text-3xl text-[var(--color-text-primary)] mb-8">
+            <h2 className="font-semibold tracking-tight text-2xl sm:text-3xl text-[var(--color-text-primary)] mb-8">
               You Might Also Like
             </h2>
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
