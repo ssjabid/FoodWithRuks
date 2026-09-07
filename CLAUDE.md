@@ -107,6 +107,7 @@
 - Public comments UI still not built (API + moderation exist).
 - Real images await Firebase Storage.
 - Instagram handle in `siteSettings` is stored for reference; public links use `SOCIAL_LINKS` in `src/lib/site.ts`.
+- `npm run lint` (eslint flat config) passes with ~21 warnings: React Compiler rules (set-state-in-effect, immutability, refs) are downgraded to warn for pre-existing patterns; clean up incrementally.
 - Framer Motion animations require requestAnimationFrame; automated screenshots in hidden panes appear blank (not a site bug).
 
 ## Commands
