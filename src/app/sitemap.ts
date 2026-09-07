@@ -1,7 +1,6 @@
 import { MetadataRoute } from "next";
 import { SAMPLE_RECIPES, SAMPLE_LIFESTYLE_POSTS } from "@/lib/sampleData";
-
-const SITE_URL = "https://foodwithruks.com";
+import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Static pages

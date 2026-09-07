@@ -51,13 +51,13 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
 
     if (selectedCategories.length > 0) {
       result = result.filter((r) =>
-        selectedCategories.some((cat) => r.category.includes(cat))
+        selectedCategories.some((cat) => (r.category as string[]).includes(cat))
       );
     }
 
     if (selectedMealTypes.length > 0) {
       result = result.filter((r) =>
-        selectedMealTypes.some((mt) => r.mealType.includes(mt))
+        selectedMealTypes.some((mt) => (r.mealType as string[]).includes(mt))
       );
     }
 

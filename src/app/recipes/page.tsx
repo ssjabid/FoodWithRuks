@@ -5,7 +5,7 @@ import { SAMPLE_RECIPES } from "@/lib/sampleData";
 
 export const metadata: Metadata = {
   title: "Recipes",
-  description: "Browse all recipes from FoodWithRuks — find your next favorite dish.",
+  description: "Browse every recipe from Agooh & Ruks — wholesome, easy-to-follow food for your soul.",
 };
 
 export default async function RecipesPage() {

@@ -1,5 +1,6 @@
 import { adminDb } from "./admin";
 import type { Recipe } from "@/types";
+import type { RecipeCategory, MealType } from "@/lib/constants";
 
 function docToRecipe(doc: FirebaseFirestore.QueryDocumentSnapshot): Recipe {
   const data = doc.data();
@@ -10,10 +11,10 @@ function docToRecipe(doc: FirebaseFirestore.QueryDocumentSnapshot): Recipe {
     description: data.description,
     personalStory: data.personalStory || "",
     instagramUrl: data.instagramUrl || "",
-    category: data.category || [],
+    category: (data.category || []) as RecipeCategory[],
     tags: data.tags || [],
     dietaryTags: data.dietaryTags || [],
-    mealType: data.mealType || [],
+    mealType: (data.mealType || []) as MealType[],
     specialOccasion: data.specialOccasion || [],
     prepTime: data.prepTime || 0,
     cookTime: data.cookTime || 0,

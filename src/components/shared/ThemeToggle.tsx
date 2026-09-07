@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { STORAGE_KEYS } from "@/lib/site";
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(false);
@@ -9,7 +10,7 @@ export function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("fwr_theme");
+    const stored = localStorage.getItem(STORAGE_KEYS.theme);
     if (stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
       setDark(true);
       document.documentElement.classList.add("dark");
@@ -20,7 +21,7 @@ export function ThemeToggle() {
     const next = !dark;
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("fwr_theme", next ? "dark" : "light");
+    localStorage.setItem(STORAGE_KEYS.theme, next ? "dark" : "light");
   };
 
   if (!mounted) return <div className="w-9 h-9" />;

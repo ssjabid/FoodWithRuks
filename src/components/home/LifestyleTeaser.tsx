@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SAMPLE_LIFESTYLE_POSTS } from "@/lib/sampleData";
 import { formatDate } from "@/lib/utils";
+import { getLifestyleCategoryLabel } from "@/lib/constants";
 
 export function LifestyleTeaser() {
   const posts = SAMPLE_LIFESTYLE_POSTS.slice(0, 3);
@@ -44,7 +45,7 @@ export function LifestyleTeaser() {
                     </motion.div>
                   </div>
                   <div className="p-4">
-                    <Badge variant="accent" className="mb-2">{post.category}</Badge>
+                    <Badge variant="accent" className="mb-2">{getLifestyleCategoryLabel(post.category)}</Badge>
                     <h3 className="text-base font-bold tracking-tight text-[var(--color-text-primary)] mb-2 line-clamp-2">
                       {post.title}
                     </h3>

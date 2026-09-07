@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { FilterPill } from "@/components/ui/FilterPill";
-import { LIFESTYLE_CATEGORIES } from "@/lib/constants";
+import { LIFESTYLE_CATEGORIES, getLifestyleCategoryLabel } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { StaggerContainer, StaggerItem } from "@/components/shared/StaggerReveal";
@@ -45,10 +45,10 @@ export function LifestyleClient({ initialPosts }: LifestyleClientProps) {
           />
           {LIFESTYLE_CATEGORIES.map((cat) => (
             <FilterPill
-              key={cat}
-              label={cat}
-              selected={selectedCategory === cat}
-              onClick={() => setSelectedCategory(cat)}
+              key={cat.value}
+              label={cat.label}
+              selected={selectedCategory === cat.value}
+              onClick={() => setSelectedCategory(cat.value)}
             />
           ))}
         </div>
@@ -78,7 +78,7 @@ export function LifestyleClient({ initialPosts }: LifestyleClientProps) {
                         </motion.div>
                       </div>
                       <div className="p-4">
-                        <Badge variant="accent" className="mb-2">{post.category}</Badge>
+                        <Badge variant="accent" className="mb-2">{getLifestyleCategoryLabel(post.category)}</Badge>
                         <h2 className="text-base font-bold tracking-tight text-[var(--color-text-primary)] mb-2 line-clamp-2">
                           {post.title}
                         </h2>

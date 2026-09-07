@@ -1,5 +1,6 @@
 import { adminDb } from "./admin";
 import type { LifestylePost } from "@/types";
+import type { LifestyleCategory } from "@/lib/constants";
 
 function docToPost(doc: FirebaseFirestore.QueryDocumentSnapshot): LifestylePost {
   const data = doc.data();
@@ -9,7 +10,7 @@ function docToPost(doc: FirebaseFirestore.QueryDocumentSnapshot): LifestylePost 
     slug: data.slug,
     excerpt: data.excerpt || "",
     content: data.content || "",
-    category: data.category || "",
+    category: (data.category || "") as LifestyleCategory,
     readingTime: data.readingTime || 0,
     status: data.status || "draft",
     createdAt: data.createdAt?.toDate() || new Date(),

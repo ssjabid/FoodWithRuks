@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { StaggerContainer, StaggerItem } from "@/components/shared/StaggerReveal";
 import { formatDate } from "@/lib/utils";
+import { getLifestyleCategoryLabel } from "@/lib/constants";
 import type { LifestylePost } from "@/types";
 
 interface LifestylePostClientProps {
@@ -21,7 +22,7 @@ export function LifestylePostClient({ post, relatedPosts }: LifestylePostClientP
         <div className="max-w-3xl">
           {/* Header */}
           <header className="mb-8 sm:mb-10">
-            <Badge variant="accent" className="mb-3">{post.category}</Badge>
+            <Badge variant="accent" className="mb-3">{getLifestyleCategoryLabel(post.category)}</Badge>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
               {post.title}
             </h1>
@@ -55,7 +56,7 @@ export function LifestylePostClient({ post, relatedPosts }: LifestylePostClientP
                   <Link href={`/lifestyle/${p.slug}`} className="group block">
                     <Card>
                       <div className="p-4">
-                        <Badge variant="accent" className="mb-2">{p.category}</Badge>
+                        <Badge variant="accent" className="mb-2">{getLifestyleCategoryLabel(p.category)}</Badge>
                         <h3 className="text-base font-bold tracking-tight text-[var(--color-text-primary)] mb-1 line-clamp-2">
                           {p.title}
                         </h3>

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getRecipeBySlug, getRelatedRecipes } from "@/lib/firebase/recipes";
 import { SAMPLE_RECIPES } from "@/lib/sampleData";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, AUTHOR_NAME } from "@/lib/site";
+import { getCategoryLabel } from "@/lib/constants";
 import { RecipePageClient } from "./RecipePageClient";
 import type { Recipe } from "@/types";
 
@@ -61,14 +62,13 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
     name: recipe.title,
     description: recipe.description,
     image: recipe.heroImage || undefined,
-    author: { "@type": "Person", name: "Ruks" },
+    author: { "@type": "Person", name: AUTHOR_NAME },
     datePublished: recipe.publishedAt?.toISOString(),
     prepTime: `PT${recipe.prepTime}M`,
     cookTime: `PT${recipe.cookTime}M`,
     totalTime: `PT${recipe.prepTime + recipe.cookTime}M`,
     recipeYield: `${recipe.servings} servings`,
-    recipeCategory: recipe.category[0] || "",
-    recipeCuisine: "South Asian",
+    recipeCategory: recipe.category[0] ? getCategoryLabel(recipe.category[0]) : "",
     keywords: recipe.tags.join(", "),
     recipeIngredient: recipe.ingredients.map((i) => `${i.amount} ${i.unit} ${i.name}`),
     recipeInstructions: recipe.instructions.map((i) => ({

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
-import { SITE_NAME, RECIPE_CATEGORIES } from "@/lib/constants";
+import { RECIPE_CATEGORIES } from "@/lib/constants";
+import { SITE_NAME } from "@/lib/site";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();

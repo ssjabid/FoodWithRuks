@@ -8,6 +8,7 @@ import { StarRating } from "@/components/ui/StarRating";
 import { FavoriteButton } from "@/components/shared/FavoriteButton";
 import { FoodPlaceholder } from "@/components/shared/FoodPlaceholder";
 import { formatCookTime } from "@/lib/utils";
+import { getCategoryLabel } from "@/lib/constants";
 import type { Recipe } from "@/types";
 
 interface RecipeCardProps {
@@ -36,7 +37,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
         <div className="p-4">
           <div className="flex flex-wrap gap-1.5 mb-2">
             {recipe.category.slice(0, 2).map((cat) => (
-              <Badge key={cat} variant="default">{cat}</Badge>
+              <Badge key={cat} variant="default">{getCategoryLabel(cat)}</Badge>
             ))}
           </div>
 

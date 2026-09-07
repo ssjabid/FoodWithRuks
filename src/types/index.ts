@@ -1,3 +1,5 @@
+import type { RecipeCategory, MealType, LifestyleCategory } from "@/lib/constants";
+
 export interface Recipe {
   id: string;
   title: string;
@@ -5,10 +7,10 @@ export interface Recipe {
   description: string;
   personalStory: string;
   instagramUrl?: string;
-  category: string[];
+  category: RecipeCategory[];
   tags: string[];
   dietaryTags: string[];
-  mealType: string[];
+  mealType: MealType[];
   specialOccasion: string[];
   prepTime: number;
   cookTime: number;
@@ -57,16 +59,6 @@ export interface SEO {
   ogImage?: string;
 }
 
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  image: string;
-  order: number;
-  recipeCount: number;
-}
-
 export interface Comment {
   id: string;
   recipeId: string;
@@ -89,20 +81,20 @@ export interface ContactMessage {
 }
 
 export interface SiteSettings {
-  siteName: string;
-  tagline: string;
-  aboutText: string;
-  aboutImage: string;
-  socialLinks: {
-    instagram?: string;
-    pinterest?: string;
-    tiktok?: string;
-    youtube?: string;
-  };
-  newsletterEnabled: boolean;
-  heroImage: string;
-  heroTagline: string;
-  instagramPostUrls: string[];
+  /** Slug of the recipe pinned as "New Recipe of the Week"; empty = latest published. */
+  recipeOfTheWeekSlug: string;
+  instagramHandle: string;
+  updatedAt?: Date;
+}
+
+export type SubscriberSource = "home" | "footer" | "newsletter-page";
+
+export interface Subscriber {
+  id: string;
+  email: string;
+  source: SubscriberSource;
+  status: "subscribed" | "unsubscribed";
+  createdAt: Date;
 }
 
 export interface LifestylePost {
@@ -111,7 +103,7 @@ export interface LifestylePost {
   slug: string;
   excerpt: string;
   content: string;
-  category: string;
+  category: LifestyleCategory;
   readingTime: number;
   status: "draft" | "published";
   createdAt: Date;

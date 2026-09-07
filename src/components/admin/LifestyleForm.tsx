@@ -84,7 +84,7 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
         >
           <option value="">Select category</option>
           {LIFESTYLE_CATEGORIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c.value} value={c.value}>{c.label}</option>
           ))}
         </select>
       </div>

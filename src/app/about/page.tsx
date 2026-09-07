@@ -3,7 +3,7 @@ import { AboutPageClient } from "./AboutPageClient";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Meet Ruks — the home cook behind FoodWithRuks. Learn about my cooking journey and passion for food.",
+  description: "Meet Ruks — the home cook behind Agooh & Ruks. Food made with love, cooked simply, for your soul.",
 };
 
 export default function AboutPage() {
