@@ -1,10 +1,13 @@
-# FoodWithRuks — Project Instructions
+# Agooh & Ruks — Project Instructions
 
 ## Project Overview
 
-**FoodWithRuks** is a modern, beautifully designed recipe blog/website for an Instagram food creator. The site showcases her recipes with stunning visuals, clean typography, and a delightful user experience. Think: a personal food brand — not a generic blog template.
+**Agooh & Ruks** is the recipe and lifestyle blog of Ruks, an Instagram food creator. The energy is "food made with love": recipes that are easy to follow and wholesome, food for your soul, and the joy of cooking and devouring food with flavour. Beyond the kitchen it covers days out, eating out, travel, parenting and crafts.
 
-The goal is a site that feels like opening a gorgeous cookbook, with the convenience of Instagram-level content discovery and the performance of a modern web app.
+- **Name**: Agooh & Ruks
+- **Byline**: Pass the Butter, Ruks
+- **Taglines**: "Pure comfort, cooked simply" (hero) · "Warmth in every bite" (secondary)
+- **Primary social**: Instagram @foodwithruks
 
 ---
 
@@ -12,543 +15,163 @@ The goal is a site that feels like opening a gorgeous cookbook, with the conveni
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | **Next.js 14+ (App Router)** with TypeScript |
-| Styling | **Tailwind CSS** + custom design tokens |
-| Database | **Firebase Firestore** (recipes, categories, user data) |
-| Auth | **Firebase Auth** (admin login for CMS) |
-| Storage | **Firebase Storage** (recipe images, media) |
-| Hosting | **Vercel** (with custom domain support) |
-| Source Control | **GitHub** |
-| Dev Tool | **Claude Code** |
-| Instagram Embeds | **react-social-media-embed** (just paste URL, no API tokens) |
+| Framework | Next.js 16 (App Router) + React 19 + TypeScript strict |
+| Styling | Tailwind CSS v4 (CSS-first) + design tokens in `src/styles/globals.css` |
+| Fonts | Lora (headings) + Inter (body), `next/font/google` |
+| Animation | Framer Motion |
+| Database | Firebase Firestore (Admin SDK, server only) |
+| Auth | Firebase Auth (Google sign-in) for the admin CMS |
+| Hosting | Vercel (Git integration; `main` = production) |
+| Embeds | react-social-media-embed (Instagram) |
 
 ---
 
-## Design Philosophy
+## Design Philosophy — "Warm Ma (空間)"
 
-### Brand Identity
-- **Name**: FoodWithRuks
-- **Vibe**: Clean, natural, intentional — like a stylish Japanese-inspired café where a friend shares her favorite recipes
-- **Style Fusion**: Sage green + monochrome elegance + Japanese "Ma" (空間) design principles
-- **NOT**: Generic food blog, corporate, cluttered, overly playful/childish, or cold minimalism
+Generous negative space (Ma), asymmetric balance, simplicity, natural shapes, understated elegance — now in a warmer, earthier palette with a serif voice.
 
-### Design Direction — "Warm Ma (空間)"
+**In practice**
+- Extra-large padding, soft shadows, 16px card corners, 10px button corners, pill badges
+- Lora gives the brand its handwritten-cookbook warmth; Inter keeps UI text crisp
+- Animations are gentle (fade/slide 300–400ms, spring hovers); nothing that draws attention to itself
+- Mobile first: the hamburger drawer is the primary navigation on every screen size
 
-This design blends a natural sage green + monochrome palette with Japanese aesthetic principles:
+### Colour System — "Warm Sage & Clay"
 
-1. **Ma (空間) — Negative Space**: Generous breathing room between all elements. Empty space is not wasted — it gives the food photography room to shine.
+Swatches: clay `#C7A491` · blush `#EECFCA` · sage `#919682` · light sage `#C7CDBF` · olive `#595E48`
 
-2. **Fukinsei (不均整) — Asymmetric Balance**: Layouts don't need to be perfectly symmetrical. Use intentional asymmetry — a hero image offset to one side, text aligned left with open space right.
-
-3. **Kanso (簡素) — Simplicity**: Strip away everything that doesn't serve a purpose. No decorative clutter. Every element earns its place.
-
-4. **Shizen (自然) — Naturalness**: Subtle organic shapes (soft rounded corners, gentle curves), natural-feeling transitions.
-
-5. **Shibui (渋い) — Understated Elegance**: Quietly beautiful. Sophistication through restraint, not showing off.
-
-**In practice:**
-- Extra-large padding/margins everywhere (1.5-2x what feels "normal")
-- Food photos get maximum space — no cramped grids
-- Subtle fade-in animations that feel like gentle breathing (200-400ms, ease-out)
-- Soft shadows, no harsh borders
-- Rounded corners (12-16px on cards, 8px on smaller elements)
-- Asymmetrical hero layouts (e.g., 60/40 splits instead of 50/50)
-- Organic flowing sections rather than rigid boxes
-
-### Color System (Interchangeable Palette)
-
-All colors defined as CSS custom properties / Tailwind config tokens — swap the entire palette by changing ~12 values.
-
-**Primary Palette — "Monochrome & Sage" (Default Light Mode):**
 ```
---color-primary: #5B7F5E        /* Sage green — buttons, accents, links */
---color-primary-hover: #4A6B4D  /* Darker sage — hover states */
---color-secondary: #F0F2ED      /* Light sage tint — card backgrounds, highlights */
---color-accent: #7A9E7E         /* Medium sage — tags, badges, secondary accents */
---color-background: #FFFFFF     /* White — page background */
---color-surface: #FAFBF9        /* Near-white sage tint — cards, modals */
---color-text-primary: #111111   /* Near-black — body text */
---color-text-secondary: #6B6B6B /* Gray — captions, metadata */
---color-text-tertiary: #999999  /* Light gray — subtle captions */
---color-border: #E8EBE5         /* Soft sage border */
---color-success: #5B7F5E        /* Sage green — success states */
---color-warning: #D4A843        /* Warm amber — warnings */
---color-error: #C75050          /* Muted red — errors */
+Light                                  Dark
+--color-primary:      #595E48          #C7CDBF
+--color-primary-hover:#474B39          #D9DDD1
+--color-on-primary:   #FFFFFF          #1B1D17
+--color-secondary:    #E4E8DD          #333828
+--color-accent:       #C7A491          #C7A491   (decorative; text-safe only in dark)
+--color-accent-soft:  #EECFCA          #3A2E2A
+--color-accent-text:  #8F624B          #D9B9A5   (clay for text, AA)
+--color-sage:         #919682          #919682   (icons/borders/large text only)
+--color-background:   #FCFBF8          #1B1D17
+--color-surface:      #F5F3EE          #22251D
+--color-elevated:     #FFFFFF          #2B2F25
+--color-text-primary: #2A2D22          #F1EEE7
+--color-text-secondary:#595E48         #B9BDAF
+--color-text-tertiary:#6E7362          #868B7B
+--color-border:       #DDE1D6          #3A3F32
+--color-success/warning/error: #6C7E5B / #B98230 / #B5564A   (dark: #A7B894 / #D9B27A / #E39383)
 ```
 
-**Dark Mode Palette:**
-```
---color-primary: #7A9E7E
---color-primary-hover: #8FB893
---color-secondary: #1A1F1A
---color-accent: #5B7F5E
---color-background: #0A0C0A
---color-surface: #141814
---color-text-primary: #E8EBE5
---color-text-secondary: #8A8F87
---color-text-tertiary: #5A5F57
---color-border: #2A302A
---color-success: #7A9E7E
---color-warning: #D4A843
---color-error: #C75050
-```
+Rules: colours are declared once in `:root` and `.dark` (never duplicated in `@theme`). Anything on a primary background uses `--color-on-primary`. `#919682` is 3.05:1 on white — never body text.
 
 ### Typography
-- **All text**: Inter (clean, modern sans-serif — highly readable)
-- **Headings**: Inter weight 700–800, tight letter-spacing (`tracking-tight`)
-- **Body**: Inter weight 400–500
-- **Logo**: "FoodWith" in text-primary + "Ruks" in sage green, Inter weight 700–800
-
-### Spacing System (8px grid, Ma-inspired)
-```
---space-xs: 4px
---space-sm: 8px
---space-md: 16px
---space-lg: 24px
---space-xl: 32px
---space-2xl: 48px
---space-3xl: 64px
---space-4xl: 96px
---space-5xl: 128px
---space-section: 96px      /* Between page sections */
---space-section-lg: 128px
-```
-
-### Animation Guidelines
-- **Allowed**: Subtle fade-ins on scroll (opacity 0→1, translateY 20px→0, 300-400ms ease-out)
-- **Allowed**: Gentle hover scale on cards (scale 1→1.02, 200ms ease)
-- **Allowed**: Smooth page transitions (fade, 200ms)
-- **NOT allowed**: Bouncing, wiggling, parallax, spinning, sliding from sides
-- **Rule**: If an animation draws attention to itself, remove it.
+- Headings: Lora, weight 600 (Lora has no 800), `letter-spacing: -0.01em`
+- Body: Inter 400–500
+- Byline / pull quotes: Lora italic in `--color-accent-text`
+- Utilities: `font-heading`, `font-body`
 
 ---
 
 ## Site Architecture
 
-### Public Pages
-
-#### 1. Landing / Home Page (`/`)
-
-7 sections, top to bottom:
-
-- **Hero Section**: Full-width gradient background with split logo ("FoodWith" + "Ruks"), tagline, and CTA. 85vh desktop, 70vh mobile. Subtle scroll indicator.
-- **Featured Recipes**: Curated grid (3-6 recipes) with generous gaps. Uses FoodPlaceholder cards. Asymmetric layout (one large card + two smaller). Section title in bold Inter.
-- **Browse by Category**: Horizontal row of category pill links (Starters, Mains, Desserts, Snacks, Drinks). Links to `/recipes?category=[slug]`.
-- **Meet Ruks**: Text-only about snippet (no photo). Short bio with link to About page.
-- **From the Kitchen Journal**: Lifestyle blog teaser — shows latest 2-3 lifestyle posts with excerpts. Link to `/lifestyle`.
-- **Shop Coming Soon**: Teaser section for upcoming products (spice kits, merchandise). Links to `/shop`.
-- **Stay Connected**: Newsletter signup — email field + submit. Warm CTA copy.
-- **Footer**: Nav links, social icons, copyright.
-
-#### 2. Recipes Page (`/recipes`)
-- **Search bar**: Prominent, real-time with debounce
-- **4-group filter system**:
-  - **Category**: Starters, Mains, Desserts, Snacks, Drinks
-  - **Meal Type**: Breakfast, Lunch, Dinner, Brunch
-  - **Special Diet**: Vegetarian, Vegan, Gluten-Free, Halal, Dairy-Free, Keto
-  - **Special Occasion**: Eid, Ramadan, Christmas, Date Night, Quick Weeknight
-- **Sort**: Newest, Most Popular, Quickest
-- **Recipe grid**: Generous Ma spacing. Cards show image, title, category, cook time, rating
-- **"Load More" button** (not infinite scroll)
-- **Favorites filter**: Toggle to show only saved recipes
-- **Empty/loading states**
-
-#### 3. Single Recipe Page (`/recipes/[slug]`) — MOST IMPORTANT PAGE
-
-Layout top to bottom:
-
-1. **Instagram Reel/Video Hero** — If recipe has Instagram URL, embed reel prominently. Full-width mobile, centered with Ma on desktop. Falls back to hero image if no video.
-2. **Recipe Header** — Title (large Inter bold), category tags, date, reading time.
-3. **Personal Story** — Warm intro paragraph from Ruks. Styled distinctly (accent background or decorative quote mark).
-4. **Quick Stats Bar** — Prep Time | Cook Time | Total Time | Servings (adjustable) | Difficulty. Clean icons.
-5. **"Jump to Recipe" Button** — Sticky on mobile. Sage green accent.
-6. **Ingredients List** — Checkable checkboxes, adjustable servings, grouped by section.
-7. **Step-by-Step Instructions** — Numbered, each in own card, optional photo per step.
-8. **Tips & Notes** — Callout box with accent background.
-9. **Nutrition Info** — Collapsible section.
-10. **Share Buttons** — Copy link, WhatsApp, Pinterest, Twitter/X.
-11. **Anonymous Comments & Ratings** — Star rating + text box, no login needed. Honeypot spam prevention. Moderation queue.
-12. **Related Recipes** — Grid of 3-4 similar recipes.
-
-**Additional features:**
-- Print stylesheet (title, ingredients, instructions only)
-- Schema.org Recipe JSON-LD for rich Google snippets
-- Smooth transition from recipe card click
-- Favorite (heart) button
-
-#### 4. About Page (`/about`)
-- Personal story, text-only layout (no photo), cooking journey, mission
-- Link to Contact page
-
-#### 5. Contact Us Page (`/contact`)
-- Form: Name, Email, Subject, Message
-- Saves to Firebase `contactMessages` collection
-- Wife reviews in admin dashboard
-- Honeypot spam field
-- Success/error states
-
-#### 6. Lifestyle Page (`/lifestyle`)
-- Blog articles about cooking, kitchen life, and food culture
-- Category filter pills at the top
-- 2-column grid of article cards (title, excerpt, category, reading time)
-- Each article has a slug-based route (`/lifestyle/[slug]`) with prose content, share buttons, and related posts
-
-#### 7. Shop Page (`/shop`)
-- Coming soon page showcasing future products (spice kits, merchandise)
-- Category filter pills at the top
-- 3-column product grid with pulsing "Coming Soon" badges
-- Products display name, description, price, and category
-
 ### Navigation
+Hamburger menu on the **left at every breakpoint**, minimalist header (hamburger · centred wordmark · search + theme toggle). Drawer slides from the left with accordion groups:
 
-Main navigation links (in order): **Recipes, About, Lifestyle, Shop, Contact**. No Home or Categories link in the nav bar.
+1. **Recipes** → Starters, Main Courses, Side Dishes, Desserts, Bread, Drinks, Baby Weaning
+2. **Lifestyle** → Days Out, Eating Out, Travel, Parenting, Craft & Hobbies
+3. **About Me**
+4. **Newsletter**
+5. **Contact**
 
-### Admin / CMS Pages (Firebase Auth protected)
+Ctrl/Cmd+K opens the search overlay from anywhere.
 
-#### 8. Admin Login (`/admin/login`)
-- Email/password form → Firebase Auth
+### Public pages
 
-#### 9. Admin Dashboard (`/admin`)
-- Stats: total recipes (published/draft), pending comments, unread messages
-- Quick actions: "Add New Recipe", "Manage Categories"
-- Recent recipes list, pending comments list
+**Home (`/`)**: Hero (byline, wordmark, tagline, search bar, CTAs) → New Recipe of the Week → What to eat? grid → Fresh from the kitchen (3 latest) → Beyond the kitchen (3 lifestyle posts) → Follow on Instagram → Newsletter.
 
-#### 10. Recipe Editor (`/admin/recipes/new` and `/admin/recipes/[id]/edit`)
+**Recipes (`/recipes`)**: "What to eat?" boxes (Starters, Main Course, Side Dishes, Snacks, Breakfast, Dinner, Desserts, Drinks, Bread, Baby Weaning), search, **Meal Type** filter pills (Breakfast, Brunch, Lunch, Dinner), sort, favourites. State lives in the URL (`?q=`, `?category=`, `?mealType=a,b`).
 
-**Form fields:**
-- Title → auto-generates slug
-- Slug (editable)
-- Description (short summary for cards + SEO)
-- Personal Story (rich text for intro paragraph)
-- Instagram Reel URL (paste URL, preview renders below)
-- Category (multi-select)
-- Tags (free-form)
-- Dietary Tags (checkboxes: Vegetarian, Vegan, Gluten-Free, Dairy-Free, Halal, Nut-Free)
-- Prep Time, Cook Time, Servings, Difficulty
-- Ingredients (dynamic list: Amount | Unit | Name | Group — add/remove/reorder)
-- Instructions (dynamic list: Step text | Optional image — add/remove/reorder)
-- Hero Image (drag-and-drop upload, WebP conversion)
-- Tips/Notes
-- Nutrition (optional: Calories, Protein, Carbs, Fat)
-- SEO (meta title, description with char count, OG image)
-- Status: Draft / Published toggle
-- Featured toggle
+**Recipe (`/recipes/[slug]`)**: hero placeholder (+ Instagram reel embed when a URL is set), header with category/diet badges, personal story, stats bar, servings adjuster, jump-to, print/share, ingredients, instructions, tips, nutrition, related. Schema.org Recipe JSON-LD.
 
-**Editor features:**
-- Auto-save every 30 seconds
-- Preview mode
-- Validation with helpful errors
+**Lifestyle (`/lifestyle`, `/lifestyle/[slug]`)**: category pills with `?category=` deep links, article prose, share, related.
 
-#### 11. Recipe List (`/admin/recipes`)
-- Table: Title, Status, Category, Date, Actions (Edit/Delete)
-- Filter by status, search by title
+**About (`/about`)**, **Contact (`/contact`)**, **Newsletter (`/newsletter`)**, custom 404. `/shop` redirects to `/`.
 
-#### 12. Category Manager (`/admin/categories`)
-- CRUD: Name, Slug, Description, Image, Order
-
-#### 13. Comments Manager (`/admin/comments`)
-- Filter: Pending / Approved / All
-- Actions: Approve, Delete
-
-#### 14. Contact Messages (`/admin/messages`)
-- List: Name, Email, Subject, Date, Read/Unread
-- Click to view full message, mark read/unread, delete
+### Admin (`/admin`, Google sign-in, `ADMIN_EMAIL` allow-list)
+Dashboard · Recipes · Lifestyle · Comments · Subscribers (CSV export) · Messages · Settings (pin Recipe of the Week, Instagram handle). Mutations revalidate the affected public pages.
 
 ---
 
-## Firebase Data Models
-
-### Firestore Collections
+## Data Models (Firestore)
 
 ```
-recipes/
-  {recipeId}/
-    title: string
-    slug: string (unique)
-    description: string
-    personalStory: string
-    instagramUrl: string (optional)
-    category: string[]
-    tags: string[]
-    dietaryTags: string[]
-    mealType: string[] (Breakfast, Lunch, Dinner, Brunch)
-    specialOccasion: string[] (Eid, Ramadan, Christmas, Date Night, Quick Weeknight)
-    prepTime: number (minutes)
-    cookTime: number (minutes)
-    servings: number
-    difficulty: "easy" | "medium" | "hard"
-    ingredients: [{ id, amount, unit, name, group? }]
-    instructions: [{ step, text, image? }]
-    heroImage: string (Storage URL)
-    tips: string
-    nutrition: { calories?, protein?, carbs?, fat? }
-    seo: { metaTitle?, metaDescription?, ogImage? }
-    status: "draft" | "published"
-    featured: boolean
-    rating: { average: number, count: number }
-    viewCount: number
-    createdAt: timestamp
-    updatedAt: timestamp
-    publishedAt: timestamp
-    scheduledAt: timestamp (optional — future use)
+recipes/{id}
+  title, slug, description, personalStory, instagramUrl?
+  category: RecipeCategory[]   // starters|mains|sides|snacks|desserts|bread|drinks|baby-weaning
+  mealType: MealType[]         // breakfast|brunch|lunch|dinner
+  tags[], dietaryTags[], specialOccasion[]
+  prepTime, cookTime, servings, difficulty
+  ingredients[{id, amount, unit, name, group?}], instructions[{step, text, image?}]
+  heroImage, tips, nutrition?, seo?
+  status: draft|published, featured, rating{average,count}, viewCount
+  createdAt, updatedAt, publishedAt?, scheduledAt?
 
-categories/
-  {categoryId}/
-    name: string
-    slug: string
-    description: string
-    image: string
-    order: number
-    recipeCount: number
+lifestylePosts/{id}
+  title, slug, excerpt, content (HTML)
+  category: LifestyleCategory  // days-out|eating-out|travel|parenting|craft-hobbies
+  readingTime, status, createdAt, updatedAt, publishedAt
 
-comments/
-  {commentId}/
-    recipeId: string
-    recipeSlug: string
-    text: string
-    rating: number (1-5)
-    status: "pending" | "approved"
-    createdAt: timestamp
-    ipHash: string
+subscribers/{normalisedEmail}
+  email, source: home|footer|newsletter-page, status: subscribed|unsubscribed, createdAt
 
-contactMessages/
-  {messageId}/
-    name: string
-    email: string
-    subject: string
-    message: string
-    read: boolean
-    createdAt: timestamp
+siteSettings/general
+  recipeOfTheWeekSlug, instagramHandle, updatedAt
 
-siteSettings/
-  general/
-    siteName, tagline, aboutText, aboutImage
-    socialLinks: { instagram, pinterest, tiktok, youtube }
-    newsletterEnabled: boolean
-    heroImage, heroTagline
-    instagramPostUrls: string[] (for homepage feed section)
-
-lifestylePosts/
-  {postId}/
-    title: string
-    slug: string (unique)
-    excerpt: string
-    content: string (HTML)
-    category: string
-    readingTime: number (minutes)
-    status: "draft" | "published"
-    createdAt: timestamp
-    updatedAt: timestamp
-    publishedAt: timestamp
-
-products/
-  {productId}/
-    name: string
-    slug: string (unique)
-    description: string
-    price: number
-    currency: string
-    category: string
-    image: string (optional)
-    inStock: boolean
-    comingSoon: boolean
+comments/{id}, contactMessages/{id}   (unchanged)
 ```
 
-### Firebase Storage Structure
-```
-/recipes/{recipeId}/hero.webp
-/recipes/{recipeId}/steps/step-{n}.webp
-/categories/{categoryId}/cover.webp
-/about/profile.webp
-```
+Composite indexes are checked in at `firestore.indexes.json`; rules (`firestore.rules`) deny all client access because every read/write is server-side via the Admin SDK.
 
 ---
 
-## Spam Prevention (Anonymous Comments + Contact Form)
-
-1. **Honeypot field** — hidden field, rejected if filled
-2. **Rate limiting** — max 3 comments per IP per hour (hashed IP)
-3. **Minimum length** — comments must be 10+ characters
-4. **Moderation queue** — all comments default to `pending`
-5. **Time check** — reject if submitted in under 2 seconds
-
----
-
-## Visitor Favorites (localStorage)
-
-- Heart icon on recipe cards and recipe pages
-- Saves recipe slug to `localStorage` key `fwr_favorites`
-- Filter on `/recipes` page: "Show favorites only"
-- Note in UI: "Favorites saved to this browser only"
-- No account needed
-
----
-
-## Instagram Integration
-
-- Wife pastes Instagram reel/post URL into recipe form
-- Renders via `react-social-media-embed` `InstagramEmbed` component
-- **Homepage feed section has been removed.** Instagram embeds are still supported on individual recipe pages via the `instagramUrl` field.
-- No API tokens or Facebook app needed
-
----
-
-## SEO Requirements
-
-- Schema.org Recipe JSON-LD on every recipe page
-- Dynamic sitemap from published recipes
-- OG + Twitter Card meta tags on all pages
-- Canonical URLs
-- Next.js Metadata API
-- robots.txt
-- Image alt text (enforced in admin)
-- Dynamic OG images via `@vercel/og`
-- Target: Lighthouse 95+
+## SEO
+- Metadata API on every page; `metadataBase` = `SITE_URL` (env-driven)
+- `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx` (1200×630, Lora when fetchable)
+- `robots.ts`, `sitemap.ts` from Firestore with sample fallback
+- JSON-LD: WebSite (+SearchAction) and Organization in the layout, Recipe on recipe pages
+- Public pages `revalidate = 3600`; admin mutations call `revalidatePath`
 
 ---
 
 ## Key Technical Decisions
 
-1. Next.js App Router, Server Components by default
-2. ISR for recipe pages, on-demand revalidation
-3. Firebase Admin SDK server-side, Client SDK for admin pages + public writes
-4. Images: Intentionally not used during development. FoodPlaceholder component with SVG icons used site-wide. Real images via Firebase Storage planned for Phase 5.
-5. Vercel auto-deploy from GitHub `main` branch
-6. Instagram embeds via `react-social-media-embed`
-7. Favorites via localStorage
-8. Anonymous comments with honeypot + rate limiting + moderation
-9. Contact form saves to Firestore (admin reviews in dashboard)
-10. Scheduling-ready data model (scheduledAt field) for future use
-11. Lifestyle blog articles with category filtering and prose content rendering
-12. Shop page with coming-soon product grid (Stripe integration planned for later)
+1. Server Components by default; client components only for interactivity
+2. All Firestore access via Admin SDK; client SDK is auth-only
+3. URL is the source of truth for recipe/lifestyle filters (shareable, back-button friendly, Suspense-wrapped)
+4. Brand strings live in `src/lib/site.ts`; taxonomy + nav tree in `src/lib/constants.ts`; nothing brand-related is hardcoded in components
+5. Newsletter stored in Firestore (no third-party ESP); admin exports CSV
+6. Images intentionally placeholder-only until Firebase Storage is enabled
+7. Favourites in localStorage with a `favorites-changed` event for reactive filtering
 
 ---
 
-## File Structure
+## File Structure (key paths)
 ```
-foodwithruks/
-├── CLAUDE.md
-├── TASKS.md
-├── .env.local / .env.example
-├── next.config.js
-├── tailwind.config.ts
-├── tsconfig.json
-├── package.json
-├── public/
-│   ├── favicon.ico
-│   ├── robots.txt
-│   └── images/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx                    # Landing
-│   │   ├── not-found.tsx               # 404
-│   │   ├── sitemap.ts
-│   │   ├── recipes/
-│   │   │   ├── page.tsx                # Listing
-│   │   │   └── [slug]/page.tsx         # Single recipe
-│   │   ├── about/page.tsx
-│   │   ├── contact/page.tsx
-│   │   ├── lifestyle/
-│   │   │   ├── page.tsx                # Lifestyle listing
-│   │   │   └── [slug]/page.tsx         # Single lifestyle article
-│   │   ├── shop/page.tsx               # Shop (coming soon)
-│   │   ├── admin/
-│   │   │   ├── layout.tsx              # Auth guard
-│   │   │   ├── page.tsx                # Dashboard
-│   │   │   ├── login/page.tsx
-│   │   │   ├── recipes/page.tsx
-│   │   │   ├── recipes/new/page.tsx
-│   │   │   ├── recipes/[id]/edit/page.tsx
-│   │   │   ├── categories/page.tsx
-│   │   │   ├── comments/page.tsx
-│   │   │   └── messages/page.tsx
-│   │   └── api/
-│   │       ├── revalidate/route.ts
-│   │       ├── comments/route.ts
-│   │       ├── contact/route.ts
-│   │       └── og/route.tsx
-│   ├── components/
-│   │   ├── ui/          # Button, Card, Input, Badge, Skeleton, Modal, StarRating
-│   │   ├── layout/      # Header, Footer, Nav, MobileMenu
-│   │   ├── recipe/      # RecipeCard, RecipeGrid, IngredientList, InstructionStep, ServingsAdjuster, ShareButtons, PrintButton
-│   │   ├── admin/       # RecipeForm, CategoryForm, CommentsList, MessagesList, DashboardStats
-│   │   ├── home/        # LifestyleTeaser, ShopTeaser (homepage-specific sections)
-│   │   └── shared/      # ThemeToggle, Newsletter, BackToTop, FoodPlaceholder, FavoriteButton, JumpToRecipe, AnonymousCommentForm
-│   ├── lib/
-│   │   ├── firebase/    # config, admin, auth, recipes, categories, comments, contact, storage
-│   │   ├── utils.ts
-│   │   ├── favorites.ts
-│   │   ├── spam.ts
-│   │   └── constants.ts
-│   ├── hooks/           # useAuth, useFavorites, useDebounce, useInView
-│   ├── types/index.ts
-│   └── styles/
-│       ├── globals.css  # Tailwind + CSS variables + print
-│       └── print.css
-└── scripts/
-    └── seed.ts
+src/
+├── app/
+│   ├── layout.tsx, page.tsx, not-found.tsx, sitemap.ts, robots.ts, icon.svg, apple-icon.tsx, opengraph-image.tsx
+│   ├── recipes/ (page.tsx, RecipesClient.tsx, [slug]/)
+│   ├── lifestyle/ (page.tsx, LifestyleClient.tsx, [slug]/)
+│   ├── about/, contact/ (page.tsx + ContactClient.tsx), newsletter/
+│   ├── admin/ (layout, dashboard, recipes, lifestyle, comments, messages, subscribers, settings, login)
+│   └── api/ (newsletter, contact, comments, revalidate, admin/*)
+├── components/
+│   ├── layout/ (Header, NavDrawer, SearchOverlay, Footer)
+│   ├── home/ (HeroSection, RecipeOfTheWeek, WhatToEatSection, LatestRecipes, LifestyleTeaser, InstagramBlock, NewsletterSection)
+│   ├── recipe/ (WhatToEatGrid, RecipeCard, RecipeGrid, InstagramEmbed, IngredientList, ...)
+│   ├── shared/ (NewsletterForm, InstagramIcon, ThemeToggle, FoodPlaceholder, FavoriteButton, ...)
+│   ├── admin/ (AdminBrand, RecipeForm, LifestyleForm)
+│   └── ui/ (Logo, Button, Card, Badge, Input, FilterPill, AnimatedDropdown, Modal, Skeleton, StarRating)
+├── lib/ (site.ts, constants.ts, search.ts, favorites.ts, utils.ts, adminFetch.ts, firebase/*)
+├── styles/globals.css
+└── types/index.ts
+firestore.rules · firestore.indexes.json · firebase.json · .firebaserc · README.md
 ```
-
-**Note on images**: Images are intentionally NOT used during development. The `FoodPlaceholder` component (with SVG food icons) replaces all images site-wide. Real images will be added via Firebase Storage in a later phase.
-
----
-
-## Phase Plan
-
-### Phase 1 — Foundation
-- Project setup (Next.js, Tailwind, Firebase, GitHub, Vercel)
-- Design tokens + theme system (light/dark with CSS variables)
-- Typography (Inter via next/font — single font for all text)
-- Base UI components
-- Layout (Header, Footer, Nav, Mobile Menu)
-- Landing page (full design, placeholder content)
-- Dark mode toggle
-
-### Phase 2 — Recipe Display
-- Recipe card + grid components
-- Recipes listing page (filter, search, sort, load more)
-- Single recipe page (all 12 sections)
-- Instagram reel embed
-- Adjustable servings
-- Jump to Recipe button
-- Category pages
-- Visitor favorites (localStorage)
-- Schema.org JSON-LD
-- SEO (sitemap, meta, OG images)
-- Print stylesheet
-
-### Phase 3 — Admin CMS
-- Firebase Auth + admin login
-- Admin layout with auth guard
-- Dashboard with stats
-- Recipe editor (full form, dynamic lists, image upload)
-- Instagram URL with preview
-- Auto-save, preview mode
-- Recipe list with filters
-- Category manager
-- On-demand ISR on publish
-
-### Phase 4 — Engagement & Polish
-- Anonymous comments + ratings (spam prevention)
-- Comment moderation in admin
-- Contact page + Firestore submission
-- Messages list in admin
-- Newsletter signup (email capture)
-- Instagram feed on homepage
-- About page
-- Share buttons
-- Related recipes
-- Scroll animations
-- 404 page + error boundaries
-- Performance pass
-
-### Phase 5 — Launch
-- Custom domain + DNS + SSL
-- Seed 5-10 real recipes
-- Create categories with images
-- QA across devices + browsers
-- Analytics setup
-- Lighthouse audit (target 95+)
-- Schema.org testing
-- Social sharing testing

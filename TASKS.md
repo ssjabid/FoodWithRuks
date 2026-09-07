@@ -1,4 +1,4 @@
-# TASKS.md — FoodWithRuks Task Tracker
+# TASKS.md — Agooh & Ruks Task Tracker
 
 > Claude Code: Pick the next unchecked task in order. After completing, mark it `[x]` and update CLAUDE.md.
 
@@ -134,13 +134,8 @@
 - [x] Build LifestyleTeaser homepage section ("From the Kitchen Journal")
 - [x] Build lifestyle admin editor (/admin/lifestyle) — create/edit/delete posts
 
-### 2.7 Shop Page
-- [x] Create Product type in types/index.ts
-- [x] Create sample products data (6 products, all coming soon)
-- [x] Build shop page (/shop) with coming-soon banner, category filters, product grid with pulsing badges
-- [x] Build ShopTeaser homepage section ("Shop Coming Soon")
-- [x] Build shop admin product manager (/admin/shop) — CRUD products
-- [ ] Integrate Stripe for payments (future)
+### 2.7 Shop Page — REMOVED (2026-09-07)
+- [x] ~~Shop page, ShopTeaser, product admin, product API, Product type, sample products~~ — **REMOVED in the Agooh & Ruks revamp. /shop now redirects to /.**
 
 ### 2.8 Site-wide Polish
 - [x] Remove all Unsplash images — replace with FoodPlaceholder component (SVG icons)
@@ -360,6 +355,61 @@
 
 ---
 
+## Phase 6 — Agooh & Ruks Revamp (2026-09-07)
+
+### 6.1 Brand + Config
+- [x] Rename to "Agooh & Ruks" (byline "Pass the Butter, Ruks", taglines) — `src/lib/site.ts` single source
+- [x] Env-driven `SITE_URL` (NEXT_PUBLIC_SITE_URL → Vercel production URL → foodwithruks.vercel.app); share links use window origin
+- [x] Instagram-only social links (@foodwithruks); remove fake Pinterest/TikTok/YouTube
+- [x] localStorage keys renamed (`ar_theme`, `ar_favorites`)
+
+### 6.2 Taxonomy
+- [x] Recipe categories: starters, mains, sides, snacks, desserts, bread, drinks, baby-weaning (typed unions)
+- [x] Lifestyle categories: days-out, eating-out, travel, parenting, craft-hobbies (slugs + labels)
+- [x] `WHAT_TO_EAT` boxes and `NAV_TREE` with nested topics
+- [x] Sample data retagged (+ raita, lentil mash, masala omelette, farm-park post)
+
+### 6.3 Design tokens + fonts
+- [x] "Warm Sage & Clay" palette (light + dark), contrast-checked
+- [x] Colours declared once in :root/.dark; `--color-on-primary`, `--color-accent-text`, `--color-accent-soft`
+- [x] Lora (headings) + Inter (body) via next/font on <html>; font-extrabold removed
+
+### 6.4 Navigation
+- [x] Header: hamburger left at all sizes, centred Lora wordmark, search + theme toggle right
+- [x] NavDrawer from the left with accordion groups, focus trap, Escape, return focus
+- [x] SearchOverlay (Ctrl/Cmd+K) → /recipes?q=
+
+### 6.5 Pages
+- [x] Home: hero with search, Recipe of the Week, What to eat grid, latest recipes, lifestyle teaser (Firestore), Instagram block, newsletter
+- [x] Recipes: What to eat grid + search + Meal Type filter only; URL-synced (q/category/mealType); favourites reactive; Suspense
+- [x] Recipe detail: Instagram embed when URL set; JSON-LD publisher/url; static params from Firestore
+- [x] Lifestyle: ?category= deep links, new taxonomy
+- [x] About + Contact rebranded; Contact has server metadata
+- [x] Shop removed; /shop → / redirect
+
+### 6.6 Newsletter (real)
+- [x] POST /api/newsletter (honeypot, validation, rate-limit-lite, dedupe by email doc id)
+- [x] Shared NewsletterForm (inline/compact/stacked) replaces both fake forms
+- [x] /newsletter page
+- [x] Admin subscribers page (search, delete, CSV export), stats card, sidebar entry
+
+### 6.7 Admin
+- [x] AdminBrand component; dashboard greeting
+- [x] /admin/settings (pin Recipe of the Week, Instagram handle) + API
+- [x] revalidatePath after recipe/lifestyle create/update/delete
+
+### 6.8 SEO + Firebase
+- [x] icon.svg, apple-icon, opengraph-image (Lora fetched with fallback), robots.ts, sitemap.ts from Firestore
+- [x] WebSite + Organization JSON-LD; page revalidate = 3600
+- [x] firestore.rules (deny client), firestore.indexes.json, firebase.json, .firebaserc
+- [ ] Deploy Firestore rules + indexes to production (`npx firebase-tools deploy --only firestore`)
+
+### 6.9 Ship
+- [x] Local build + type-check green
+- [ ] Vercel preview verified, merged to main, production smoke test
+
+---
+
 ## Backlog / Future Ideas
 
 - [ ] Scheduled publishing (scheduledAt field ready — needs UI + cron/Cloud Function)
@@ -377,6 +427,4 @@
 - [ ] Affiliate / sponsored recipe integration
 - [ ] Real images: When Firebase Storage is enabled, replace FoodPlaceholder with actual recipe/lifestyle photos
 - [x] Lifestyle admin editor for creating/editing blog posts
-- [x] Shop admin product manager with inventory tracking
-- [ ] Stripe integration for shop checkout
-- [ ] Instagram feed section (re-add if desired — component removed but embed library still installed)
+- [x] Instagram embed on recipe pages (InstagramEmbed component)

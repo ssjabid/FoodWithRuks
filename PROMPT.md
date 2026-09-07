@@ -7,7 +7,7 @@
 ## Initial Prompt (First Session)
 
 ```
-You are building FoodWithRuks — a modern recipe blog website with a warm pink + Japanese Ma (空間) design aesthetic.
+You are building Agooh & Ruks — a modern recipe + lifestyle blog with a warm sage & clay palette and Japanese Ma (空間) design aesthetic.
 
 Before starting any task:
 1. Read CLAUDE.md to understand the current project state
@@ -23,7 +23,7 @@ After completing any task:
 Key design rules:
 - "Warm Ma" aesthetic: generous negative space (Ma), asymmetric layouts, organic shapes, subtle depth
 - All colors via CSS custom properties (palette swap = edit ~12 values)
-- Fonts: Cormorant Garamond (headings), DM Sans (body), Satisfy (logo only)
+- Fonts: Lora (headings, italic byline), Inter (body) — via next/font
 - Mobile-first responsive (65%+ of recipe traffic is mobile)
 - Dark mode on every component
 - Animations: subtle fade-ins ONLY (300-400ms ease-out). No bouncing, wiggling, parallax.
@@ -40,7 +40,7 @@ Start with Phase 1, Task 1.1.
 ## Continuation Prompt (Every Subsequent Session)
 
 ```
-Continue building FoodWithRuks.
+Continue building Agooh & Ruks.
 
 1. Read CLAUDE.md for current state
 2. Read TASKS.md for next task
@@ -58,5 +58,5 @@ If you hit a blocker, document it in CLAUDE.md under "Known Issues / Blockers" a
 > Paste this into the "Description" field of the Claude Project:
 
 ```
-Building a Blogging website for my wife's recipes (FoodWithRuks). Instagram food creator recipe blog with warm pink + Japanese Ma aesthetic. Tech: Next.js 14 + TypeScript, Tailwind, Firebase (Firestore/Auth/Storage), Vercel hosting, GitHub. Features: recipe pages with Instagram video embeds, admin CMS for easy recipe management, anonymous comments/ratings, visitor favorites, contact form. Design: modern minimalist with generous spacing, dark mode, mobile-first.
+Building a Blogging website for my wife's recipes (Agooh & Ruks). Instagram food creator recipe + lifestyle blog (Agooh & Ruks) with a warm sage & clay palette, Lora + Inter, hamburger-first navigation. Tech: Next.js 14 + TypeScript, Tailwind, Firebase (Firestore/Auth/Storage), Vercel hosting, GitHub. Features: What-to-eat recipe browsing, Instagram embeds, newsletter (Firestore), admin CMS with site settings, visitor favourites, contact form. Design: modern minimalist with generous spacing, dark mode, mobile-first.
 ```
