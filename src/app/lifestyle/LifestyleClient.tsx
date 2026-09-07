@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { FilterPill } from "@/components/ui/FilterPill";
-import { LIFESTYLE_CATEGORIES, getLifestyleCategoryLabel } from "@/lib/constants";
+import { LIFESTYLE_CATEGORIES, getLifestyleCategoryLabel, isLifestyleCategory } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { StaggerContainer, StaggerItem } from "@/components/shared/StaggerReveal";
@@ -18,7 +19,19 @@ interface LifestyleClientProps {
 }
 
 export function LifestyleClient({ initialPosts }: LifestyleClientProps) {
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+
+  const raw = params.get("category") ?? "";
+  const selectedCategory = isLifestyleCategory(raw) ? raw : "";
+
+  const select = useCallback(
+    (value: string) => {
+      router.replace(value ? `${pathname}?category=${value}` : pathname, { scroll: false });
+    },
+    [pathname, router]
+  );
 
   const filteredPosts = useMemo(() => {
     if (!selectedCategory) return initialPosts;
@@ -29,26 +42,20 @@ export function LifestyleClient({ initialPosts }: LifestyleClientProps) {
     <PageTransition>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
-            Lifestyle
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">Lifestyle</h1>
           <p className="text-[var(--color-text-secondary)] text-base sm:text-lg">
-            Stories from the kitchen — tips, culture, and the joy of cooking
+            Days out, eating out, travel, parenting and the crafts in between.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-8 sm:mb-10">
-          <FilterPill
-            label="All"
-            selected={!selectedCategory}
-            onClick={() => setSelectedCategory("")}
-          />
+          <FilterPill label="All" selected={!selectedCategory} onClick={() => select("")} />
           {LIFESTYLE_CATEGORIES.map((cat) => (
             <FilterPill
               key={cat.value}
               label={cat.label}
               selected={selectedCategory === cat.value}
-              onClick={() => setSelectedCategory(cat.value)}
+              onClick={() => select(cat.value)}
             />
           ))}
         </div>
@@ -79,7 +86,7 @@ export function LifestyleClient({ initialPosts }: LifestyleClientProps) {
                       </div>
                       <div className="p-4">
                         <Badge variant="accent" className="mb-2">{getLifestyleCategoryLabel(post.category)}</Badge>
-                        <h2 className="text-base font-bold tracking-tight text-[var(--color-text-primary)] mb-2 line-clamp-2">
+                        <h2 className="text-base font-semibold tracking-tight text-[var(--color-text-primary)] mb-2 line-clamp-2">
                           {post.title}
                         </h2>
                         <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3">
@@ -100,8 +107,8 @@ export function LifestyleClient({ initialPosts }: LifestyleClientProps) {
 
         {filteredPosts.length === 0 && (
           <div className="text-center py-16">
-            <h3 className="font-bold tracking-tight text-xl text-[var(--color-text-primary)] mb-2">No articles found</h3>
-            <p className="text-[var(--color-text-secondary)]">Try selecting a different category.</p>
+            <h3 className="font-semibold tracking-tight text-xl text-[var(--color-text-primary)] mb-2">Nothing here yet</h3>
+            <p className="text-[var(--color-text-secondary)]">Try another category, or check back soon.</p>
           </div>
         )}
       </div>

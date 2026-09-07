@@ -1,15 +1,23 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
+import { WhatToEatGrid } from "@/components/recipe/WhatToEatGrid";
 import { Input } from "@/components/ui/Input";
 import { FilterPill } from "@/components/ui/FilterPill";
 import { AnimatedDropdown } from "@/components/ui/AnimatedDropdown";
 import { useDebounce } from "@/hooks/useDebounce";
-import { RECIPE_CATEGORIES, MEAL_TYPES, DIETARY_TAGS, SPECIAL_OCCASIONS, SORT_OPTIONS } from "@/lib/constants";
-import { getFavorites } from "@/lib/favorites";
-import { cn } from "@/lib/utils";
+import {
+  MEAL_TYPES,
+  SORT_OPTIONS,
+  WHAT_TO_EAT,
+  isRecipeCategory,
+  isMealType,
+  getCategoryLabel,
+  getMealTypeLabel,
+} from "@/lib/constants";
+import { getFavorites, onFavoritesChange } from "@/lib/favorites";
 import { PageTransition } from "@/components/shared/PageTransition";
 import type { Recipe } from "@/types";
 
@@ -18,63 +26,92 @@ interface RecipesClientProps {
 }
 
 export function RecipesClient({ initialRecipes }: RecipesClientProps) {
-  const [search, setSearch] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedMealTypes, setSelectedMealTypes] = useState<string[]>([]);
-  const [selectedDietaryTags, setSelectedDietaryTags] = useState<string[]>([]);
-  const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+
+  // URL is the source of truth for q / category / mealType
+  const q = params.get("q") ?? "";
+  const rawCategory = params.get("category") ?? "";
+  const category = isRecipeCategory(rawCategory) ? rawCategory : "";
+  const mealTypes = useMemo(
+    () => (params.get("mealType") ?? "").split(",").filter(isMealType),
+    [params]
+  );
+
+  const [searchInput, setSearchInput] = useState(q);
+  const debouncedSearch = useDebounce(searchInput);
   const [sortBy, setSortBy] = useState("newest");
   const [showFavorites, setShowFavorites] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  const debouncedSearch = useDebounce(search);
+  // Keep the input in sync when the URL changes from elsewhere (search overlay, back button)
+  useEffect(() => {
+    setSearchInput(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
 
-  const activeFilterCount =
-    selectedCategories.length +
-    selectedMealTypes.length +
-    selectedDietaryTags.length +
-    selectedOccasions.length +
-    (showFavorites ? 1 : 0);
+  useEffect(() => {
+    const sync = () => setFavorites(getFavorites());
+    sync();
+    return onFavoritesChange(sync);
+  }, []);
+
+  const setParam = useCallback(
+    (key: string, value: string) => {
+      const next = new URLSearchParams(params.toString());
+      if (value) next.set(key, value);
+      else next.delete(key);
+      const qs = next.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [params, pathname, router]
+  );
+
+  // Push debounced search text into the URL
+  useEffect(() => {
+    if (debouncedSearch !== q) setParam("q", debouncedSearch);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
+  const toggleMealType = (value: string) => {
+    const current: string[] = mealTypes;
+    const next = current.includes(value) ? current.filter((m) => m !== value) : [...current, value];
+    setParam("mealType", next.join(","));
+  };
+
+  const activeBox = useMemo(() => {
+    if (category) return { param: "category" as const, value: category };
+    if (mealTypes.length === 1) {
+      const box = WHAT_TO_EAT.find((b) => b.param === "mealType" && b.value === mealTypes[0]);
+      if (box) return { param: "mealType" as const, value: mealTypes[0] };
+    }
+    return null;
+  }, [category, mealTypes]);
 
   const filteredRecipes = useMemo(() => {
     let result = [...initialRecipes];
 
-    if (debouncedSearch) {
-      const query = debouncedSearch.toLowerCase();
+    if (q) {
+      const query = q.toLowerCase();
       result = result.filter(
         (r) =>
           r.title.toLowerCase().includes(query) ||
           r.description.toLowerCase().includes(query) ||
-          r.tags.some((t) => t.toLowerCase().includes(query))
+          r.tags.some((t) => t.toLowerCase().includes(query)) ||
+          r.ingredients.some((i) => i.name.toLowerCase().includes(query))
       );
     }
 
-    if (selectedCategories.length > 0) {
-      result = result.filter((r) =>
-        selectedCategories.some((cat) => (r.category as string[]).includes(cat))
-      );
+    if (category) {
+      result = result.filter((r) => (r.category as string[]).includes(category));
     }
 
-    if (selectedMealTypes.length > 0) {
-      result = result.filter((r) =>
-        selectedMealTypes.some((mt) => (r.mealType as string[]).includes(mt))
-      );
-    }
-
-    if (selectedDietaryTags.length > 0) {
-      result = result.filter((r) =>
-        selectedDietaryTags.every((tag) => r.dietaryTags.includes(tag))
-      );
-    }
-
-    if (selectedOccasions.length > 0) {
-      result = result.filter((r) =>
-        selectedOccasions.some((occ) => r.specialOccasion.includes(occ))
-      );
+    if (mealTypes.length > 0) {
+      result = result.filter((r) => mealTypes.some((mt) => (r.mealType as string[]).includes(mt)));
     }
 
     if (showFavorites) {
-      const favorites = getFavorites();
       result = result.filter((r) => favorites.includes(r.slug));
     }
 
@@ -83,84 +120,74 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
         result.sort((a, b) => b.viewCount - a.viewCount);
         break;
       case "quickest":
-        result.sort((a, b) => (a.prepTime + a.cookTime) - (b.prepTime + b.cookTime));
+        result.sort((a, b) => a.prepTime + a.cookTime - (b.prepTime + b.cookTime));
         break;
       default:
-        result.sort((a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime());
+        result.sort(
+          (a, b) =>
+            new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
+        );
     }
 
     return result;
-  }, [initialRecipes, debouncedSearch, selectedCategories, selectedMealTypes, selectedDietaryTags, selectedOccasions, sortBy, showFavorites]);
+  }, [initialRecipes, q, category, mealTypes, showFavorites, favorites, sortBy]);
 
-  const toggleFilter = (value: string, selected: string[], setter: (v: string[]) => void) => {
-    setter(
-      selected.includes(value)
-        ? selected.filter((v) => v !== value)
-        : [...selected, value]
-    );
-  };
+  const activeFilterCount = (category ? 1 : 0) + mealTypes.length + (showFavorites ? 1 : 0) + (q ? 1 : 0);
 
   const clearFilters = () => {
-    setSearch("");
-    setSelectedCategories([]);
-    setSelectedMealTypes([]);
-    setSelectedDietaryTags([]);
-    setSelectedOccasions([]);
+    setSearchInput("");
     setSortBy("newest");
     setShowFavorites(false);
+    router.replace(pathname, { scroll: false });
   };
+
+  const heading = category
+    ? getCategoryLabel(category)
+    : mealTypes.length === 1
+      ? getMealTypeLabel(mealTypes[0])
+      : "Recipes";
 
   return (
     <PageTransition>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
-            Recipes
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">What to eat?</h1>
           <p className="text-[var(--color-text-secondary)] text-base sm:text-lg">
-            Discover delicious recipes for every occasion
+            Pick a craving, or search for something specific.
           </p>
         </div>
+
+        <WhatToEatGrid active={activeBox} size="compact" className="mb-8" />
 
         <div className="mb-4">
           <Input
             type="search"
-            placeholder="Search recipes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search recipes, ingredients…"
+            aria-label="Search recipes"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 mb-6">
-          <motion.button
-            onClick={() => setFiltersOpen(!filtersOpen)}
-            whileTap={{ scale: 0.95 }}
-            className={cn(
-              "h-9 px-4 rounded-full text-sm font-medium border inline-flex items-center gap-2 transition-colors duration-200",
-              filtersOpen || activeFilterCount > 0
-                ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] border-[var(--color-primary)]"
-                : "bg-transparent text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-            )}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="w-5 h-5 rounded-full bg-[var(--color-on-primary)] text-[var(--color-primary)] text-xs font-bold flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </motion.button>
+          <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mr-1">
+            Meal
+          </span>
+          {MEAL_TYPES.map((m) => (
+            <FilterPill
+              key={m.value}
+              label={m.label}
+              selected={mealTypes.includes(m.value)}
+              onClick={() => toggleMealType(m.value)}
+            />
+          ))}
 
-          <AnimatedDropdown
-            options={SORT_OPTIONS}
-            value={sortBy}
-            onChange={setSortBy}
-          />
+          <span className="hidden sm:block w-px h-6 bg-[var(--color-border)] mx-1" aria-hidden="true" />
+
+          <AnimatedDropdown options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} />
 
           <FilterPill
-            label={showFavorites ? "\u2665 Favorites" : "\u2661 Favorites"}
+            label={showFavorites ? "♥ Favourites" : "♡ Favourites"}
             selected={showFavorites}
             onClick={() => setShowFavorites(!showFavorites)}
           />
@@ -175,86 +202,15 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
           )}
 
           <span className="ml-auto text-sm text-[var(--color-text-tertiary)]">
+            {heading !== "Recipes" && (
+              <span className="font-medium text-[var(--color-text-secondary)]">{heading} · </span>
+            )}
             {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? "s" : ""}
           </span>
         </div>
 
-        <AnimatePresence>
-          {filtersOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div className="mb-6 p-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-elevated)]">
-                <div className="space-y-4">
-                  <FilterGroup
-                    label="Category"
-                    items={RECIPE_CATEGORIES.map(c => ({ value: c.value, label: c.label }))}
-                    selected={selectedCategories}
-                    onToggle={(v) => toggleFilter(v, selectedCategories, setSelectedCategories)}
-                  />
-                  <div className="border-t border-[var(--color-border)]" />
-                  <FilterGroup
-                    label="Meal Type"
-                    items={MEAL_TYPES.map(m => ({ value: m.value, label: m.label }))}
-                    selected={selectedMealTypes}
-                    onToggle={(v) => toggleFilter(v, selectedMealTypes, setSelectedMealTypes)}
-                  />
-                  <div className="border-t border-[var(--color-border)]" />
-                  <FilterGroup
-                    label="Diet"
-                    items={DIETARY_TAGS.map(tag => ({ value: tag, label: tag }))}
-                    selected={selectedDietaryTags}
-                    onToggle={(v) => toggleFilter(v, selectedDietaryTags, setSelectedDietaryTags)}
-                  />
-                  <div className="border-t border-[var(--color-border)]" />
-                  <FilterGroup
-                    label="Occasion"
-                    items={SPECIAL_OCCASIONS.map(o => ({ value: o.value, label: o.label }))}
-                    selected={selectedOccasions}
-                    onToggle={(v) => toggleFilter(v, selectedOccasions, setSelectedOccasions)}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         <RecipeGrid recipes={filteredRecipes} />
       </div>
     </PageTransition>
-  );
-}
-
-function FilterGroup({
-  label,
-  items,
-  selected,
-  onToggle,
-}: {
-  label: string;
-  items: { value: string; label: string }[];
-  selected: string[];
-  onToggle: (value: string) => void;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider shrink-0 pt-2 w-20">
-        {label}
-      </span>
-      <div className="flex flex-wrap gap-2">
-        {items.map((item) => (
-          <FilterPill
-            key={item.value}
-            label={item.label}
-            selected={selected.includes(item.value)}
-            onClick={() => onToggle(item.value)}
-          />
-        ))}
-      </div>
-    </div>
   );
 }
