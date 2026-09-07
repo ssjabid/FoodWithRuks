@@ -5,12 +5,16 @@ import { motion } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/shared/StaggerReveal";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { SAMPLE_LIFESTYLE_POSTS } from "@/lib/sampleData";
+import type { LifestylePost } from "@/types";
 import { formatDate } from "@/lib/utils";
 import { getLifestyleCategoryLabel } from "@/lib/constants";
 
-export function LifestyleTeaser() {
-  const posts = SAMPLE_LIFESTYLE_POSTS.slice(0, 3);
+interface LifestyleTeaserProps {
+  posts: LifestylePost[];
+}
+
+export function LifestyleTeaser({ posts }: LifestyleTeaserProps) {
+  if (posts.length === 0) return null;
 
   return (
     <section className="py-16 sm:py-20 bg-[var(--color-surface)]">
@@ -18,11 +22,11 @@ export function LifestyleTeaser() {
         <StaggerContainer>
           <StaggerItem>
             <div className="mb-8 sm:mb-10">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">
-                From the Kitchen Journal
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">
+                Beyond the kitchen
               </h2>
               <p className="text-[var(--color-text-secondary)] text-base sm:text-lg">
-                Stories, tips, and the joy of cooking
+                Days out, eating out, travel, parenting and crafts
               </p>
             </div>
           </StaggerItem>
@@ -46,7 +50,7 @@ export function LifestyleTeaser() {
                   </div>
                   <div className="p-4">
                     <Badge variant="accent" className="mb-2">{getLifestyleCategoryLabel(post.category)}</Badge>
-                    <h3 className="text-base font-bold tracking-tight text-[var(--color-text-primary)] mb-2 line-clamp-2">
+                    <h3 className="text-base font-semibold tracking-tight text-[var(--color-text-primary)] mb-2 line-clamp-2">
                       {post.title}
                     </h3>
                     <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3">

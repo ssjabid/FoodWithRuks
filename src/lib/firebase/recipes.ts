@@ -1,4 +1,5 @@
 import { adminDb } from "./admin";
+import { getSiteSettings } from "./siteSettings";
 import type { Recipe } from "@/types";
 import type { RecipeCategory, MealType } from "@/lib/constants";
 
@@ -108,6 +109,20 @@ export async function getRelatedRecipes(recipe: Recipe, limit = 4): Promise<Reci
     .map(docToRecipe)
     .filter((r) => r.slug !== recipe.slug)
     .slice(0, limit);
+}
+
+/**
+ * The pinned "New Recipe of the Week" (siteSettings/general.recipeOfTheWeekSlug),
+ * falling back to the most recently published recipe.
+ */
+export async function getRecipeOfTheWeek(): Promise<Recipe | null> {
+  const settings = await getSiteSettings();
+  if (settings.recipeOfTheWeekSlug) {
+    const pinned = await getRecipeBySlug(settings.recipeOfTheWeekSlug);
+    if (pinned) return pinned;
+  }
+  const [latest] = await getPublishedRecipes({ limit: 1 });
+  return latest ?? null;
 }
 
 export async function getAllRecipeSlugs(): Promise<string[]> {
