@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { verifyAdminRequest } from "@/lib/firebase/authCheck";
 import { getPostById, updatePost, deletePost } from "@/lib/firebase/lifestyle";
 
@@ -31,6 +32,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const data = await request.json();
     await updatePost(id, data);
+    revalidatePublic(typeof data?.slug === "string" ? data.slug : undefined);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Post update error:", error);
@@ -46,10 +48,18 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   try {
     const { id } = await params;
+    const existing = await getPostById(id);
     await deletePost(id);
+    revalidatePublic(existing?.slug);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Post delete error:", error);
     return NextResponse.json({ error: "Failed to delete post" }, { status: 500 });
   }
+}
+
+function revalidatePublic(slug?: string) {
+  for (const path of ["/", "/lifestyle"]) revalidatePath(path);
+  if (slug) revalidatePath(`/lifestyle/${slug}`);
+  revalidatePath("/sitemap.xml");
 }

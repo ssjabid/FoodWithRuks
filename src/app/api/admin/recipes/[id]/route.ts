@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { verifyAdminRequest } from "@/lib/firebase/authCheck";
 import { getRecipeById, updateRecipe, deleteRecipe } from "@/lib/firebase/recipes";
 
@@ -31,6 +32,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const data = await request.json();
     await updateRecipe(id, data);
+    revalidatePublic(typeof data?.slug === "string" ? data.slug : undefined);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Recipe update error:", error);
@@ -46,10 +48,18 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   try {
     const { id } = await params;
+    const existing = await getRecipeById(id);
     await deleteRecipe(id);
+    revalidatePublic(existing?.slug);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Recipe delete error:", error);
     return NextResponse.json({ error: "Failed to delete recipe" }, { status: 500 });
   }
+}
+
+function revalidatePublic(slug?: string) {
+  for (const path of ["/", "/recipes"]) revalidatePath(path);
+  if (slug) revalidatePath(`/recipes/${slug}`);
+  revalidatePath("/sitemap.xml");
 }

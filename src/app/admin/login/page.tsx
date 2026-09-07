@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { AdminBrand } from "@/components/admin/AdminBrand";
 
 export default function AdminLoginPage() {
   const { user, loading, isAdmin, adminChecked, signInWithGoogle, logout } = useAuth();
@@ -49,9 +50,8 @@ export default function AdminLoginPage() {
         className="w-full max-w-md p-8 rounded-[var(--radius-lg)] bg-[var(--color-elevated)] border border-[var(--color-border)] shadow-[var(--shadow-lg)]"
       >
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            <span>FoodWith</span>
-            <span className="text-[var(--color-primary)]">Ruks</span>
+          <h1>
+            <AdminBrand asLink={false} size="lg" />
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">Admin Dashboard</p>
         </div>

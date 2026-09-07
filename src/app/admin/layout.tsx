@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { AdminBrand } from "@/components/admin/AdminBrand";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" },
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
   { label: "Comments", href: "/admin/comments", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
   { label: "Subscribers", href: "/admin/subscribers", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
   { label: "Messages", href: "/admin/messages", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
+  { label: "Settings", href: "/admin/settings", icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -51,11 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 border-r border-[var(--color-border)] bg-[var(--color-elevated)]">
         <div className="flex items-center h-16 px-6 border-b border-[var(--color-border)]">
-          <Link href="/admin" className="text-lg font-bold tracking-tight">
-            <span className="text-[var(--color-text-primary)]">FoodWith</span>
-            <span className="text-[var(--color-primary)]">Ruks</span>
-          </Link>
-          <span className="ml-2 text-xs text-[var(--color-text-tertiary)]">Admin</span>
+          <AdminBrand />
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
@@ -107,10 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="fixed inset-y-0 left-0 z-50 w-64 bg-[var(--color-elevated)] border-r border-[var(--color-border)] lg:hidden"
             >
               <div className="flex items-center justify-between h-16 px-6 border-b border-[var(--color-border)]">
-                <span className="text-lg font-bold tracking-tight">
-                  <span className="text-[var(--color-text-primary)]">FoodWith</span>
-                  <span className="text-[var(--color-primary)]">Ruks</span>
-                </span>
+                <AdminBrand asLink={false} />
                 <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-full hover:bg-[var(--color-secondary)]">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
