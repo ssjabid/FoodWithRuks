@@ -1,5 +1,4 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
@@ -12,8 +11,8 @@ const firebaseConfig = {
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getFirestore(app);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-export { app, db, auth, googleProvider };
+// Client SDK is used for Google sign-in only. All Firestore access is server-side via firebase-admin.
+export { app, auth, googleProvider };
