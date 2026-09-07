@@ -1,7 +1,6 @@
 export const NAV_ITEMS = [
   { label: "Recipes", href: "/recipes" },
   { label: "Lifestyle", href: "/lifestyle" },
-  { label: "Shop", href: "/shop" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ] as const;
@@ -61,13 +60,6 @@ export const LIFESTYLE_CATEGORIES = [
   "Food Culture",
   "Cooking Journey",
   "Behind the Scenes",
-] as const;
-
-export const PRODUCT_CATEGORIES = [
-  "Spice Mixes",
-  "Cookbooks",
-  "Kitchen Tools",
-  "Merch",
 ] as const;
 
 export const SITE_NAME = "FoodWithRuks";

@@ -37,7 +37,6 @@ export function Footer() {
               <FooterLink href="/recipes">Recipes</FooterLink>
               <FooterLink href="/about">About</FooterLink>
               <FooterLink href="/lifestyle">Lifestyle</FooterLink>
-              <FooterLink href="/shop">Shop</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
             </nav>
           </div>

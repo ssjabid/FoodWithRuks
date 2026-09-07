@@ -15,7 +15,6 @@ export async function POST(request: Request) {
       revalidatePath("/");
       revalidatePath("/recipes");
       revalidatePath("/lifestyle");
-      revalidatePath("/shop");
     }
 
     return NextResponse.json({ revalidated: true });

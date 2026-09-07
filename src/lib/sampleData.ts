@@ -1,4 +1,4 @@
-import type { Recipe, Category, LifestylePost, Product } from "@/types";
+import type { Recipe, Category, LifestylePost } from "@/types";
 
 export const SAMPLE_CATEGORIES: Category[] = [
   { id: "1", name: "Starters", slug: "starters", description: "Appetizers and small bites", image: "", order: 1, recipeCount: 1 },
@@ -315,71 +315,3 @@ export const SAMPLE_LIFESTYLE_POSTS: LifestylePost[] = [
   },
 ];
 
-export const SAMPLE_PRODUCTS: Product[] = [
-  {
-    id: "1",
-    name: "Signature Biryani Spice Mix",
-    slug: "signature-biryani-spice-mix",
-    description: "My secret biryani blend — whole spices, perfectly proportioned for the ultimate biryani every time.",
-    price: 12.99,
-    currency: "USD",
-    category: "Spice Mixes",
-    inStock: false,
-    comingSoon: true,
-  },
-  {
-    id: "2",
-    name: "Everyday Curry Powder",
-    slug: "everyday-curry-powder",
-    description: "A versatile curry blend you'll reach for daily. Works in everything from chicken curry to roasted vegetables.",
-    price: 9.99,
-    currency: "USD",
-    category: "Spice Mixes",
-    inStock: false,
-    comingSoon: true,
-  },
-  {
-    id: "3",
-    name: "FoodWithRuks Cookbook: Vol. 1",
-    slug: "foodwithruks-cookbook-vol-1",
-    description: "50 of my most-loved recipes in a beautiful hardcover book. Stories, tips, and step-by-step photos.",
-    price: 34.99,
-    currency: "USD",
-    category: "Cookbooks",
-    inStock: false,
-    comingSoon: true,
-  },
-  {
-    id: "4",
-    name: "Wooden Spice Box (Masala Dabba)",
-    slug: "wooden-spice-box",
-    description: "A handcrafted wooden spice box with 7 compartments. Keep your everyday spices organized.",
-    price: 29.99,
-    currency: "USD",
-    category: "Kitchen Tools",
-    inStock: false,
-    comingSoon: true,
-  },
-  {
-    id: "5",
-    name: "Chai Lover's Blend",
-    slug: "chai-lovers-blend",
-    description: "Cardamom, cinnamon, ginger, and cloves — pre-mixed for the perfect cup of masala chai.",
-    price: 8.99,
-    currency: "USD",
-    category: "Spice Mixes",
-    inStock: false,
-    comingSoon: true,
-  },
-  {
-    id: "6",
-    name: "FoodWithRuks Apron",
-    slug: "foodwithruks-apron",
-    description: "A premium cotton apron in sage green with the FoodWithRuks logo. Looks good, cooks better.",
-    price: 24.99,
-    currency: "USD",
-    category: "Merch",
-    inStock: false,
-    comingSoon: true,
-  },
-];
