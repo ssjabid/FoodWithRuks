@@ -50,7 +50,7 @@ export default function AdminCommentsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Comments</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Comments</h1>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">
           {comments.filter((c) => c.status === "pending").length} pending
         </p>
@@ -63,7 +63,7 @@ export default function AdminCommentsPage() {
             onClick={() => setFilter(f)}
             className={`h-9 px-4 rounded-full text-sm font-medium border transition-colors ${
               filter === f
-                ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] border-[var(--color-primary)]"
                 : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)]"
             }`}
           >

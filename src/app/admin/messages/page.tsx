@@ -48,7 +48,7 @@ export default function AdminMessagesPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Messages</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Messages</h1>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">
           {messages.filter((m) => !m.read).length} unread
         </p>

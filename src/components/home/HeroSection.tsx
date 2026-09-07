@@ -26,7 +26,7 @@ export function HeroSection() {
         >
           <motion.h1
             variants={item}
-            className="font-extrabold tracking-tight text-5xl sm:text-6xl lg:text-7xl text-[var(--color-text-primary)] mb-4"
+            className="font-semibold tracking-tight text-5xl sm:text-6xl lg:text-7xl text-[var(--color-text-primary)] mb-4"
           >
             Agooh <span className="text-[var(--color-accent-text)]">&amp;</span> Ruks
           </motion.h1>

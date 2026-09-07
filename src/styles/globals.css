@@ -1,25 +1,9 @@
 @import "tailwindcss";
 
+/* ————————————————————————
+   DESIGN TOKENS — non-colour (static, safe in @theme)
+   ———————————————————————— */
 @theme {
-  /* Monochrome & Sage — Light mode defaults */
-  --color-primary: #5B7F5E;
-  --color-primary-hover: #4A6B4D;
-  --color-secondary: #F0F2ED;
-  --color-accent: #7A9E7E;
-  --color-background: #FFFFFF;
-  --color-surface: #FAFBF9;
-  --color-elevated: #FFFFFF;
-  --color-text-primary: #111111;
-  --color-text-secondary: #6B6B6B;
-  --color-text-tertiary: #999999;
-  --color-border: #E8EBE5;
-  --color-success: #5B7F5E;
-  --color-warning: #D4A04A;
-  --color-error: #C45B4A;
-
-  --font-heading: "Inter", sans-serif;
-  --font-body: "Inter", sans-serif;
-
   --radius-sm: 10px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -37,45 +21,73 @@
   --space-section: 80px;
   --space-section-lg: 120px;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 25px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px rgba(20, 22, 15, 0.05);
+  --shadow-md: 0 8px 25px rgba(20, 22, 15, 0.08);
+  --shadow-lg: 0 16px 40px rgba(20, 22, 15, 0.1);
+}
+
+/* Fonts are loaded by next/font in src/app/layout.tsx and exposed as
+   --font-lora / --font-inter on <html>. `@theme inline` keeps the var()
+   reference live so `font-heading` / `font-body` utilities resolve. */
+@theme inline {
+  --font-heading: var(--font-lora), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ————————————————————————
+   PALETTE — "Warm Sage & Clay"
+   Raw swatches (documentation + one-off use)
+   ———————————————————————— */
+:root {
+  --palette-clay: #C7A491;
+  --palette-blush: #EECFCA;
+  --palette-sage: #919682;
+  --palette-sage-light: #C7CDBF;
+  --palette-olive: #595E48;
 }
 
 /* Light mode (default) */
 :root {
-  --color-primary: #5B7F5E;
-  --color-primary-hover: #4A6B4D;
-  --color-secondary: #F0F2ED;
-  --color-accent: #7A9E7E;
-  --color-background: #FFFFFF;
-  --color-surface: #FAFBF9;
+  --color-primary: #595E48;          /* olive — 6.7:1 on white */
+  --color-primary-hover: #474B39;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #E4E8DD;        /* light sage tint — chips, hover bg */
+  --color-accent: #C7A491;           /* clay — decorative only (2.3:1) */
+  --color-accent-soft: #EECFCA;      /* blush — callouts, story background */
+  --color-accent-text: #8F624B;      /* clay deepened for text — AA on white */
+  --color-sage: #919682;             /* icons, borders, large text only */
+  --color-background: #FCFBF8;
+  --color-surface: #F5F3EE;
   --color-elevated: #FFFFFF;
-  --color-text-primary: #111111;
-  --color-text-secondary: #6B6B6B;
-  --color-text-tertiary: #999999;
-  --color-border: #E8EBE5;
-  --color-success: #5B7F5E;
-  --color-warning: #D4A04A;
-  --color-error: #C45B4A;
+  --color-text-primary: #2A2D22;
+  --color-text-secondary: #595E48;
+  --color-text-tertiary: #6E7362;
+  --color-border: #DDE1D6;
+  --color-success: #6C7E5B;
+  --color-warning: #B98230;
+  --color-error: #B5564A;
 }
 
 /* Dark mode */
 .dark {
-  --color-primary: #7A9E7E;
-  --color-primary-hover: #8FB493;
-  --color-secondary: #1A1D1A;
-  --color-accent: #5B7F5E;
-  --color-background: #0A0C0A;
-  --color-surface: #141814;
-  --color-elevated: #1E231E;
-  --color-text-primary: #F0F2ED;
-  --color-text-secondary: #8A8E87;
-  --color-text-tertiary: #555A53;
-  --color-border: #252A25;
-  --color-success: #7A9E7E;
-  --color-warning: #D4A04A;
-  --color-error: #C45B4A;
+  --color-primary: #C7CDBF;          /* light sage — 10.8:1 on bg */
+  --color-primary-hover: #D9DDD1;
+  --color-on-primary: #1B1D17;
+  --color-secondary: #333828;
+  --color-accent: #C7A491;           /* clay reads as text in dark mode (7.7:1) */
+  --color-accent-soft: #3A2E2A;
+  --color-accent-text: #D9B9A5;
+  --color-sage: #919682;
+  --color-background: #1B1D17;
+  --color-surface: #22251D;
+  --color-elevated: #2B2F25;
+  --color-text-primary: #F1EEE7;
+  --color-text-secondary: #B9BDAF;
+  --color-text-tertiary: #868B7B;
+  --color-border: #3A3F32;
+  --color-success: #A7B894;
+  --color-warning: #D9B27A;
+  --color-error: #E39383;
 }
 
 /* ————————————————————————
@@ -96,15 +108,25 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-/* Dark mode color transitions — smooth 300ms */
+/* Colour-scheme transitions — smooth 300ms */
 *, *::before, *::after {
   transition-property: background-color, border-color, color, box-shadow;
   transition-duration: 0.3s;
   transition-timing-function: ease;
+}
+
+/* Focus ring — consistent, token-driven */
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 70%, transparent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 45%, transparent);
 }
 
 /* ————————————————————————
@@ -127,41 +149,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-page-enter {
   animation: pageEnter 0.3s ease-out both;
-}
-
-/* ————————————————————————
-   NAVIGATION PROGRESS BAR
-   ———————————————————————— */
-.nav-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 2px;
-  background: var(--color-primary);
-  z-index: 100;
-  animation: navProgress 0.6s ease-out forwards;
-}
-
-@keyframes navProgress {
-  from { width: 0%; }
-  to { width: 100%; }
-}
-
-/* ————————————————————————
-   STICKY HEADER STATES
-   ———————————————————————— */
-.header-transparent {
-  background-color: transparent;
-  border-bottom-color: transparent;
-  box-shadow: none;
-}
-
-.header-scrolled {
-  background-color: color-mix(in srgb, var(--color-background) 95%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom-color: var(--color-border);
-  box-shadow: var(--shadow-sm);
 }
 
 /* ————————————————————————
@@ -226,7 +213,6 @@ h1, h2, h3, h4, h5, h6 {
    MICRO-INTERACTIONS
    ———————————————————————— */
 
-/* Button press effect */
 .btn-press {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -241,7 +227,6 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: none;
 }
 
-/* Card hover lift */
 .card-hover {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -251,7 +236,6 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-md);
 }
 
-/* Link arrow slide */
 .link-arrow {
   display: inline-flex;
   align-items: center;
@@ -268,7 +252,6 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateX(4px);
 }
 
-/* Favorite heart bounce */
 @keyframes heartBounce {
   0% { transform: scale(1); }
   30% { transform: scale(1.3); }
@@ -280,17 +263,16 @@ h1, h2, h3, h4, h5, h6 {
   animation: heartBounce 0.3s ease-out;
 }
 
-/* Jump-to-recipe gentle pulse */
+/* Jump-to-recipe gentle pulse — token driven */
 @keyframes gentlePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(91, 127, 94, 0.3); }
-  50% { box-shadow: 0 0 0 6px rgba(91, 127, 94, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 30%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 0%, transparent); }
 }
 
 .pulse-gentle {
   animation: gentlePulse 2.5s ease-in-out infinite;
 }
 
-/* Coming soon badge pulse */
 @keyframes comingSoonPulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -300,14 +282,12 @@ h1, h2, h3, h4, h5, h6 {
   animation: comingSoonPulse 2s ease-in-out infinite;
 }
 
-/* Star cascade — each star fades in with slight delay */
 .star-cascade > *:nth-child(1) { transition-delay: 0ms; }
 .star-cascade > *:nth-child(2) { transition-delay: 40ms; }
 .star-cascade > *:nth-child(3) { transition-delay: 80ms; }
 .star-cascade > *:nth-child(4) { transition-delay: 120ms; }
 .star-cascade > *:nth-child(5) { transition-delay: 160ms; }
 
-/* Smooth strikethrough for ingredient checkboxes */
 .ingredient-checked {
   text-decoration: line-through;
   text-decoration-color: var(--color-text-tertiary);
@@ -316,12 +296,10 @@ h1, h2, h3, h4, h5, h6 {
   transition: text-decoration-color 0.3s ease, opacity 0.3s ease;
 }
 
-/* Filter pill selection */
 .filter-pill {
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Social icon hover */
 .social-hover {
   transition: transform 0.2s ease, color 0.2s ease;
 }
@@ -331,7 +309,6 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-primary);
 }
 
-/* Back to top button */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -358,18 +335,24 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   background-color: var(--color-secondary);
+  background-image:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-accent-soft) 55%, transparent), transparent 55%),
+    radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--palette-sage-light) 60%, transparent), transparent 55%);
 }
 
 .dark .placeholder-icon {
   background-color: var(--color-surface);
+  background-image:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 55%),
+    radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 55%);
 }
 
 /* ————————————————————————
    PROSE STYLES (for lifestyle articles)
    ———————————————————————— */
 .prose h2 {
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   font-size: 1.5rem;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
@@ -399,6 +382,12 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.5rem;
   line-height: 1.75;
   color: var(--color-text-secondary);
+}
+
+.prose a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* ————————————————————————

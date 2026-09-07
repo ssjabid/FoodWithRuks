@@ -55,7 +55,7 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)]">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--color-text-primary)]">Dashboard</h1>
         <p className="text-[var(--color-text-secondary)] text-sm mt-1">Welcome back to FoodWithRuks Admin</p>
       </div>
 
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/admin/recipes/new"
-            className="h-9 px-4 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-white text-sm font-medium inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
+            className="h-9 px-4 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-medium inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

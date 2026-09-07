@@ -23,7 +23,7 @@ export function NewsletterSection() {
         <StaggerContainer>
           <StaggerItem>
             <div className="max-w-xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+              <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
                 Stay Connected
               </h2>
               <p className="text-[var(--color-text-secondary)] text-base sm:text-lg mb-6">
@@ -33,7 +33,7 @@ export function NewsletterSection() {
               <form onSubmit={handleSubmit} className="relative">
                 <div
                   className="flex items-center h-12 sm:h-14 rounded-full border border-[var(--color-border)] bg-[var(--color-elevated)] overflow-hidden transition-shadow duration-200"
-                  style={{ boxShadow: focused ? "0 0 0 3px rgba(91,127,94,0.15)" : "none" }}
+                  style={{ boxShadow: focused ? "0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent)" : "none" }}
                 >
                   <input
                     ref={inputRef}
@@ -68,7 +68,7 @@ export function NewsletterSection() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         whileTap={{ scale: 0.95 }}
-                        className="h-9 sm:h-10 mx-1.5 px-5 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] transition-colors whitespace-nowrap"
+                        className="h-9 sm:h-10 mx-1.5 px-5 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:bg-[var(--color-primary-hover)] transition-colors whitespace-nowrap"
                       >
                         <span className="hidden sm:inline">Subscribe</span>
                         <svg className="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

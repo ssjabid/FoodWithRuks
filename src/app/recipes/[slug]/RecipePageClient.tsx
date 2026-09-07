@@ -48,7 +48,7 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
                 <Badge key={tag} variant="accent">{tag}</Badge>
               ))}
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
               {recipe.title}
             </h1>
             <p className="text-[var(--color-text-secondary)] text-base sm:text-lg mb-3">{recipe.description}</p>

@@ -114,7 +114,7 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
     <PageTransition>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
             Recipes
           </h1>
           <p className="text-[var(--color-text-secondary)] text-base sm:text-lg">
@@ -138,7 +138,7 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
             className={cn(
               "h-9 px-4 rounded-full text-sm font-medium border inline-flex items-center gap-2 transition-colors duration-200",
               filtersOpen || activeFilterCount > 0
-                ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] border-[var(--color-primary)]"
                 : "bg-transparent text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
             )}
           >
@@ -147,7 +147,7 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
             </svg>
             Filters
             {activeFilterCount > 0 && (
-              <span className="w-5 h-5 rounded-full bg-white text-[var(--color-primary)] text-xs font-bold flex items-center justify-center">
+              <span className="w-5 h-5 rounded-full bg-[var(--color-on-primary)] text-[var(--color-primary)] text-xs font-bold flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}

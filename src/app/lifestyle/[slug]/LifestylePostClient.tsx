@@ -23,7 +23,7 @@ export function LifestylePostClient({ post, relatedPosts }: LifestylePostClientP
           {/* Header */}
           <header className="mb-8 sm:mb-10">
             <Badge variant="accent" className="mb-3">{getLifestyleCategoryLabel(post.category)}</Badge>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
               {post.title}
             </h1>
             <div className="flex items-center gap-4 text-sm text-[var(--color-text-secondary)]">

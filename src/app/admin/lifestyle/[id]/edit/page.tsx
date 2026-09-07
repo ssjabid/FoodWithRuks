@@ -34,7 +34,7 @@ export default function EditLifestylePostPage() {
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-6">Edit Post</h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-6">Edit Post</h1>
       <LifestyleForm post={post} />
     </div>
   );

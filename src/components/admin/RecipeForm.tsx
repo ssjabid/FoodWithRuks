@@ -379,7 +379,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         <button
           onClick={() => handleSave("published")}
           disabled={saving}
-          className="h-11 px-6 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="h-11 px-6 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {saving ? "Saving..." : isEdit ? "Update & Publish" : "Publish"}
         </button>
@@ -474,7 +474,7 @@ function PillGroup({
               onClick={() => onToggle(opt)}
               className={`h-9 px-4 rounded-full text-sm font-medium border transition-colors ${
                 active
-                  ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                  ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] border-[var(--color-primary)]"
                   : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
               }`}
             >

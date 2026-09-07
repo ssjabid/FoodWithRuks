@@ -51,12 +51,12 @@ export default function AdminRecipesPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Recipes</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Recipes</h1>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">{recipes.length} total</p>
         </div>
         <Link
           href="/admin/recipes/new"
-          className="h-9 px-4 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-white text-sm font-medium inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
+          className="h-9 px-4 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-medium inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -73,7 +73,7 @@ export default function AdminRecipesPage() {
             onClick={() => setFilter(f)}
             className={`h-9 px-4 rounded-full text-sm font-medium border transition-colors ${
               filter === f
-                ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] border-[var(--color-primary)]"
                 : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)]"
             }`}
           >

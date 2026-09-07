@@ -14,7 +14,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<Variant, string> = {
   primary:
-    "bg-[var(--color-primary)] text-white",
+    "bg-[var(--color-primary)] text-[var(--color-on-primary)]",
   secondary:
     "bg-[var(--color-secondary)] text-[var(--color-text-primary)]",
   outline:
@@ -60,10 +60,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className={cn(
             "absolute inset-0 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300",
             fillColors[variant],
-            variant === "outline" && "group-hover:text-white"
+            variant === "outline" && "group-hover:text-[var(--color-on-primary)]"
           )}
         />
-        <span className={cn("relative z-10", variant === "outline" && "group-hover:text-white transition-colors duration-300")}>
+        <span className={cn("relative z-10", variant === "outline" && "group-hover:text-[var(--color-on-primary)] transition-colors duration-300")}>
           {children}
         </span>
       </motion.button>

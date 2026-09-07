@@ -94,7 +94,7 @@ export function Footer() {
                 />
                 <button
                   type="submit"
-                  className="h-9 w-9 shrink-0 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-white flex items-center justify-center hover:bg-[var(--color-primary-hover)] btn-press"
+                  className="h-9 w-9 shrink-0 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] flex items-center justify-center hover:bg-[var(--color-primary-hover)] btn-press"
                   aria-label="Subscribe"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

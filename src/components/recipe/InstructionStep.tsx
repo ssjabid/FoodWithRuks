@@ -8,7 +8,7 @@ interface InstructionStepProps {
 export function InstructionStep({ instruction }: InstructionStepProps) {
   return (
     <div className="flex gap-4 p-4 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border)]">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-bold">
+      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] flex items-center justify-center text-sm font-bold">
         {instruction.step}
       </div>
       <div className="flex-1">

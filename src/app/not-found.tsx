@@ -25,7 +25,7 @@ export default function NotFound() {
       >
         <motion.h1
           variants={item}
-          className="font-extrabold tracking-tight text-6xl sm:text-8xl text-[var(--color-primary)] mb-4"
+          className="font-semibold tracking-tight text-6xl sm:text-8xl text-[var(--color-primary)] mb-4"
         >
           404
         </motion.h1>

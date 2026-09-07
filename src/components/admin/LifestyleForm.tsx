@@ -122,7 +122,7 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
         <button
           onClick={() => handleSave("published")}
           disabled={saving}
-          className="h-11 px-6 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="h-11 px-6 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {saving ? "Saving..." : isEdit ? "Update & Publish" : "Publish"}
         </button>

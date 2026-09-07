@@ -50,7 +50,7 @@ export default function ContactPage() {
           <StaggerContainer>
             <StaggerItem>
               <div className="mb-8 sm:mb-10">
-                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
+                <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
                   Get in Touch
                 </h1>
                 <p className="text-[var(--color-text-secondary)] text-base sm:text-lg">

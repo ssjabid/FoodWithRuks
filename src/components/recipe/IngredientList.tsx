@@ -71,7 +71,7 @@ export function IngredientList({ ingredients, originalServings, currentServings 
                     >
                       {isChecked && (
                         <motion.svg
-                          className="w-2.5 h-2.5 text-white"
+                          className="w-2.5 h-2.5 text-[var(--color-on-primary)]"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"

@@ -38,7 +38,7 @@ export default function EditRecipePage() {
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-6">Edit Recipe</h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-6">Edit Recipe</h1>
       <RecipeForm recipe={recipe} />
     </div>
   );
