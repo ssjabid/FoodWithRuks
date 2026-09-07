@@ -10,7 +10,7 @@
 
 **Phase**: Agooh & Ruks revamp complete (rebrand, palette, fonts, hamburger nav, home + recipes rebuild, newsletter backend, admin settings, SEO routes, Firestore rules/indexes)
 **Last Updated**: 2026-09-07
-**Last Task Completed**: Full revamp on branch `revamp/agooh-and-ruks` (12 commits). Shop removed. Docs rewritten.
+**Last Task Completed**: Revamp merged to `main` and LIVE at https://foodwithruks.vercel.app (2026-09-07). Firestore rules + indexes deployed. Firestore is empty, so sample content shows until recipes/posts are published in /admin.
 
 ## Live deployment (important)
 

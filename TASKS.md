@@ -402,11 +402,11 @@
 - [x] icon.svg, apple-icon, opengraph-image (Lora fetched with fallback), robots.ts, sitemap.ts from Firestore
 - [x] WebSite + Organization JSON-LD; page revalidate = 3600
 - [x] firestore.rules (deny client), firestore.indexes.json, firebase.json, .firebaserc
-- [ ] Deploy Firestore rules + indexes to production (`npx firebase-tools deploy --only firestore`)
+- [x] Deploy Firestore rules + indexes to production (deployed 2026-09-07)
 
 ### 6.9 Ship
 - [x] Local build + type-check green
-- [ ] Vercel preview verified, merged to main, production smoke test
+- [x] Vercel preview built, merged to main, production smoke test passed (2026-09-07)
 
 ---
 
