@@ -135,6 +135,20 @@ export async function getAllRecipeSlugs(): Promise<string[]> {
   return snapshot.docs.map((doc) => doc.data().slug);
 }
 
+/** Slug + updatedAt for every published document — used by sitemap.xml. */
+export async function getRecipeSitemapEntries(): Promise<{ slug: string; updatedAt: Date }[]> {
+  const snapshot = await adminDb
+    .collection("recipes")
+    .where("status", "==", "published")
+    .select("slug", "updatedAt")
+    .get();
+
+  return snapshot.docs.map((doc) => ({
+    slug: doc.data().slug as string,
+    updatedAt: doc.data().updatedAt?.toDate?.() ?? new Date(),
+  }));
+}
+
 // Admin CRUD functions
 
 export async function getAllRecipes(): Promise<Recipe[]> {

@@ -41,6 +41,20 @@ export async function getPostBySlug(slug: string): Promise<LifestylePost | null>
   return docToPost(snapshot.docs[0]);
 }
 
+/** Slug + updatedAt for every published document — used by sitemap.xml. */
+export async function getPostSitemapEntries(): Promise<{ slug: string; updatedAt: Date }[]> {
+  const snapshot = await adminDb
+    .collection("lifestylePosts")
+    .where("status", "==", "published")
+    .select("slug", "updatedAt")
+    .get();
+
+  return snapshot.docs.map((doc) => ({
+    slug: doc.data().slug as string,
+    updatedAt: doc.data().updatedAt?.toDate?.() ?? new Date(),
+  }));
+}
+
 export async function getAllPostSlugs(): Promise<string[]> {
   const snapshot = await adminDb
     .collection("lifestylePosts")
