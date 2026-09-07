@@ -421,5 +421,17 @@ export const SAMPLE_LIFESTYLE_POSTS: LifestylePost[] = [
     updatedAt: new Date("2026-03-05"),
     publishedAt: new Date("2026-03-05"),
   },
+  {
+    id: "5",
+    title: "A Slow Sunday at the Farm Park",
+    slug: "slow-sunday-at-the-farm-park",
+    excerpt: "Muddy boots, a picnic of leftover biryani, and the goat that stole a paratha. Our favourite kind of day out.",
+    content: "<p>Some weekends need a plan. This one needed wellies, a flask of chai and absolutely no schedule.</p><h2>Pack the Leftovers</h2><p>Cold biryani in a tub is one of the great picnic foods. Add a few parathas wrapped in foil and you are set.</p><h2>Let Them Lead</h2><p>We let Agooh choose which animals to visit first. Forty minutes with the goats, ninety seconds with the cows.</p><h2>The Best Bit</h2><p>Sitting on a damp bench, sharing a paratha with a goat looking on, and nobody looking at a phone.</p>",
+    category: "days-out",
+    readingTime: 3,
+    status: "published",
+    createdAt: new Date("2026-03-09"),
+    updatedAt: new Date("2026-03-09"),
+    publishedAt: new Date("2026-03-09"),
+  },
 ];
-

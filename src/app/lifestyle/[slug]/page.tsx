@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getPublishedPosts } from "@/lib/firebase/lifestyle";
+import { getPostBySlug, getPublishedPosts, getAllPostSlugs } from "@/lib/firebase/lifestyle";
 import { SAMPLE_LIFESTYLE_POSTS } from "@/lib/sampleData";
 import { LifestylePostClient } from "./LifestylePostClient";
+
+export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return SAMPLE_LIFESTYLE_POSTS.map((post) => ({
-    slug: post.slug,
-  }));
+  try {
+    const slugs = await getAllPostSlugs();
+    if (slugs.length > 0) return slugs.map((slug) => ({ slug }));
+  } catch (error) {
+    console.error("[lifestyle/[slug]] could not load slugs from Firestore, using sample data:", error);
+  }
+  return SAMPLE_LIFESTYLE_POSTS.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
