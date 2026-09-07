@@ -11,6 +11,7 @@ interface Stats {
   totalPosts: number;
   pendingComments: number;
   unreadMessages: number;
+  subscribers: number;
 }
 
 interface RecipeSummary {
@@ -25,6 +26,7 @@ const STAT_CARDS = [
   { key: "totalPosts", label: "Total Posts", color: "text-blue-600 dark:text-blue-400", href: "/admin/lifestyle" },
   { key: "pendingComments", label: "Pending Comments", color: "text-amber-600 dark:text-amber-400", href: "/admin/comments" },
   { key: "unreadMessages", label: "Unread Messages", color: "text-rose-600 dark:text-rose-400", href: "/admin/messages" },
+  { key: "subscribers", label: "Subscribers", color: "text-[var(--color-accent-text)]", href: "/admin/subscribers" },
 ] as const;
 
 export default function AdminDashboard() {
@@ -56,11 +58,11 @@ export default function AdminDashboard() {
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--color-text-primary)]">Dashboard</h1>
-        <p className="text-[var(--color-text-secondary)] text-sm mt-1">Welcome back to FoodWithRuks Admin</p>
+        <p className="text-[var(--color-text-secondary)] text-sm mt-1">Welcome back to Agooh & Ruks Admin</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {STAT_CARDS.map((card, i) => (
           <motion.div
             key={card.key}

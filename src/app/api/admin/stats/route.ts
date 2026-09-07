@@ -9,11 +9,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const [recipes, posts, comments, messages] = await Promise.all([
+    const [recipes, posts, comments, messages, subscribers] = await Promise.all([
       adminDb.collection("recipes").count().get(),
       adminDb.collection("lifestylePosts").count().get(),
       adminDb.collection("comments").where("status", "==", "pending").count().get(),
       adminDb.collection("contactMessages").where("read", "==", false).count().get(),
+      adminDb.collection("subscribers").where("status", "==", "subscribed").count().get(),
     ]);
 
     return NextResponse.json({
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
       totalPosts: posts.data().count,
       pendingComments: comments.data().count,
       unreadMessages: messages.data().count,
+      subscribers: subscribers.data().count,
     });
   } catch (error) {
     console.error("Stats error:", error);
