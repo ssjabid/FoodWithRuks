@@ -441,7 +441,7 @@ Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of
 
 ### 7.6 Ship
 - [x] Local build + type-check green
-- [ ] Vercel preview verified (palettes, drawer, focus), merged to main, production smoke test
+- [x] Vercel preview built, merged to main, production smoke test passed (2026-09-08)
 
 ---
 

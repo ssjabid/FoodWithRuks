@@ -10,7 +10,7 @@
 
 **Phase**: Calm editorial pass complete (motion diet, focus states, typography scale, editorial home, five palettes with drawer picker)
 **Last Updated**: 2026-09-08
-**Last Task Completed**: Calm editorial redesign on branch `redesign/calm-editorial` — awaiting Vercel preview sign-off and merge to `main`. Production still runs the 2026-09-07 revamp until merged.
+**Last Task Completed**: Calm editorial redesign merged to `main` and LIVE at https://foodwithruks.vercel.app (2026-09-08). Appearance picker is visible to visitors until Ruks chooses a palette and hides it in /admin/settings.
 
 ## Live deployment (important)
 
