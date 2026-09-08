@@ -3,6 +3,9 @@ import { Inter, Lora } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BackToTop } from "@/components/shared/BackToTop";
+import { ThemeProvider } from "@/components/shared/ThemeProvider";
+import { getSiteSettingsSafe } from "@/lib/firebase/siteSettings";
+import { PALETTE_IDS } from "@/lib/theme";
 import {
   SITE_NAME,
   SITE_DESCRIPTION,
@@ -13,6 +16,8 @@ import {
   AUTHOR_NAME,
 } from "@/lib/site";
 import "@/styles/globals.css";
+
+export const revalidate = 3600;
 
 const lora = Lora({
   subsets: ["latin"],
@@ -76,34 +81,36 @@ const structuredData = [
   },
 ];
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSiteSettingsSafe();
+
+  // Runs before first paint: applies the visitor's stored palette/mode (or the OS mode) so nothing flashes.
+  const themeScript = `(function(){try{var d=document.documentElement,P=${JSON.stringify(PALETTE_IDS)};
+var p=localStorage.getItem('${STORAGE_KEYS.palette}');if(P.indexOf(p)>-1){d.setAttribute('data-palette',p);}
+var m=localStorage.getItem('${STORAGE_KEYS.mode}')||localStorage.getItem('${STORAGE_KEYS.theme}');
+var dark=m==='dark'||((!m||m==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+if(dark){d.classList.add('dark');}else{d.classList.remove('dark');}}catch(e){}})();`;
+
   return (
-    <html lang="en" className={`${lora.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      data-palette={settings.defaultPalette}
+      className={`${lora.variable} ${inter.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                var theme = localStorage.getItem('${STORAGE_KEYS.theme}');
-                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark');
-                }
-              })();
-            `,
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </head>
       <body className="font-body antialiased">
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-1 page-enter">{children}</main>
-          <Footer />
-        </div>
-        <BackToTop />
+        <ThemeProvider defaultPalette={settings.defaultPalette} showPicker={settings.showThemePicker}>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+          <BackToTop />
+        </ThemeProvider>
       </body>
     </html>
   );

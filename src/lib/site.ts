@@ -38,6 +38,9 @@ export const SOCIAL_LINKS = {
 
 /** localStorage keys — namespaced so a future rebrand can't collide. */
 export const STORAGE_KEYS = {
+  /** legacy light|dark key, migrated to mode on first read */
   theme: "ar_theme",
+  mode: "ar_mode",
+  palette: "ar_palette",
   favorites: "ar_favorites",
 } as const;

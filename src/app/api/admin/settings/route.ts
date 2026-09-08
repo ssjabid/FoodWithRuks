@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { verifyAdminRequest } from "@/lib/firebase/authCheck";
 import { getSiteSettings, updateSiteSettings } from "@/lib/firebase/siteSettings";
 import { getRecipeBySlug } from "@/lib/firebase/recipes";
+import { isPaletteId } from "@/lib/theme";
 
 const HANDLE_RE = /^@?[A-Za-z0-9._]{1,30}$/;
 
@@ -27,8 +28,18 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const body = (await request.json()) as { recipeOfTheWeekSlug?: unknown; instagramHandle?: unknown };
-    const update: { recipeOfTheWeekSlug?: string; instagramHandle?: string } = {};
+    const body = (await request.json()) as {
+      recipeOfTheWeekSlug?: unknown;
+      instagramHandle?: unknown;
+      defaultPalette?: unknown;
+      showThemePicker?: unknown;
+    };
+    const update: {
+      recipeOfTheWeekSlug?: string;
+      instagramHandle?: string;
+      defaultPalette?: "cream" | "sage" | "blush" | "clay" | "olive";
+      showThemePicker?: boolean;
+    } = {};
 
     if (typeof body.recipeOfTheWeekSlug === "string") {
       const slug = body.recipeOfTheWeekSlug.trim();
@@ -49,8 +60,22 @@ export async function PUT(request: Request) {
       update.instagramHandle = handle.startsWith("@") ? handle : `@${handle}`;
     }
 
+    if (body.defaultPalette !== undefined) {
+      if (!isPaletteId(body.defaultPalette)) {
+        return NextResponse.json({ error: "Unknown palette." }, { status: 400 });
+      }
+      update.defaultPalette = body.defaultPalette;
+    }
+
+    if (body.showThemePicker !== undefined) {
+      if (typeof body.showThemePicker !== "boolean") {
+        return NextResponse.json({ error: "showThemePicker must be true or false." }, { status: 400 });
+      }
+      update.showThemePicker = body.showThemePicker;
+    }
+
     await updateSiteSettings(update);
-    revalidatePath("/");
+    revalidatePath("/", "layout");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Settings update error:", error);

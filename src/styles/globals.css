@@ -4,41 +4,45 @@
    DESIGN TOKENS — non-colour (static, safe in @theme)
    ———————————————————————— */
 @theme {
-  --radius-sm: 10px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-badge: 999px;
 
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --space-3xl: 64px;
-  --space-4xl: 96px;
-  --space-5xl: 128px;
-  --space-section: 80px;
-  --space-section-lg: 120px;
+  --container-wide: 1240px;
+  --container-prose: 45rem;
 
-  --shadow-sm: 0 1px 3px rgba(20, 22, 15, 0.05);
-  --shadow-md: 0 8px 25px rgba(20, 22, 15, 0.08);
-  --shadow-lg: 0 16px 40px rgba(20, 22, 15, 0.1);
+  /* Every Tailwind transition-* utility uses these by default */
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
 /* Fonts are loaded by next/font in src/app/layout.tsx and exposed as
-   --font-lora / --font-inter on <html>. `@theme inline` keeps the var()
-   reference live so `font-heading` / `font-body` utilities resolve. */
+   --font-lora / --font-inter on <html>. */
 @theme inline {
   --font-heading: var(--font-lora), Georgia, "Times New Roman", serif;
   --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* ————————————————————————
-   PALETTE — "Warm Sage & Clay"
-   Raw swatches (documentation + one-off use)
+   MOTION + TYPE SCALE (runtime tokens)
    ———————————————————————— */
 :root {
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-drawer: 220ms;
+
+  --text-display: clamp(3rem, 2.25rem + 3.2vw, 4.5rem);   /* 48–72 hero */
+  --text-h1: clamp(2.25rem, 1.9rem + 1.5vw, 3rem);        /* 36–48 page titles */
+  --text-h2: clamp(1.625rem, 1.45rem + 0.8vw, 2rem);      /* 26–32 sections */
+  --text-h3: 1.125rem;                                     /* 18 card titles */
+  --text-body: 1.0625rem;                                  /* 17 article body */
+  --text-ui: 1rem;
+  --text-small: 0.875rem;
+  --text-eyebrow: 0.75rem;
+  --text-nav: 1.25rem;
+
   --palette-clay: #C7A491;
   --palette-blush: #EECFCA;
   --palette-sage: #919682;
@@ -46,364 +50,548 @@
   --palette-olive: #595E48;
 }
 
-/* Light mode (default) */
-:root {
-  --color-primary: #595E48;          /* olive — 6.7:1 on white */
-  --color-primary-hover: #474B39;
+/* ————————————————————————
+   PALETTES — five arrangements of the same swatches, each light + dark.
+   Order matters: light blocks first, then dark blocks (compound
+   [data-palette].dark selectors outrank the single-class blocks).
+   ———————————————————————— */
+
+/* Cream & Olive — light (default) */
+:root,
+[data-palette="cream"] {
+  color-scheme: light;
+  --color-primary: #595E48;
+  --color-primary-hover: #474B3A;
   --color-on-primary: #FFFFFF;
-  --color-secondary: #E4E8DD;        /* light sage tint — chips, hover bg */
-  --color-accent: #C7A491;           /* clay — decorative only (2.3:1) */
-  --color-accent-soft: #EECFCA;      /* blush — callouts, story background */
-  --color-accent-text: #8F624B;      /* clay deepened for text — AA on white */
-  --color-sage: #919682;             /* icons, borders, large text only */
+  --color-secondary: #E4E8DD;
+  --color-accent: #C7A491;
+  --color-accent-soft: #EECFCA;
+  --color-accent-text: #8F624B;
   --color-background: #FCFBF8;
   --color-surface: #F5F3EE;
   --color-elevated: #FFFFFF;
   --color-text-primary: #2A2D22;
   --color-text-secondary: #595E48;
-  --color-text-tertiary: #6E7362;
+  --color-text-tertiary: #62675A;
   --color-border: #DDE1D6;
-  --color-success: #6C7E5B;
+  --color-success: #5E6E4F;
   --color-warning: #B98230;
-  --color-error: #B5564A;
+  --color-error: #9E4A3F;
+  --color-placeholder-bg: #E4E8DD;
+  --color-placeholder-icon: #919682;
+  --color-band: #F5F3EE;
+  --color-on-band: #2A2D22;
 }
 
-/* Dark mode */
-.dark {
-  --color-primary: #C7CDBF;          /* light sage — 10.8:1 on bg */
-  --color-primary-hover: #D9DDD1;
+/* Sage — light */
+[data-palette="sage"] {
+  color-scheme: light;
+  --color-primary: #595E48;
+  --color-primary-hover: #474B3A;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #DDE1D9;
+  --color-accent: #919682;
+  --color-accent-soft: #EECFCA;
+  --color-accent-text: #79533F;
+  --color-background: #F1F2EF;
+  --color-surface: #E9EBE5;
+  --color-elevated: #FFFFFF;
+  --color-text-primary: #24261D;
+  --color-text-secondary: #474B3A;
+  --color-text-tertiary: #62675A;
+  --color-border: #C7CDBF;
+  --color-success: #5E6E4F;
+  --color-warning: #B98230;
+  --color-error: #9E4A3F;
+  --color-placeholder-bg: #DDE1D9;
+  --color-placeholder-icon: #919682;
+  --color-band: #DDE1D9;
+  --color-on-band: #24261D;
+}
+
+/* Blush — light */
+[data-palette="blush"] {
+  color-scheme: light;
+  --color-primary: #595E48;
+  --color-primary-hover: #474B3A;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #F3DDDA;
+  --color-accent: #C7A491;
+  --color-accent-soft: #EECFCA;
+  --color-accent-text: #79533F;
+  --color-background: #FAF1EF;
+  --color-surface: #F5E2DF;
+  --color-elevated: #FFFFFF;
+  --color-text-primary: #322924;
+  --color-text-secondary: #5A4A41;
+  --color-text-tertiary: #6F5B50;
+  --color-border: #EECFCA;
+  --color-success: #5E6E4F;
+  --color-warning: #B98230;
+  --color-error: #9E4A3F;
+  --color-placeholder-bg: #F5E2DF;
+  --color-placeholder-icon: #C7A491;
+  --color-band: #EECFCA;
+  --color-on-band: #322924;
+}
+
+/* Clay — light */
+[data-palette="clay"] {
+  color-scheme: light;
+  --color-primary: #825540;
+  --color-primary-hover: #6E4735;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #E9DBD3;
+  --color-accent: #919682;
+  --color-accent-soft: #E4E8DD;
+  --color-accent-text: #595E48;
+  --color-background: #F7F1EE;
+  --color-surface: #EEE4DE;
+  --color-elevated: #FFFFFF;
+  --color-text-primary: #322924;
+  --color-text-secondary: #5A4A41;
+  --color-text-tertiary: #6F5B50;
+  --color-border: #E3D2C8;
+  --color-success: #5E6E4F;
+  --color-warning: #B98230;
+  --color-error: #9E4A3F;
+  --color-placeholder-bg: #E9DBD3;
+  --color-placeholder-icon: #C7A491;
+  --color-band: #C7A491;
+  --color-on-band: #322924;
+}
+
+/* Evening Olive — light (sage ground with olive bands) */
+[data-palette="olive"] {
+  color-scheme: light;
+  --color-primary: #595E48;
+  --color-primary-hover: #474B3A;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #D2D7CC;
+  --color-accent: #C7A491;
+  --color-accent-soft: #EECFCA;
+  --color-accent-text: #79533F;
+  --color-background: #E9EBE5;
+  --color-surface: #DDE1D9;
+  --color-elevated: #F1F2EF;
+  --color-text-primary: #24261D;
+  --color-text-secondary: #474B3A;
+  --color-text-tertiary: #595E48;
+  --color-border: #B9BFB2;
+  --color-success: #595E48;
+  --color-warning: #8F6A2A;
+  --color-error: #9E4A3F;
+  --color-placeholder-bg: #DDE1D9;
+  --color-placeholder-icon: #919682;
+  --color-band: #595E48;
+  --color-on-band: #FCFBF8;
+}
+
+/* Cream & Olive — dark (default dark) */
+.dark,
+[data-palette="cream"].dark {
+  color-scheme: dark;
+  --color-primary: #C7CDBF;
+  --color-primary-hover: #DDE1D9;
   --color-on-primary: #1B1D17;
   --color-secondary: #333828;
-  --color-accent: #C7A491;           /* clay reads as text in dark mode (7.7:1) */
+  --color-accent: #C7A491;
   --color-accent-soft: #3A2E2A;
-  --color-accent-text: #D9B9A5;
-  --color-sage: #919682;
+  --color-accent-text: #D8BFB2;
   --color-background: #1B1D17;
   --color-surface: #22251D;
   --color-elevated: #2B2F25;
   --color-text-primary: #F1EEE7;
   --color-text-secondary: #B9BDAF;
-  --color-text-tertiary: #868B7B;
+  --color-text-tertiary: #9FA491;
   --color-border: #3A3F32;
   --color-success: #A7B894;
   --color-warning: #D9B27A;
   --color-error: #E39383;
+  --color-placeholder-bg: #22251D;
+  --color-placeholder-icon: #6E7362;
+  --color-band: #22251D;
+  --color-on-band: #F1EEE7;
+}
+
+/* Sage — dark */
+[data-palette="sage"].dark {
+  color-scheme: dark;
+  --color-primary: #C7CDBF;
+  --color-primary-hover: #DDE1D9;
+  --color-on-primary: #24261D;
+  --color-secondary: #3A3D2F;
+  --color-accent: #C7A491;
+  --color-accent-soft: #3C312C;
+  --color-accent-text: #D8BFB2;
+  --color-background: #24261D;
+  --color-surface: #2D2F24;
+  --color-elevated: #35382B;
+  --color-text-primary: #F1F2EF;
+  --color-text-secondary: #C7CDBF;
+  --color-text-tertiary: #9FA491;
+  --color-border: #474B3A;
+  --color-success: #A7B894;
+  --color-warning: #D9B27A;
+  --color-error: #E39383;
+  --color-placeholder-bg: #2D2F24;
+  --color-placeholder-icon: #6E7362;
+  --color-band: #2D2F24;
+  --color-on-band: #F1F2EF;
+}
+
+/* Blush — dark */
+[data-palette="blush"].dark {
+  color-scheme: dark;
+  --color-primary: #EECFCA;
+  --color-primary-hover: #F5E2DF;
+  --color-on-primary: #241E1A;
+  --color-secondary: #3C312C;
+  --color-accent: #C7A491;
+  --color-accent-soft: #50423A;
+  --color-accent-text: #D8BFB2;
+  --color-background: #241E1A;
+  --color-surface: #2E2621;
+  --color-elevated: #3A302A;
+  --color-text-primary: #F8ECEA;
+  --color-text-secondary: #D8BFB2;
+  --color-text-tertiary: #B39786;
+  --color-border: #4C3E37;
+  --color-success: #A7B894;
+  --color-warning: #D9B27A;
+  --color-error: #E39383;
+  --color-placeholder-bg: #2E2621;
+  --color-placeholder-icon: #7B665A;
+  --color-band: #2E2621;
+  --color-on-band: #F8ECEA;
+}
+
+/* Clay — dark */
+[data-palette="clay"].dark {
+  color-scheme: dark;
+  --color-primary: #C7A491;
+  --color-primary-hover: #D8BFB2;
+  --color-on-primary: #241E1A;
+  --color-secondary: #3C312C;
+  --color-accent: #C7CDBF;
+  --color-accent-soft: #3A3D2F;
+  --color-accent-text: #C7CDBF;
+  --color-background: #1E1916;
+  --color-surface: #2A221E;
+  --color-elevated: #362C27;
+  --color-text-primary: #F7F1EE;
+  --color-text-secondary: #D8BFB2;
+  --color-text-tertiary: #B39786;
+  --color-border: #4C3E37;
+  --color-success: #A7B894;
+  --color-warning: #D9B27A;
+  --color-error: #E39383;
+  --color-placeholder-bg: #2A221E;
+  --color-placeholder-icon: #7B665A;
+  --color-band: #2A221E;
+  --color-on-band: #F7F1EE;
+}
+
+/* Evening Olive — dark (olive itself is the ground) */
+[data-palette="olive"].dark {
+  color-scheme: dark;
+  --color-primary: #EECFCA;
+  --color-primary-hover: #F5E2DF;
+  --color-on-primary: #24261D;
+  --color-secondary: #595E48;
+  --color-accent: #C7A491;
+  --color-accent-soft: #5A4A41;
+  --color-accent-text: #E9DBD3;
+  --color-background: #474B3A;
+  --color-surface: #595E48;
+  --color-elevated: #3E4232;
+  --color-text-primary: #F9FAF9;
+  --color-text-secondary: #E9EBE5;
+  --color-text-tertiary: #DDE1D9;
+  --color-border: #6A6E5A;
+  --color-success: #E9EBE5;
+  --color-warning: #EAD2A8;
+  --color-error: #F5CFC8;
+  --color-placeholder-bg: #595E48;
+  --color-placeholder-icon: #C7CDBF;
+  --color-band: #2A2D22;
+  --color-on-band: #F9FAF9;
 }
 
 /* ————————————————————————
-   BASE STYLES
+   BASE
    ———————————————————————— */
-html {
-  scroll-behavior: smooth;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: var(--text-ui);
+    line-height: 1.6;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Keyboard focus only. Inputs opt out via .field (they always match :focus-visible). */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  }
+
+  /* Colour crossfade — only while the theme is being switched (ThemeProvider adds the class for 300ms) */
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition:
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      color var(--dur-base) var(--ease-out),
+      fill var(--dur-base) var(--ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-body {
+/* ————————————————————————
+   TYPOGRAPHY UTILITIES
+   ———————————————————————— */
+@utility eyebrow {
   font-family: var(--font-body);
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-weight: 400;
+  font-size: var(--text-eyebrow);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-text-tertiary);
 }
 
-h1, h2, h3, h4, h5, h6 {
+@utility h-display {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-size: var(--text-display);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+@utility h-page {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: 500;
+  line-height: 1.15;
   letter-spacing: -0.01em;
 }
 
-/* Colour-scheme transitions — smooth 300ms */
-*, *::before, *::after {
-  transition-property: background-color, border-color, color, box-shadow;
-  transition-duration: 0.3s;
-  transition-timing-function: ease;
+@utility h-section {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
-/* Focus ring — consistent, token-driven */
-:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--color-primary) 70%, transparent);
-  outline-offset: 2px;
+@utility h-card {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: 500;
+  line-height: 1.3;
 }
 
-::selection {
-  background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+@utility accent-italic {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-accent-text);
 }
 
-/* ————————————————————————
-   PAGE TRANSITION
-   ———————————————————————— */
-@keyframes pageEnter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.page-enter {
-  animation: pageEnter 0.4s ease-out forwards;
-}
-
-.animate-page-enter {
-  animation: pageEnter 0.3s ease-out both;
+@utility text-body {
+  font-size: var(--text-body);
+  line-height: 1.65;
 }
 
 /* ————————————————————————
-   SCROLL REVEAL ANIMATIONS
+   COMPONENTS
    ———————————————————————— */
-@keyframes fadeInUp {
-  from {
+@layer components {
+  /* Form fields: border darkens on focus, no glow. */
+  .field {
+    border: 1px solid var(--color-border);
+    background-color: var(--color-elevated);
+    color: var(--color-text-primary);
+    transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  }
+  .field::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  .field:hover {
+    border-color: var(--color-text-tertiary);
+  }
+  .field:focus,
+  .field:focus-within {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+  }
+  .field-bare {
+    background: transparent;
+    color: var(--color-text-primary);
+  }
+  .field-bare::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  .field-bare:focus {
+    outline: none;
+  }
+
+  /* Editorial links: underline, brightens on hover */
+  .link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    transition: text-decoration-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
+  .link-primary {
+    color: var(--color-primary);
+  }
+
+  /* The only keyframe left */
+  .fade-in {
+    animation: fadeIn var(--dur-fast) var(--ease-out) both;
+  }
+
+  /* Height-animated disclosure without JS measuring */
+  .accordion {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--dur-base) var(--ease-out);
+  }
+  .accordion > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .accordion[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
+  /* Drawer + overlay: always mounted, visibility delayed so exit transitions run */
+  .drawer-backdrop {
     opacity: 0;
-    transform: translateY(20px);
+    visibility: hidden;
+    transition: opacity 150ms var(--ease-out), visibility 0s linear 150ms;
   }
-  to {
+  .drawer-backdrop[data-state="open"] {
     opacity: 1;
-    transform: translateY(0);
+    visibility: visible;
+    transition-delay: 0s;
   }
-}
-
-@keyframes fadeInLeft {
-  from {
+  .drawer-panel {
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform var(--dur-drawer) var(--ease-out), visibility 0s linear var(--dur-drawer);
+  }
+  .drawer-panel[data-state="open"] {
+    transform: none;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+  .overlay-panel {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translate(-50%, -8px);
+    visibility: hidden;
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out), visibility 0s linear 150ms;
   }
-  to {
+  .overlay-panel[data-state="open"] {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate(-50%, 0);
+    visibility: visible;
+    transition-delay: 0s;
   }
-}
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.4s ease-out forwards;
-}
+  /* Flat image placeholder */
+  .placeholder-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-placeholder-bg);
+    color: var(--color-placeholder-icon);
+  }
 
-.animate-grid-item {
-  animation: fadeInUp 0.4s ease-out both;
-}
-
-.animate-fade-in-left {
-  animation: fadeInLeft 0.4s ease-out forwards;
-}
-
-.animate-on-scroll {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-}
-
-.animate-on-scroll.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Stagger delay utility classes — 75ms per card */
-.stagger-1 { transition-delay: 0ms; }
-.stagger-2 { transition-delay: 75ms; }
-.stagger-3 { transition-delay: 150ms; }
-.stagger-4 { transition-delay: 225ms; }
-.stagger-5 { transition-delay: 300ms; }
-.stagger-6 { transition-delay: 375ms; }
-.stagger-7 { transition-delay: 450ms; }
-.stagger-8 { transition-delay: 525ms; }
-
-/* ————————————————————————
-   MICRO-INTERACTIONS
-   ———————————————————————— */
-
-.btn-press {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.btn-press:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-press:active {
-  transform: scale(0.97);
-  box-shadow: none;
-}
-
-.card-hover {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-md);
-}
-
-.link-arrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.link-arrow svg,
-.link-arrow .arrow {
-  transition: transform 0.2s ease;
-}
-
-.link-arrow:hover svg,
-.link-arrow:hover .arrow {
-  transform: translateX(4px);
-}
-
-@keyframes heartBounce {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.3); }
-  60% { transform: scale(0.95); }
-  100% { transform: scale(1); }
-}
-
-.heart-bounce {
-  animation: heartBounce 0.3s ease-out;
-}
-
-/* Jump-to-recipe gentle pulse — token driven */
-@keyframes gentlePulse {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 30%, transparent); }
-  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 0%, transparent); }
-}
-
-.pulse-gentle {
-  animation: gentlePulse 2.5s ease-in-out infinite;
-}
-
-@keyframes comingSoonPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.coming-soon-pulse {
-  animation: comingSoonPulse 2s ease-in-out infinite;
-}
-
-.star-cascade > *:nth-child(1) { transition-delay: 0ms; }
-.star-cascade > *:nth-child(2) { transition-delay: 40ms; }
-.star-cascade > *:nth-child(3) { transition-delay: 80ms; }
-.star-cascade > *:nth-child(4) { transition-delay: 120ms; }
-.star-cascade > *:nth-child(5) { transition-delay: 160ms; }
-
-.ingredient-checked {
-  text-decoration: line-through;
-  text-decoration-color: var(--color-text-tertiary);
-  text-decoration-thickness: 1.5px;
-  opacity: 0.5;
-  transition: text-decoration-color 0.3s ease, opacity 0.3s ease;
-}
-
-.filter-pill {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.social-hover {
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.social-hover:hover {
-  transform: scale(1.15);
-  color: var(--color-primary);
+  /* Article prose (lifestyle posts) */
+  .prose {
+    font-size: var(--text-body);
+    line-height: 1.65;
+    max-width: 68ch;
+  }
+  .prose h2 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-primary);
+  }
+  .prose h3 {
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+  }
+  .prose p {
+    margin-bottom: 1.1rem;
+    color: var(--color-text-primary);
+  }
+  .prose ul, .prose ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.1rem;
+  }
+  .prose li {
+    margin-bottom: 0.4rem;
+  }
+  .prose a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(8px); }
-}
-
-.back-to-top-enter {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-.back-to-top-exit {
-  animation: fadeOut 0.3s ease-out forwards;
+  from { opacity: 0; }
 }
 
 /* ————————————————————————
-   FOOD PLACEHOLDER ICON
-   ———————————————————————— */
-.placeholder-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-secondary);
-  background-image:
-    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-accent-soft) 55%, transparent), transparent 55%),
-    radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--palette-sage-light) 60%, transparent), transparent 55%);
-}
-
-.dark .placeholder-icon {
-  background-color: var(--color-surface);
-  background-image:
-    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 55%),
-    radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 55%);
-}
-
-/* ————————————————————————
-   PROSE STYLES (for lifestyle articles)
-   ———————————————————————— */
-.prose h2 {
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  font-size: 1.5rem;
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-  color: var(--color-text-primary);
-}
-
-.prose h3 {
-  font-weight: 600;
-  font-size: 1.25rem;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: var(--color-text-primary);
-}
-
-.prose p {
-  margin-bottom: 1rem;
-  line-height: 1.75;
-  color: var(--color-text-secondary);
-}
-
-.prose ul, .prose ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.prose li {
-  margin-bottom: 0.5rem;
-  line-height: 1.75;
-  color: var(--color-text-secondary);
-}
-
-.prose a {
-  color: var(--color-primary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* ————————————————————————
-   SCROLLBAR STYLES
-   ———————————————————————— */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* ————————————————————————
-   PRINT STYLES
+   PRINT
    ———————————————————————— */
 @media print {
   header, footer, nav, .no-print,

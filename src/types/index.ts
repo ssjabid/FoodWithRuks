@@ -1,4 +1,5 @@
 import type { RecipeCategory, MealType, LifestyleCategory } from "@/lib/constants";
+import type { PaletteId } from "@/lib/theme";
 
 export interface Recipe {
   id: string;
@@ -84,6 +85,10 @@ export interface SiteSettings {
   /** Slug of the recipe pinned as "New Recipe of the Week"; empty = latest published. */
   recipeOfTheWeekSlug: string;
   instagramHandle: string;
+  /** Site-wide default palette (visitors can override in the drawer). */
+  defaultPalette: PaletteId;
+  /** Whether the Appearance picker is shown to visitors. */
+  showThemePicker: boolean;
   updatedAt?: Date;
 }
 
