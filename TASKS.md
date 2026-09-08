@@ -410,6 +410,41 @@
 
 ---
 
+## Phase 7 — Calm Editorial Pass (2026-09-08)
+
+Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of five top food blogs and moribyan.com.
+
+### 7.1 Motion diet
+- [x] Remove framer-motion from every public component; delete PageTransition, StaggerReveal, ScrollReveal, ScrollProgress, useInView, AnimatedDropdown
+- [x] Motion tokens (120/200/220ms ease-out), reduced-motion kill switch, scoped theme crossfade, dead CSS removed
+- [x] CSS drawer/overlay (data-state + inert), accordions, .fade-in; flat cards (no shadows, no lift/zoom)
+
+### 7.2 Focus + interaction
+- [x] .field inputs (border darkens, no glow) — fixes the hero search halo; .field-bare inside wrappers
+- [x] Global :focus-visible outline; SearchOverlay indicator; native ingredient checkboxes; native Select for sort
+- [x] .link underlines; card hover = title underline + image opacity
+
+### 7.3 Typography + layout
+- [x] Type scale utilities (h-display/h-page/h-section/h-card/eyebrow/accent-italic/text-body), headings Lora 500
+- [x] Editorial home: hero with italic accent + featured recipe, Currently cooking, Explore by category (counts), Most loved, lifestyle, Instagram band, newsletter
+- [x] max-w-wide / max-w-prose containers, SectionHeader, radii 6/8/12
+
+### 7.4 Palettes + theming
+- [x] Five palettes (cream, sage, blush, clay, olive) × light/dark token sets; scripts/check-contrast.mjs
+- [x] ThemeProvider + themeStore (ar_palette / ar_mode, system mode), no-FOUC script, color-scheme
+- [x] Appearance picker in the drawer; admin default palette + show/hide picker
+- [ ] Ruks picks a palette; set it as default in /admin/settings and hide the picker
+
+### 7.5 Cleanup
+- [x] Badge accent contrast, ButtonLink (no button-in-anchor), formatDate en-GB, Card shadow leak, Button ring halo, chevrons unified
+- [x] Lint warnings 21 → 8
+
+### 7.6 Ship
+- [x] Local build + type-check green
+- [ ] Vercel preview verified (palettes, drawer, focus), merged to main, production smoke test
+
+---
+
 ## Backlog / Future Ideas
 
 - [ ] Scheduled publishing (scheduledAt field ready — needs UI + cron/Cloud Function)
@@ -428,3 +463,4 @@
 - [ ] Real images: When Firebase Storage is enabled, replace FoodPlaceholder with actual recipe/lifestyle photos
 - [x] Lifestyle admin editor for creating/editing blog posts
 - [x] Instagram embed on recipe pages (InstagramEmbed component)
+- [ ] Convert /admin to CSS motion and uninstall framer-motion

@@ -17,8 +17,8 @@
 |-------|-----------|
 | Framework | Next.js 16 (App Router) + React 19 + TypeScript strict |
 | Styling | Tailwind CSS v4 (CSS-first) + design tokens in `src/styles/globals.css` |
-| Fonts | Lora (headings) + Inter (body), `next/font/google` |
-| Animation | Framer Motion |
+| Fonts | Lora (headings, italic accents) + Inter (body, eyebrows), `next/font/google` |
+| Animation | CSS transitions only on the public site (120–220ms, ease-out). `framer-motion` remains for `/admin` only. |
 | Database | Firebase Firestore (Admin SDK, server only) |
 | Auth | Firebase Auth (Google sign-in) for the admin CMS |
 | Hosting | Vercel (Git integration; `main` = production) |
@@ -26,77 +26,72 @@
 
 ---
 
-## Design Philosophy — "Warm Ma (空間)"
+## Design Philosophy — calm editorial
 
-Generous negative space (Ma), asymmetric balance, simplicity, natural shapes, understated elegance — now in a warmer, earthier palette with a serif voice.
+A personal food blog, not a product site. Research (NN/g on animation duration and scroll fading, Feast Design Co's food-blog guidance, and a DOM audit of Pinch of Yum, Smitten Kitchen, Minimalist Baker, Half Baked Harvest and Cookie + Kate) says: no scroll-reveal, no card lift or photo zoom, no running animations, colour-only transitions, serif headings, body text 16–18px, flat chrome that gets out of the way of the food. The layout reference Ruks likes is moribyan.com: slim sticky header, display serif headline with an italic accent word, uppercase eyebrow labels, wide 1240px grid, square flat images, sections such as "Currently cooking", "Explore by category" (with counts) and "Most loved".
 
 **In practice**
-- Extra-large padding, soft shadows, 16px card corners, 10px button corners, pill badges
-- Lora gives the brand its handwritten-cookbook warmth; Inter keeps UI text crisp
-- Animations are gentle (fade/slide 300–400ms, spring hovers); nothing that draws attention to itself
-- Mobile first: the hamburger drawer is the primary navigation on every screen size
+- Motion is functional only: drawer slide (220ms), overlay fades (150ms), accordions (200ms), `.fade-in` for swapped labels (120ms), hover/focus colour changes (150ms). `prefers-reduced-motion` disables all of it.
+- Hover on cards = title underline + image opacity 0.9. Links underline. Buttons change colour only.
+- Flat: no shadows, hairline `--color-border` dividers, radii 6/8/12px.
+- Generous but not empty: sections `py-12 sm:py-16`, `max-w-wide` (1240px) grids, `max-w-prose` (720px) articles.
 
-### Colour System — "Warm Sage & Clay"
+### Colour System — five palettes from one set of swatches
 
 Swatches: clay `#C7A491` · blush `#EECFCA` · sage `#919682` · light sage `#C7CDBF` · olive `#595E48`
 
-```
-Light                                  Dark
---color-primary:      #595E48          #C7CDBF
---color-primary-hover:#474B39          #D9DDD1
---color-on-primary:   #FFFFFF          #1B1D17
---color-secondary:    #E4E8DD          #333828
---color-accent:       #C7A491          #C7A491   (decorative; text-safe only in dark)
---color-accent-soft:  #EECFCA          #3A2E2A
---color-accent-text:  #8F624B          #D9B9A5   (clay for text, AA)
---color-sage:         #919682          #919682   (icons/borders/large text only)
---color-background:   #FCFBF8          #1B1D17
---color-surface:      #F5F3EE          #22251D
---color-elevated:     #FFFFFF          #2B2F25
---color-text-primary: #2A2D22          #F1EEE7
---color-text-secondary:#595E48         #B9BDAF
---color-text-tertiary:#6E7362          #868B7B
---color-border:       #DDE1D6          #3A3F32
---color-success/warning/error: #6C7E5B / #B98230 / #B5564A   (dark: #A7B894 / #D9B27A / #E39383)
-```
+| Palette (`data-palette`) | Character |
+|---|---|
+| `cream` — Cream & Olive (default) | Warm cream ground, olive type and buttons, clay and blush accents |
+| `sage` | Light sage everywhere, olive type, clay links (the most palette-true) |
+| `blush` | Soft pink ground and surfaces, olive buttons, clay links |
+| `clay` | Clay buttons and links, light-sage sections, blush callouts |
+| `olive` — Evening Olive | Sage ground with deep olive bands; dark mode is olive itself |
 
-Rules: colours are declared once in `:root` and `.dark` (never duplicated in `@theme`). Anything on a primary background uses `--color-on-primary`. `#919682` is 3.05:1 on white — never body text.
+Each palette has a light block and a `[data-palette].dark` block in `globals.css` with the same 21 tokens (`primary`, `primary-hover`, `on-primary`, `secondary`, `accent`, `accent-soft`, `accent-text`, `background`, `surface`, `elevated`, `text-primary`, `text-secondary`, `text-tertiary`, `border`, `success`, `warning`, `error`, `placeholder-bg`, `placeholder-icon`, `band`, `on-band`). `node scripts/check-contrast.mjs` verifies text ≥ 7:1 / secondary ≥ 4.5:1 / buttons and links ≥ 4.5:1 for every set.
+
+Rules: `--color-accent` is decorative only in light modes. Text on tinted surfaces uses `--color-text-primary`. Anything on a primary background uses `--color-on-primary`. Colour declarations live only in the palette blocks — never hardcode hex in components (the OG image and apple icon are the exception; they follow the cream palette).
+
+Visitors pick a palette and Light/Dark/System from the "Appearance" section of the drawer (stored in `localStorage` as `ar_palette` / `ar_mode`). Admin sets the site default and can hide the picker (`siteSettings/general`).
 
 ### Typography
-- Headings: Lora, weight 600 (Lora has no 800), `letter-spacing: -0.01em`
-- Body: Inter 400–500
-- Byline / pull quotes: Lora italic in `--color-accent-text`
-- Utilities: `font-heading`, `font-body`
+- Headings: Lora 500 (`h-display` 48–72px hero, `h-page` 36–48px, `h-section` 26–32px, `h-card` 18px), line-height 1.05–1.3, `-0.01em`
+- Accent: `accent-italic` (Lora italic 400 in `--color-accent-text`) for the byline and one hero word
+- Eyebrows: `eyebrow` (Inter 500, 12px, uppercase, 0.16em tracking, tertiary colour)
+- Body: Inter 16px/1.6 UI, `text-body` 17px/1.65 for recipe text, `.prose` 17px/1.65 with 68ch measure
+
+### Focus and forms
+- Keyboard focus: global `:focus-visible` 2px primary outline, 2px offset
+- Inputs: `.field` (hairline border; on focus the border turns primary with a 1px inset — no glow), `.field-bare` for inputs inside a `.field` wrapper (hero search, inline newsletter)
+- Links: `.link` underline, offset 3px, brightens on hover
 
 ---
 
 ## Site Architecture
 
 ### Navigation
-Hamburger menu on the **left at every breakpoint**, minimalist header (hamburger · centred wordmark · search + theme toggle). Drawer slides from the left with accordion groups:
+Hamburger menu on the **left at every breakpoint**, minimalist 56px sticky header (hamburger · centred wordmark · search + theme toggle). The drawer is an always-mounted portal (`data-state`, `inert` when closed) with accordion groups, an Appearance picker and a tagline/Instagram footer:
 
 1. **Recipes** → Starters, Main Courses, Side Dishes, Desserts, Bread, Drinks, Baby Weaning
 2. **Lifestyle** → Days Out, Eating Out, Travel, Parenting, Craft & Hobbies
-3. **About Me**
-4. **Newsletter**
-5. **Contact**
+3. **About Me** · 4. **Newsletter** · 5. **Contact**
 
 Ctrl/Cmd+K opens the search overlay from anywhere.
 
 ### Public pages
 
-**Home (`/`)**: Hero (byline, wordmark, tagline, search bar, CTAs) → New Recipe of the Week → What to eat? grid → Fresh from the kitchen (3 latest) → Beyond the kitchen (3 lifestyle posts) → Follow on Instagram → Newsletter.
+**Home (`/`)**: Hero (byline, "Pure comfort, *cooked simply*", tagline, search, Browse recipes / About me) with the "New this week" featured recipe beside it → Currently cooking (3 latest) → Explore by category (two-column list with counts) → Most loved (4 rows) → Beyond the kitchen (3 posts) → Instagram band → Newsletter.
 
-**Recipes (`/recipes`)**: "What to eat?" boxes (Starters, Main Course, Side Dishes, Snacks, Breakfast, Dinner, Desserts, Drinks, Bread, Baby Weaning), search, **Meal Type** filter pills (Breakfast, Brunch, Lunch, Dinner), sort, favourites. State lives in the URL (`?q=`, `?category=`, `?mealType=a,b`).
+**Recipes (`/recipes`)**: compact "What to eat?" grid, search, **Meal Type** pills, native sort select, favourites. State lives in the URL (`?q=`, `?category=`, `?mealType=a,b`).
 
-**Recipe (`/recipes/[slug]`)**: hero placeholder (+ Instagram reel embed when a URL is set), header with category/diet badges, personal story, stats bar, servings adjuster, jump-to, print/share, ingredients, instructions, tips, nutrition, related. Schema.org Recipe JSON-LD.
+**Recipe (`/recipes/[slug]`)**: header with badges, placeholder hero (+ Instagram reel embed when set), italic personal story, stats strip, jump/print/share, ingredients with real checkboxes and servings scaling, numbered method, tips callout, nutrition accordion, related recipes. Schema.org Recipe JSON-LD.
 
-**Lifestyle (`/lifestyle`, `/lifestyle/[slug]`)**: category pills with `?category=` deep links, article prose, share, related.
+**Lifestyle (`/lifestyle`, `/lifestyle/[slug]`)**: category pills with `?category=` deep links, prose article, share, more stories.
 
-**About (`/about`)**, **Contact (`/contact`)**, **Newsletter (`/newsletter`)**, custom 404. `/shop` redirects to `/`.
+**About**, **Contact**, **Newsletter**, custom 404. `/shop` redirects to `/`.
 
 ### Admin (`/admin`, Google sign-in, `ADMIN_EMAIL` allow-list)
-Dashboard · Recipes · Lifestyle · Comments · Subscribers (CSV export) · Messages · Settings (pin Recipe of the Week, Instagram handle). Mutations revalidate the affected public pages.
+Dashboard · Recipes · Lifestyle · Comments · Subscribers (CSV export) · Messages · Settings (featured recipe, Instagram handle, default palette, show theme picker). Mutations revalidate the affected public pages.
 
 ---
 
@@ -123,12 +118,12 @@ subscribers/{normalisedEmail}
   email, source: home|footer|newsletter-page, status: subscribed|unsubscribed, createdAt
 
 siteSettings/general
-  recipeOfTheWeekSlug, instagramHandle, updatedAt
+  recipeOfTheWeekSlug, instagramHandle, defaultPalette, showThemePicker, updatedAt
 
 comments/{id}, contactMessages/{id}   (unchanged)
 ```
 
-Composite indexes are checked in at `firestore.indexes.json`; rules (`firestore.rules`) deny all client access because every read/write is server-side via the Admin SDK.
+Composite indexes are checked in at `firestore.indexes.json` and deployed; rules (`firestore.rules`) deny all client access because every read/write is server-side via the Admin SDK.
 
 ---
 
@@ -137,19 +132,20 @@ Composite indexes are checked in at `firestore.indexes.json`; rules (`firestore.
 - `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx` (1200×630, Lora when fetchable)
 - `robots.ts`, `sitemap.ts` from Firestore with sample fallback
 - JSON-LD: WebSite (+SearchAction) and Organization in the layout, Recipe on recipe pages
-- Public pages `revalidate = 3600`; admin mutations call `revalidatePath`
+- Public pages and the root layout `revalidate = 3600`; admin mutations call `revalidatePath`
 
 ---
 
 ## Key Technical Decisions
 
-1. Server Components by default; client components only for interactivity
+1. Server Components by default; client components only for interactivity (`useIsClient` for portals instead of mount effects)
 2. All Firestore access via Admin SDK; client SDK is auth-only
 3. URL is the source of truth for recipe/lifestyle filters (shareable, back-button friendly, Suspense-wrapped)
-4. Brand strings live in `src/lib/site.ts`; taxonomy + nav tree in `src/lib/constants.ts`; nothing brand-related is hardcoded in components
-5. Newsletter stored in Firestore (no third-party ESP); admin exports CSV
-6. Images intentionally placeholder-only until Firebase Storage is enabled
-7. Favourites in localStorage with a `favorites-changed` event for reactive filtering
+4. Brand strings live in `src/lib/site.ts`; taxonomy + nav tree in `src/lib/constants.ts`; palettes in `src/lib/theme.ts` + `globals.css`
+5. Theme state is an external store read with `useSyncExternalStore`; the root layout injects the admin default and a no-FOUC script
+6. Newsletter stored in Firestore (no third-party ESP); admin exports CSV
+7. Images intentionally placeholder-only until Firebase Storage is enabled
+8. Favourites in localStorage with a `favorites-changed` event for reactive filtering
 
 ---
 
@@ -157,7 +153,8 @@ Composite indexes are checked in at `firestore.indexes.json`; rules (`firestore.
 ```
 src/
 ├── app/
-│   ├── layout.tsx, page.tsx, not-found.tsx, sitemap.ts, robots.ts, icon.svg, apple-icon.tsx, opengraph-image.tsx
+│   ├── layout.tsx (fonts, settings, ThemeProvider, no-FOUC script), page.tsx, not-found.tsx
+│   ├── sitemap.ts, robots.ts, icon.svg, apple-icon.tsx, opengraph-image.tsx
 │   ├── recipes/ (page.tsx, RecipesClient.tsx, [slug]/)
 │   ├── lifestyle/ (page.tsx, LifestyleClient.tsx, [slug]/)
 │   ├── about/, contact/ (page.tsx + ContactClient.tsx), newsletter/
@@ -165,13 +162,14 @@ src/
 │   └── api/ (newsletter, contact, comments, revalidate, admin/*)
 ├── components/
 │   ├── layout/ (Header, NavDrawer, SearchOverlay, Footer)
-│   ├── home/ (HeroSection, RecipeOfTheWeek, WhatToEatSection, LatestRecipes, LifestyleTeaser, InstagramBlock, NewsletterSection)
-│   ├── recipe/ (WhatToEatGrid, RecipeCard, RecipeGrid, InstagramEmbed, IngredientList, ...)
-│   ├── shared/ (NewsletterForm, InstagramIcon, ThemeToggle, FoodPlaceholder, FavoriteButton, ...)
+│   ├── home/ (HeroSection, HeroSearch, FeaturedRecipe, CurrentlyCooking, ExploreByCategory, MostLoved, LifestyleTeaser, InstagramBlock, NewsletterSection)
+│   ├── recipe/ (WhatToEatGrid, RecipeCard, RecipeGrid, InstagramEmbed, IngredientList, InstructionStep, ShareButtons, ...)
+│   ├── shared/ (ThemeProvider, ThemePicker, ThemeToggle, SectionHeader, NewsletterForm, FoodPlaceholder, FavoriteButton, BackToTop, InstagramIcon)
 │   ├── admin/ (AdminBrand, RecipeForm, LifestyleForm)
-│   └── ui/ (Logo, Button, Card, Badge, Input, FilterPill, AnimatedDropdown, Modal, Skeleton, StarRating)
-├── lib/ (site.ts, constants.ts, search.ts, favorites.ts, utils.ts, adminFetch.ts, firebase/*)
+│   └── ui/ (Button + ButtonLink, Card, Badge, Input, FilterPill, Select, Chevron, Modal, Skeleton, StarRating, Logo)
+├── hooks/ (useDebounce, useIsClient, useAuth)
+├── lib/ (site.ts, constants.ts, theme.ts, themeStore.ts, categoryCounts.ts, search.ts, favorites.ts, utils.ts, adminFetch.ts, firebase/*)
 ├── styles/globals.css
 └── types/index.ts
-firestore.rules · firestore.indexes.json · firebase.json · .firebaserc · README.md
+scripts/check-contrast.mjs · firestore.rules · firestore.indexes.json · firebase.json · .firebaserc · README.md
 ```

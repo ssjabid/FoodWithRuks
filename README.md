@@ -2,7 +2,7 @@
 
 > Pure comfort, cooked simply. Warmth in every bite.
 
-The recipe and lifestyle blog for Ruks, an Instagram food creator: wholesome, easy-to-follow recipes, plus days out, eating out, travel, parenting and crafts. Built with Next.js, Tailwind CSS v4, Firebase and Framer Motion. Deployed on Vercel.
+The recipe and lifestyle blog for Ruks, an Instagram food creator: wholesome, easy-to-follow recipes, plus days out, eating out, travel, parenting and crafts. Built with Next.js, Tailwind CSS v4 and Firebase; calm, CSS-only motion. Deployed on Vercel.
 
 **Live site:** https://foodwithruks.vercel.app (auto-deploys from `main`)
 
@@ -13,7 +13,7 @@ The recipe and lifestyle blog for Ruks, an Instagram food creator: wholesome, ea
 | Framework | Next.js 16 (App Router, React 19, TypeScript strict) |
 | Styling | Tailwind CSS v4 (CSS-first `@theme`), design tokens in `src/styles/globals.css` |
 | Fonts | Lora (headings) + Inter (body) via `next/font/google` |
-| Animation | Framer Motion |
+| Motion | CSS transitions only (public site); five switchable palettes with light/dark |
 | Data | Firebase Firestore via the Admin SDK (server only) |
 | Auth | Firebase Auth, Google sign-in, admin allow-list by email |
 | Hosting | Vercel (Git integration) |
