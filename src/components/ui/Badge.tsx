@@ -9,7 +9,7 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const variantStyles: Record<BadgeVariant, string> = {
   default: "bg-[var(--color-secondary)] text-[var(--color-text-primary)]",
-  accent: "bg-[var(--color-accent)]/15 text-[var(--color-accent)]",
+  accent: "bg-[var(--color-accent-soft)] text-[var(--color-accent-text)]",
   outline: "border border-[var(--color-border)] text-[var(--color-text-secondary)]",
 };
 

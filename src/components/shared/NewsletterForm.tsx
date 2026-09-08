@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { SubscriberSource } from "@/types";
 
@@ -63,24 +62,18 @@ export function NewsletterForm({ source, variant = "inline", className }: Newsle
 
   const statusLine = (
     <div aria-live="polite" className="min-h-[1.25rem] mt-2">
-      <AnimatePresence mode="wait">
-        {message && (
-          <motion.p
-            key={status}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className={cn(
-              "text-sm",
-              status === "success" ? "text-[var(--color-success)]" : "text-[var(--color-error)]"
-            )}
-          >
-            {message}
-          </motion.p>
-        )}
-      </AnimatePresence>
+      {message && (
+        <p
+          key={status}
+          className={cn("fade-in text-sm", status === "success" ? "text-[var(--color-success)]" : "text-[var(--color-error)]")}
+        >
+          {message}
+        </p>
+      )}
     </div>
   );
+
+  const busy = status === "submitting";
 
   if (variant === "compact") {
     return (
@@ -94,13 +87,13 @@ export function NewsletterForm({ source, variant = "inline", className }: Newsle
             aria-label="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={status === "submitting"}
-            className="flex-1 min-w-0 h-9 px-3 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-elevated)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)]"
+            disabled={busy}
+            className="field flex-1 min-w-0 h-10 px-3 rounded-[var(--radius-sm)] text-base sm:text-sm"
           />
           <button
             type="submit"
-            disabled={status === "submitting"}
-            className="h-9 w-9 shrink-0 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] flex items-center justify-center hover:bg-[var(--color-primary-hover)] btn-press disabled:opacity-60"
+            disabled={busy}
+            className="h-10 w-10 shrink-0 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] flex items-center justify-center hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-60"
             aria-label="Subscribe"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -128,15 +121,15 @@ export function NewsletterForm({ source, variant = "inline", className }: Newsle
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={status === "submitting"}
-            className="flex-1 h-11 px-4 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-elevated)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)]"
+            disabled={busy}
+            className="field flex-1 h-11 px-4 rounded-[var(--radius-sm)] text-base"
           />
           <button
             type="submit"
-            disabled={status === "submitting"}
-            className="h-11 px-6 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:bg-[var(--color-primary-hover)] btn-press disabled:opacity-60"
+            disabled={busy}
+            className="h-11 px-6 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-60"
           >
-            {status === "submitting" ? "Joining…" : "Join the newsletter"}
+            {busy ? "Joining…" : "Join the newsletter"}
           </button>
         </div>
         {statusLine}
@@ -148,7 +141,7 @@ export function NewsletterForm({ source, variant = "inline", className }: Newsle
   return (
     <form onSubmit={handleSubmit} className={cn("relative", className)}>
       {honeypot}
-      <div className="flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-elevated)] p-1 focus-within:border-[var(--color-primary)] focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-primary)_18%,transparent)] transition-all">
+      <div className="field flex items-center rounded-full p-1">
         <input
           type="email"
           required
@@ -156,15 +149,15 @@ export function NewsletterForm({ source, variant = "inline", className }: Newsle
           aria-label="Email address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          disabled={status === "submitting"}
-          className="flex-1 min-w-0 h-9 sm:h-10 pl-4 pr-2 bg-transparent text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none"
+          disabled={busy}
+          className="field-bare flex-1 min-w-0 h-10 pl-4 pr-2 text-base"
         />
         <button
           type="submit"
-          disabled={status === "submitting"}
-          className="h-9 sm:h-10 px-5 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-60 shrink-0"
+          disabled={busy}
+          className="h-10 px-5 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-60 shrink-0"
         >
-          {status === "submitting" ? "…" : "Subscribe"}
+          {busy ? "…" : "Subscribe"}
         </button>
       </div>
       {statusLine}

@@ -20,13 +20,11 @@ const sizeStyles = {
 export function Logo({ className, size = "md", withByline = false, asText = false }: LogoProps) {
   const content = (
     <>
-      <span className="font-heading font-semibold tracking-tight text-[var(--color-text-primary)]">
+      <span className="font-heading font-medium tracking-tight text-[var(--color-text-primary)]">
         Agooh <span className="text-[var(--color-accent-text)]">&amp;</span> Ruks
       </span>
       {withByline && (
-        <span className="block font-heading italic text-xs font-normal tracking-normal text-[var(--color-text-secondary)] mt-0.5">
-          {SITE_BYLINE}
-        </span>
+        <span className="block accent-italic text-xs tracking-normal mt-0.5">{SITE_BYLINE}</span>
       )}
     </>
   );
@@ -36,7 +34,7 @@ export function Logo({ className, size = "md", withByline = false, asText = fals
   if (asText) return <span className={classes}>{content}</span>;
 
   return (
-    <Link href="/" className={cn(classes, "hover:opacity-80 transition-opacity duration-200")} aria-label="Agooh & Ruks — home">
+    <Link href="/" className={cn(classes, "rounded-sm")} aria-label="Agooh & Ruks — home">
       {content}
     </Link>
   );

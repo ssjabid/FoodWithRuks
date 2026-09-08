@@ -1,47 +1,24 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { HTMLAttributes } from "react";
-import { motion } from "framer-motion";
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  /** kept for API compatibility; cards are flat now and never move */
   hover?: boolean;
 }
 
-export function Card({ className, hover = true, children, ...props }: CardProps) {
-  if (!hover) {
-    return (
-      <div
-        className={cn(
-          "bg-[var(--color-elevated)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden",
-          "shadow-[var(--shadow-sm)]",
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  }
-
+/** Flat editorial card: no border, no shadow, rounded image clip. Hover treatment lives on the parent link. */
+export function Card({ className, hover: _hover, children, ...props }: CardProps) {
+  void _hover;
   return (
-    <motion.div
-      whileHover={{ y: -8, boxShadow: "0 16px 40px rgba(0,0,0,0.1)" }}
-      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className={cn(
-        "bg-[var(--color-elevated)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden",
-        "shadow-[var(--shadow-sm)]",
-        className
-      )}
-    >
+    <div className={cn("rounded-[var(--radius-md)] overflow-hidden", className)} {...props}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
 export function CardContent({ className, children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("p-4", className)} {...props}>
+    <div className={cn("pt-3", className)} {...props}>
       {children}
     </div>
   );

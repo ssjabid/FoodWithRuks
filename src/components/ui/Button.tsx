@@ -1,75 +1,55 @@
-"use client";
-
+import Link from "next/link";
+import { ButtonHTMLAttributes, ComponentProps, forwardRef } from "react";
 import { cn } from "@/lib/utils";
-import React, { ButtonHTMLAttributes, forwardRef } from "react";
-import { motion } from "framer-motion";
 
-type Variant = "primary" | "secondary" | "outline" | "ghost";
-type Size = "sm" | "md" | "lg";
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";
+export type ButtonSize = "sm" | "md" | "lg";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
+const variantStyles: Record<ButtonVariant, string> = {
+  primary: "bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]",
+  secondary: "bg-[var(--color-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-border)]",
+  outline:
+    "border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-[var(--color-on-primary)]",
+  ghost: "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-secondary)]",
+};
+
+const sizeStyles: Record<ButtonSize, string> = {
+  sm: "h-9 px-3.5 text-sm font-medium",
+  md: "h-11 px-6 text-sm font-semibold",
+  lg: "h-12 px-7 text-base font-semibold",
+};
+
+/** Shared class builder so links and buttons look identical. */
+export function buttonClasses(variant: ButtonVariant = "primary", size: ButtonSize = "md", className?: string) {
+  return cn(
+    "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] whitespace-nowrap transition-colors",
+    "disabled:opacity-50 disabled:pointer-events-none",
+    variantStyles[variant],
+    sizeStyles[size],
+    className
+  );
 }
 
-const variantStyles: Record<Variant, string> = {
-  primary:
-    "bg-[var(--color-primary)] text-[var(--color-on-primary)]",
-  secondary:
-    "bg-[var(--color-secondary)] text-[var(--color-text-primary)]",
-  outline:
-    "border border-[var(--color-primary)] text-[var(--color-primary)]",
-  ghost:
-    "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-secondary)]",
-};
-
-const fillColors: Record<Variant, string> = {
-  primary: "bg-[var(--color-primary-hover)]",
-  secondary: "bg-[var(--color-border)]",
-  outline: "bg-[var(--color-primary)]",
-  ghost: "bg-[var(--color-secondary)]",
-};
-
-const sizeStyles: Record<Size, string> = {
-  sm: "h-9 px-3 text-sm font-medium",
-  md: "h-11 px-6 text-sm font-semibold",
-  lg: "h-11 px-6 text-sm font-semibold",
-};
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+}
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", disabled, children, ...props }, ref) => {
-    const { onDrag, onDragStart, onDragEnd, onAnimationStart, ...safeProps } = props as Record<string, unknown>;
-    return (
-      <motion.button
-        ref={ref}
-        whileHover={disabled ? undefined : { y: -2 }}
-        whileTap={disabled ? undefined : { scale: 0.96 }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-        className={cn(
-          "relative overflow-hidden group inline-flex items-center justify-center rounded-[var(--radius-sm)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2",
-          "disabled:opacity-50 disabled:pointer-events-none",
-          variantStyles[variant],
-          sizeStyles[size],
-          className
-        )}
-        disabled={disabled}
-        {...(safeProps as React.ComponentPropsWithoutRef<typeof motion.button>)}
-      >
-        <span
-          className={cn(
-            "absolute inset-0 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300",
-            fillColors[variant],
-            variant === "outline" && "group-hover:text-[var(--color-on-primary)]"
-          )}
-        />
-        <span className={cn("relative z-10", variant === "outline" && "group-hover:text-[var(--color-on-primary)] transition-colors duration-300")}>
-          {children}
-        </span>
-      </motion.button>
-    );
-  }
+  ({ className, variant = "primary", size = "md", type = "button", ...props }, ref) => (
+    <button ref={ref} type={type} className={buttonClasses(variant, size, className)} {...props} />
+  )
 );
 Button.displayName = "Button";
 
-export { Button };
+interface ButtonLinkProps extends ComponentProps<typeof Link> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+}
+
+/** A Next <Link> that looks like a Button (avoids nesting a <button> inside an <a>). */
+function ButtonLink({ className, variant = "primary", size = "md", ...props }: ButtonLinkProps) {
+  return <Link className={buttonClasses(variant, size, className)} {...props} />;
+}
+
+export { Button, ButtonLink };

@@ -5,27 +5,17 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className }: SkeletonProps) {
-  return (
-    <div
-      className={cn(
-        "animate-pulse rounded-[var(--radius-sm)] bg-[var(--color-border)]",
-        className
-      )}
-    />
-  );
+  return <div className={cn("animate-pulse rounded-[var(--radius-sm)] bg-[var(--color-secondary)]", className)} />;
 }
 
 export function RecipeCardSkeleton() {
   return (
-    <div className="bg-[var(--color-elevated)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden shadow-[var(--shadow-sm)]">
-      <Skeleton className="aspect-[4/3] w-full rounded-none" />
-      <div className="p-4 space-y-3">
+    <div>
+      <Skeleton className="aspect-[5/4] w-full rounded-[var(--radius-md)]" />
+      <div className="pt-3 space-y-2.5">
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-5 w-3/4" />
-        <div className="flex gap-3">
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-4 w-16" />
-        </div>
+        <Skeleton className="h-4 w-1/3" />
       </div>
     </div>
   );

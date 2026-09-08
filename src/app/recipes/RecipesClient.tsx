@@ -6,7 +6,7 @@ import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { WhatToEatGrid } from "@/components/recipe/WhatToEatGrid";
 import { Input } from "@/components/ui/Input";
 import { FilterPill } from "@/components/ui/FilterPill";
-import { AnimatedDropdown } from "@/components/ui/AnimatedDropdown";
+import { Select } from "@/components/ui/Select";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
   MEAL_TYPES,
@@ -18,7 +18,6 @@ import {
   getMealTypeLabel,
 } from "@/lib/constants";
 import { getFavorites, onFavoritesChange } from "@/lib/favorites";
-import { PageTransition } from "@/components/shared/PageTransition";
 import type { Recipe } from "@/types";
 
 interface RecipesClientProps {
@@ -34,10 +33,7 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
   const q = params.get("q") ?? "";
   const rawCategory = params.get("category") ?? "";
   const category = isRecipeCategory(rawCategory) ? rawCategory : "";
-  const mealTypes = useMemo(
-    () => (params.get("mealType") ?? "").split(",").filter(isMealType),
-    [params]
-  );
+  const mealTypes = useMemo(() => (params.get("mealType") ?? "").split(",").filter(isMealType), [params]);
 
   const [searchInput, setSearchInput] = useState(q);
   const debouncedSearch = useDebounce(searchInput);
@@ -103,17 +99,9 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
       );
     }
 
-    if (category) {
-      result = result.filter((r) => (r.category as string[]).includes(category));
-    }
-
-    if (mealTypes.length > 0) {
-      result = result.filter((r) => mealTypes.some((mt) => (r.mealType as string[]).includes(mt)));
-    }
-
-    if (showFavorites) {
-      result = result.filter((r) => favorites.includes(r.slug));
-    }
+    if (category) result = result.filter((r) => (r.category as string[]).includes(category));
+    if (mealTypes.length > 0) result = result.filter((r) => mealTypes.some((mt) => (r.mealType as string[]).includes(mt)));
+    if (showFavorites) result = result.filter((r) => favorites.includes(r.slug));
 
     switch (sortBy) {
       case "popular":
@@ -124,8 +112,7 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
         break;
       default:
         result.sort(
-          (a, b) =>
-            new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
+          (a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
         );
     }
 
@@ -141,76 +128,61 @@ export function RecipesClient({ initialRecipes }: RecipesClientProps) {
     router.replace(pathname, { scroll: false });
   };
 
-  const heading = category
-    ? getCategoryLabel(category)
-    : mealTypes.length === 1
-      ? getMealTypeLabel(mealTypes[0])
-      : "Recipes";
+  const heading = category ? getCategoryLabel(category) : mealTypes.length === 1 ? getMealTypeLabel(mealTypes[0]) : "";
 
   return (
-    <PageTransition>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <div className="mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">What to eat?</h1>
-          <p className="text-[var(--color-text-secondary)] text-base sm:text-lg">
-            Pick a craving, or search for something specific.
-          </p>
-        </div>
-
-        <WhatToEatGrid active={activeBox} size="compact" className="mb-8" />
-
-        <div className="mb-4">
-          <Input
-            type="search"
-            placeholder="Search recipes, ingredients…"
-            aria-label="Search recipes"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mr-1">
-            Meal
-          </span>
-          {MEAL_TYPES.map((m) => (
-            <FilterPill
-              key={m.value}
-              label={m.label}
-              selected={mealTypes.includes(m.value)}
-              onClick={() => toggleMealType(m.value)}
-            />
-          ))}
-
-          <span className="hidden sm:block w-px h-6 bg-[var(--color-border)] mx-1" aria-hidden="true" />
-
-          <AnimatedDropdown options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} />
-
-          <FilterPill
-            label={showFavorites ? "♥ Favourites" : "♡ Favourites"}
-            selected={showFavorites}
-            onClick={() => setShowFavorites(!showFavorites)}
-          />
-
-          {activeFilterCount > 0 && (
-            <button
-              onClick={clearFilters}
-              className="h-9 px-4 rounded-full text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
-            >
-              Clear all
-            </button>
-          )}
-
-          <span className="ml-auto text-sm text-[var(--color-text-tertiary)]">
-            {heading !== "Recipes" && (
-              <span className="font-medium text-[var(--color-text-secondary)]">{heading} · </span>
-            )}
-            {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-
-        <RecipeGrid recipes={filteredRecipes} />
+    <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <div className="mb-8">
+        <p className="eyebrow mb-2">Recipes</p>
+        <h1 className="h-page text-[var(--color-text-primary)] mb-2">What to eat?</h1>
+        <p className="text-[var(--color-text-secondary)] text-lg">Pick a craving, or search for something specific.</p>
       </div>
-    </PageTransition>
+
+      <WhatToEatGrid active={activeBox} className="mb-6" />
+
+      <div className="mb-4">
+        <Input
+          type="search"
+          placeholder="Search recipes, ingredients…"
+          aria-label="Search recipes"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 mb-8">
+        <span className="eyebrow mr-1">Meal</span>
+        {MEAL_TYPES.map((m) => (
+          <FilterPill key={m.value} label={m.label} selected={mealTypes.includes(m.value)} onClick={() => toggleMealType(m.value)} />
+        ))}
+
+        <span className="hidden sm:block w-px h-6 bg-[var(--color-border)] mx-1" aria-hidden="true" />
+
+        <Select options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} aria-label="Sort recipes" />
+
+        <FilterPill
+          label={showFavorites ? "♥ Favourites" : "♡ Favourites"}
+          selected={showFavorites}
+          onClick={() => setShowFavorites(!showFavorites)}
+        />
+
+        {activeFilterCount > 0 && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="link h-9 px-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
+          >
+            Clear all
+          </button>
+        )}
+
+        <span className="ml-auto text-sm text-[var(--color-text-tertiary)]">
+          {heading && <span className="font-medium text-[var(--color-text-secondary)]">{heading} · </span>}
+          {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
+      <RecipeGrid recipes={filteredRecipes} />
+    </div>
   );
 }

@@ -9,10 +9,9 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[var(--color-surface)] border-t border-[var(--color-border)] mt-16 sm:mt-20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          {/* Brand */}
+    <footer className="border-t border-[var(--color-border)] mt-16 sm:mt-20">
+      <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           <div className="space-y-3 sm:col-span-2 lg:col-span-1">
             <Logo size="lg" withByline />
             <p className="text-sm text-[var(--color-text-secondary)] max-w-xs">
@@ -20,11 +19,8 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Explore */}
           <div>
-            <h4 className="font-body text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-4">
-              Explore
-            </h4>
+            <h4 className="eyebrow mb-4">Explore</h4>
             <nav className="space-y-2">
               {NAV_ITEMS.map((item) => (
                 <FooterLink key={item.href} href={item.href}>
@@ -34,11 +30,8 @@ export function Footer() {
             </nav>
           </div>
 
-          {/* Recipes */}
           <div>
-            <h4 className="font-body text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-4">
-              Recipes
-            </h4>
+            <h4 className="eyebrow mb-4">Recipes</h4>
             <nav className="space-y-2">
               {RECIPE_CATEGORIES.map((cat) => (
                 <FooterLink key={cat.value} href={`/recipes?category=${cat.value}`}>
@@ -48,29 +41,24 @@ export function Footer() {
             </nav>
           </div>
 
-          {/* Connect */}
           <div>
-            <h4 className="font-body text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-4">
-              Connect
-            </h4>
+            <h4 className="eyebrow mb-4">Connect</h4>
             <a
               href={SOCIAL_LINKS.instagram.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 mb-6 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors social-hover"
+              className="link inline-flex items-center gap-2 mb-6 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
             >
-              <InstagramIcon className="w-5 h-5" />
+              <InstagramIcon className="w-4 h-4" />
               {SOCIAL_LINKS.instagram.handle}
             </a>
 
-            <p className="font-body text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-3">
-              Newsletter
-            </p>
+            <p className="eyebrow mb-3">Newsletter</p>
             <NewsletterForm source="footer" variant="compact" />
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-[var(--color-border)] text-center text-sm text-[var(--color-text-secondary)]">
+        <div className="mt-12 pt-6 border-t border-[var(--color-border)] text-sm text-[var(--color-text-tertiary)]">
           &copy; {currentYear} {SITE_NAME}. All rights reserved.
         </div>
       </div>
@@ -80,10 +68,7 @@ export function Footer() {
 
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link
-      href={href}
-      className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
-    >
+    <Link href={href} className="link block w-fit text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
       {children}
     </Link>
   );
