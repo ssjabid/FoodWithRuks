@@ -478,7 +478,8 @@ Ordered by value. Nothing here is started; pick and reorder.
 
 ### 9.1 Ruks can publish without a developer (highest value)
 - [x] **Image uploads** in the admin forms (hero, steps, lifestyle cover) — GitHub as the store (`public/images/uploads`), browser-side resize to 1600/800 WebP, one commit per upload, plain `<img>` + srcset via `Photo` (2026-09-20)
-- [ ] Set `GITHUB_UPLOAD_TOKEN` on Vercel and do the first real upload from /admin
+- [x] Token created and tested for real against the repo on a throwaway branch (single commit, raw preview, cleanup) 2026-09-20
+- [ ] First real upload from /admin by Ruks (needs the token on Vercel + a redeploy)
 - [ ] About photo (needs the editable About page below)
 - [ ] **Rich-text editor** for lifestyle posts (Tiptap or Markdown with preview) instead of the raw HTML textarea
 - [ ] **Editable pages**: About page copy + photo, hero tagline/intro, footer blurb from `/admin/settings` (or a `pages` collection)
