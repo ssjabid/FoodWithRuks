@@ -3,10 +3,12 @@ import { Logo } from "@/components/ui/Logo";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
 import { InstagramIcon } from "@/components/shared/InstagramIcon";
 import { NAV_ITEMS, RECIPE_CATEGORIES } from "@/lib/constants";
-import { SITE_NAME, SOCIAL_LINKS, TAGLINE_SECONDARY } from "@/lib/site";
+import { SITE_NAME, SOCIAL_LINKS } from "@/lib/site";
+import { getPageContentSafe } from "@/lib/firebase/pageContent";
 
-export function Footer() {
+export async function Footer() {
   const currentYear = new Date().getFullYear();
+  const content = await getPageContentSafe();
 
   return (
     <footer className="border-t border-[var(--color-border)] mt-16 sm:mt-20">
@@ -15,7 +17,7 @@ export function Footer() {
           <div className="space-y-3 sm:col-span-2 lg:col-span-1">
             <Logo size="lg" withByline />
             <p className="text-sm text-[var(--color-text-secondary)] max-w-xs">
-              {TAGLINE_SECONDARY}. Wholesome, easy-to-follow recipes and family life, shared with love.
+              {content.footerBlurb}
             </p>
           </div>
 

@@ -480,9 +480,9 @@ Ordered by value. Nothing here is started; pick and reorder.
 - [x] **Image uploads** in the admin forms (hero, steps, lifestyle cover) — GitHub as the store (`public/images/uploads`), browser-side resize to 1600/800 WebP, one commit per upload, plain `<img>` + srcset via `Photo` (2026-09-20)
 - [x] Token created and tested for real against the repo on a throwaway branch (single commit, raw preview, cleanup) 2026-09-20
 - [ ] First real upload from /admin by Ruks (needs the token on Vercel + a redeploy)
-- [ ] About photo (needs the editable About page below)
-- [ ] **Rich-text editor** for lifestyle posts (Tiptap or Markdown with preview) instead of the raw HTML textarea
-- [ ] **Editable pages**: About page copy + photo, hero tagline/intro, footer blurb from `/admin/settings` (or a `pages` collection)
+- [x] About photo (portrait beside the About text on desktop, above it on mobile)
+- [x] **Rich-text editor** for lifestyle posts and the About page (Tiptap 3: headings, bold/italic, links, lists, quote, photos, undo) 2026-09-20
+- [x] **Editable pages**: About title/subtitle/photo/story, home intro, footer blurb via `/admin/pages` (`siteSettings/pages`) 2026-09-20
 - [ ] Admin form polish on mobile (she will write on her phone): sticky Save, autosave draft, "Preview" link, duplicate recipe
 - [ ] Draft preview URLs (`?preview=token`) so she can see a recipe before publishing
 

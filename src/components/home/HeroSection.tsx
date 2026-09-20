@@ -1,15 +1,17 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { HeroSearch } from "./HeroSearch";
 import { FeaturedRecipe } from "./FeaturedRecipe";
-import { SITE_BYLINE, SITE_DESCRIPTION } from "@/lib/site";
+import { SITE_BYLINE } from "@/lib/site";
 import Link from "next/link";
 import type { Recipe } from "@/types";
 
 interface HeroSectionProps {
   recipe: Recipe | null;
+  /** Editable intro under the headline (admin → Pages) */
+  intro: string;
 }
 
-export function HeroSection({ recipe }: HeroSectionProps) {
+export function HeroSection({ recipe, intro }: HeroSectionProps) {
   return (
     <section className="border-b border-[var(--color-border)]">
       <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
@@ -20,7 +22,7 @@ export function HeroSection({ recipe }: HeroSectionProps) {
               Pure comfort, <em className="accent-italic">cooked simply</em>
             </h1>
             <p className="text-lg text-[var(--color-text-secondary)] max-w-[40ch] mb-7">
-              {SITE_DESCRIPTION.replace("Pure comfort, cooked simply. ", "")}
+              {intro}
             </p>
 
             <HeroSearch className="max-w-md mb-6" />

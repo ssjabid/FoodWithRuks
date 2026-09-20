@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input, Textarea } from "@/components/ui/Input";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { rawContentUrl } from "@/lib/site";
 import { adminFetch } from "@/lib/adminFetch";
 import { slugify } from "@/lib/utils";
 import { LIFESTYLE_CATEGORIES } from "@/lib/constants";
@@ -32,13 +34,14 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
     if (!isEdit) setSlug(slugify(value));
   };
 
-  // Auto-calculate reading time (~200 words/min)
-  const readingTime = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
+  // Auto-calculate reading time (~200 words/min) from the visible text
+  const plainText = content.replace(/<[^>]+>/g, " ").trim();
+  const readingTime = Math.max(1, Math.ceil(plainText.split(/\s+/).filter(Boolean).length / 200));
 
   const handleSave = async (publishOverride?: "draft" | "published") => {
     const finalStatus = publishOverride || status;
     if (!title.trim()) { setError("Title is required"); return; }
-    if (!content.trim()) { setError("Content is required"); return; }
+    if (!plainText) { setError("Content is required"); return; }
 
     setError("");
     setSaving(true);
@@ -48,7 +51,8 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
       slug,
       excerpt,
       coverImage,
-      content,
+      // photos inserted in the editor preview from raw GitHub; store the site path
+      content: content.split(rawContentUrl("public")).join(""),
       category,
       readingTime,
       status: finalStatus,
@@ -94,12 +98,12 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
         </select>
       </div>
 
-      <Textarea
-        label="Content (HTML)"
+      <RichTextEditor
+        label="Story"
         value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="<p>Your article content...</p>"
-        className="min-h-[300px] font-mono text-xs"
+        onChange={setContent}
+        folder="lifestyle"
+        placeholder="Write your story… Use the toolbar for headings, lists, links and photos."
       />
 
       <p className="text-xs text-[var(--color-text-tertiary)]">Estimated reading time: {readingTime} min</p>

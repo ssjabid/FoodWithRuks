@@ -102,6 +102,18 @@ export interface Subscriber {
   createdAt: Date;
 }
 
+/** Editable copy for the fixed pages (siteSettings/pages). */
+export interface PageContent {
+  heroIntro: string;
+  footerBlurb: string;
+  aboutTitle: string;
+  aboutSubtitle: string;
+  /** HTML from the editor */
+  aboutBody: string;
+  aboutPhoto: string;
+  updatedAt?: Date;
+}
+
 export interface LifestylePost {
   id: string;
   title: string;

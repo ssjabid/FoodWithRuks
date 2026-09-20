@@ -632,6 +632,42 @@
     text-decoration: underline;
     text-underline-offset: 3px;
   }
+  .prose img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    margin: 1.5rem 0;
+  }
+  .prose blockquote {
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-accent);
+    font-family: var(--font-heading);
+    font-style: italic;
+    color: var(--color-text-secondary);
+  }
+  .prose strong {
+    font-weight: 600;
+  }
+  .prose hr {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: 2rem 0;
+  }
+
+  /* Admin editor (Tiptap) */
+  .rte .rte-content p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--color-text-tertiary);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+  .rte .rte-content img.ProseMirror-selectednode {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
 
 @keyframes fadeIn {

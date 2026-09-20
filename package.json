@@ -10,6 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@tiptap/extension-image": "^3.31.3",
+    "@tiptap/extension-placeholder": "^3.31.3",
+    "@tiptap/pm": "^3.31.3",
+    "@tiptap/react": "^3.31.3",
+    "@tiptap/starter-kit": "^3.31.3",
     "clsx": "^2.1.1",
     "firebase": "^12.10.0",
     "firebase-admin": "^13.7.0",

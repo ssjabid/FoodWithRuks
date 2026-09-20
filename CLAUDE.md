@@ -8,9 +8,9 @@
 
 ## Current State
 
-**Phase**: Phase 9.1 — photo uploads via GitHub (built, awaiting `GITHUB_UPLOAD_TOKEN` on Vercel)
+**Phase**: Phase 9.1 — Ruks publishes alone: photo uploads (live), rich-text editor + editable pages (branch `feat/editor-and-pages`)
 **Last Updated**: 2026-09-20
-**Last Task Completed**: Photo uploads (branch `feat/github-photos`): admin forms get an `ImageUpload` field (hero, per-step, lifestyle cover); the browser resizes to 1600/800px WebP, `POST /api/admin/upload` commits both files to the repo in one commit via the Git Data API, the public site renders real photos through `Photo` (plain `<img>` + srcset, placeholder fallback). Live test 2026-09-20: the fine-grained token (user ssjabid) committed two files in one commit to a throwaway branch and the raw preview served them; branch deleted. The token itself is never stored in the repo or memory. Needs `GITHUB_UPLOAD_TOKEN` in Vercel before the first upload. Previously: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened. Merged and LIVE 2026-09-20. The other four palettes remain in globals.css and in /admin/settings; re-enable the picker there to compare again. Page transitions + Appearance panel live since 2026-09-20.
+**Last Task Completed**: Rich-text editor (Tiptap 3) for lifestyle posts + About page, and editable page copy (`siteSettings/pages`: home intro, footer blurb, About title/subtitle/photo/body) via `/admin/pages`. Photo uploads are LIVE (token verified for real 2026-09-20). Previously: photo uploads (branch `feat/github-photos`): admin forms get an `ImageUpload` field (hero, per-step, lifestyle cover); the browser resizes to 1600/800px WebP, `POST /api/admin/upload` commits both files to the repo in one commit via the Git Data API, the public site renders real photos through `Photo` (plain `<img>` + srcset, placeholder fallback). Live test 2026-09-20: the fine-grained token (user ssjabid) committed two files in one commit to a throwaway branch and the raw preview served them; branch deleted. The token itself is never stored in the repo or memory. Needs `GITHUB_UPLOAD_TOKEN` in Vercel before the first upload. Previously: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened. Merged and LIVE 2026-09-20. The other four palettes remain in globals.css and in /admin/settings; re-enable the picker there to compare again. Page transitions + Appearance panel live since 2026-09-20.
 
 ## Live deployment (important)
 
@@ -78,9 +78,10 @@
 | `/recipes` | "What to eat?" compact grid, search, Meal Type pills, native `Select` sort, favourites. URL is source of truth (`q`, `category`, `mealType`). Suspense-wrapped. |
 | `/recipes/[slug]` | Prose measure; Instagram embed beside hero when `instagramUrl` set; native ingredient checkboxes; `.accordion` nutrition; JSON-LD Recipe |
 | `/lifestyle`, `/lifestyle/[slug]` | `?category=` deep links; flat cards |
-| `/about`, `/contact` (server page + `ContactClient`), `/newsletter` (real form), `not-found` |
+| `/about` | Server page from `siteSettings/pages` (title, subtitle, portrait photo beside the text on desktop, HTML body via `.prose`) |
+| `/contact` (server page + `ContactClient`), `/newsletter` (real form), `not-found` |
 | `/shop` | Removed; permanent redirect to `/` in next.config.ts |
-| `/admin/*` | Dashboard, recipes, lifestyle, comments, messages, subscribers (CSV), settings (featured recipe, Instagram handle, default palette, picker toggle) |
+| `/admin/*` | Dashboard, recipes, lifestyle, **pages** (home intro, footer blurb, About), comments, messages, subscribers (CSV), settings (featured recipe, Instagram handle, default palette, picker toggle) |
 | Metadata routes | `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx`, `robots.ts`, `sitemap.ts` (Firestore + sample fallback) |
 
 ## Photo uploads (GitHub as the image store)
@@ -90,6 +91,13 @@
 - Server: `src/lib/github.ts` (`commitFiles()` = ref → commit → blobs → tree → commit → ref PATCH, retries once on 422 when the branch moved; `isUploadConfigured()`, `rawUrlFor()`) and `src/app/api/admin/upload/route.ts` (admin token check, validates data URLs and sizes, 503 when the token is missing). Env: `GITHUB_UPLOAD_TOKEN` (fine-grained PAT, only this repo, Contents read+write), `GITHUB_REPO`, `GITHUB_BRANCH`.
 - Public rendering: `src/components/shared/Photo.tsx` — plain `<img loading=lazy>` (no Vercel image-optimisation quota), `srcset` derived from the `-w1600/-w800` naming, `ratio` (square/landscape/portrait) or `fit="natural"`, falls back to `FoodPlaceholder` when `src` is empty. Used by RecipeCard, FeaturedRecipe, MostLoved, LifestyleTeaser, LifestyleClient, LifestylePostClient, InstructionStep, RecipePageClient.
 - Uploads from the admin move `main`; always `git pull --ff-only` before pushing. Repo growth: ~300 KB per photo pair.
+
+## Editor + editable pages
+
+- `src/components/admin/RichTextEditor.tsx`: Tiptap 3 (`@tiptap/react`, `starter-kit` with link, `extension-image`, `extension-placeholder`; `immediatelyRender: false`, toolbar state via `useEditorState`). Toolbar: Text/H2/H3, bold, italic, link (prompt), bullet/numbered list, quote, Photo (uploads through `/api/admin/upload`, inserts the raw GitHub preview URL), undo/redo. Output is HTML rendered by `.prose` (which now styles img/blockquote/strong/hr). Admin-only; do not import on the public site.
+- Forms rewrite `rawContentUrl("public")` → "" on save so stored HTML uses site paths (`/images/uploads/...`).
+- `LifestyleForm` uses the editor for `content` (reading time from stripped text). The old HTML textarea is gone.
+- Page copy: `src/lib/firebase/pageContent.ts` (`DEFAULT_PAGE_CONTENT` = the original hardcoded copy; `getPageContentSafe()`), `PageContent` type, `GET/PUT /api/admin/pages` (per-field length caps, revalidates layout + /about), `/admin/pages` (hero intro, footer blurb, About title/subtitle/photo/body). Consumers: `page.tsx` → `HeroSection intro`, async `Footer`, `src/app/about/page.tsx` (AboutPageClient deleted).
 
 ## Newsletter
 
@@ -116,6 +124,7 @@
 | `src/components/home/*` | HeroSection + HeroSearch + FeaturedRecipe, CurrentlyCooking, ExploreByCategory, MostLoved, LifestyleTeaser, InstagramBlock, NewsletterSection |
 | `src/lib/firebase/{recipes,lifestyle,subscribers,siteSettings,comments,messages}.ts` | Admin-SDK data access |
 | `src/lib/github.ts`, `src/app/api/admin/upload/route.ts`, `src/lib/imageResize.ts`, `src/components/admin/ImageUpload.tsx`, `src/components/shared/Photo.tsx` | Photo uploads (GitHub) + rendering |
+| `src/components/admin/RichTextEditor.tsx`, `src/lib/firebase/pageContent.ts`, `src/app/api/admin/pages/route.ts`, `src/app/admin/pages/page.tsx` | Editor + editable page copy |
 | `scripts/check-contrast.mjs` | Contrast gate for every palette × mode |
 | `firestore.rules`, `firestore.indexes.json`, `firebase.json` | Firestore config (deployed) |
 
@@ -134,6 +143,7 @@
 - Automated screenshots in the hidden browser pane are stale after scrolling (harness limitation, not a site bug); `:focus` styles cannot be verified there because the document lacks focus.
 - Suspense fallbacks on /recipes and /lifestyle mirror the real page header + container so there is no jump when the client component mounts.
 - Admin routes still get the public Header/Footer from the root layout (pre-existing); page transitions deliberately skip `/admin`.
+- Dev-only: `next dev` logs a hydration mismatch at the top of <body> on some routes (/contact, /about) while home, /recipes and /newsletter are clean; production shows no console errors on the same routes (checked 2026-09-20). Ignore unless it appears in production.
 
 ## Commands
 

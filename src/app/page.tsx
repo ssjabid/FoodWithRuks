@@ -8,6 +8,7 @@ import { NewsletterSection } from "@/components/home/NewsletterSection";
 import { getPublishedRecipes, getRecipeOfTheWeek } from "@/lib/firebase/recipes";
 import { getPublishedPosts } from "@/lib/firebase/lifestyle";
 import { getCategoryCounts } from "@/lib/categoryCounts";
+import { getPageContentSafe } from "@/lib/firebase/pageContent";
 import { SAMPLE_RECIPES, SAMPLE_LIFESTYLE_POSTS } from "@/lib/sampleData";
 import type { Recipe, LifestylePost } from "@/types";
 
@@ -20,10 +21,9 @@ const byLoved = (a: Recipe, b: Recipe) =>
   b.viewCount - a.viewCount || b.rating.count - a.rating.count || byNewest(a, b);
 
 export default async function HomePage() {
-  const [rotwResult, recipesResult, postsResult] = await Promise.allSettled([
-    getRecipeOfTheWeek(),
-    getPublishedRecipes({ limit: 100 }),
-    getPublishedPosts(),
+  const [[rotwResult, recipesResult, postsResult], content] = await Promise.all([
+    Promise.allSettled([getRecipeOfTheWeek(), getPublishedRecipes({ limit: 100 }), getPublishedPosts()] as const),
+    getPageContentSafe(),
   ]);
 
   let recipes: Recipe[];
@@ -64,7 +64,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <HeroSection recipe={featured} />
+      <HeroSection recipe={featured} intro={content.heroIntro} />
       <CurrentlyCooking recipes={latest} />
       <ExploreByCategory counts={counts} />
       <MostLoved recipes={mostLoved} />
