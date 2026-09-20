@@ -10,7 +10,7 @@
 
 **Phase**: Clay locked as the site palette; Phase 9 (content pipeline for Ruks + design polish) proposed in TASKS.md
 **Last Updated**: 2026-09-20
-**Last Task Completed**: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened (branch `feat/clay-default`). Page transitions + Appearance panel live since 2026-09-20.
+**Last Task Completed**: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened. Merged and LIVE 2026-09-20. The other four palettes remain in globals.css and in /admin/settings; re-enable the picker there to compare again. Page transitions + Appearance panel live since 2026-09-20.
 
 ## Live deployment (important)
 

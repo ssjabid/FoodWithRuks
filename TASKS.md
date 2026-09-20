@@ -468,7 +468,7 @@ Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of
 - [x] OG image, apple icon and icon.svg recoloured to Clay
 - [x] Admin private-key parsing tolerant of mixed newline formats (local dev can reach Firestore)
 - [x] Verified: Google provider on, Vercel host in authorized domains, allow-list supports several emails
-- [ ] Merged to main
+- [x] Merged to main and live (2026-09-20)
 
 ---
 
