@@ -14,12 +14,14 @@ import { ShareButtons } from "@/components/recipe/ShareButtons";
 import { PrintButton } from "@/components/recipe/PrintButton";
 import { JumpToRecipe } from "@/components/recipe/JumpToRecipe";
 import { RecipeCard } from "@/components/recipe/RecipeCard";
+import { CommentsSection } from "@/components/recipe/CommentsSection";
+import { ViewPing } from "@/components/recipe/ViewPing";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { formatDate, formatCookTime } from "@/lib/utils";
 import { getCategoryLabel } from "@/lib/constants";
 import { isInstagramUrl } from "@/components/recipe/InstagramEmbed";
 import { Skeleton } from "@/components/ui/Skeleton";
-import type { Recipe } from "@/types";
+import type { PublicComment, Recipe } from "@/types";
 
 const InstagramEmbed = dynamic(() => import("@/components/recipe/InstagramEmbed").then((m) => m.InstagramEmbed), {
   ssr: false,
@@ -29,15 +31,19 @@ const InstagramEmbed = dynamic(() => import("@/components/recipe/InstagramEmbed"
 interface RecipePageClientProps {
   recipe: Recipe;
   relatedRecipes: Recipe[];
+  comments: PublicComment[];
+  /** Draft previews skip the view counter and the comment form */
+  preview?: boolean;
 }
 
-export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientProps) {
+export function RecipePageClient({ recipe, relatedRecipes, comments, preview = false }: RecipePageClientProps) {
   const [servings, setServings] = useState(recipe.servings);
   const [nutritionOpen, setNutritionOpen] = useState(false);
   const hasEmbed = isInstagramUrl(recipe.instagramUrl);
 
   return (
     <article className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      {!preview && <ViewPing slug={recipe.slug} />}
       <div className="max-w-prose">
         {/* Header */}
         <header className="mb-8">
@@ -153,6 +159,12 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
           </section>
         )}
       </div>
+
+      {!preview && (
+        <div className="max-w-prose">
+          <CommentsSection recipeSlug={recipe.slug} comments={comments} rating={recipe.rating} />
+        </div>
+      )}
 
       {/* Related */}
       {relatedRecipes.length > 0 && (

@@ -42,6 +42,19 @@ export async function getPostBySlug(slug: string): Promise<LifestylePost | null>
   return docToPost(snapshot.docs[0]);
 }
 
+/** Any status — for signed draft previews only. */
+export async function getPostBySlugAnyStatus(slug: string): Promise<LifestylePost | null> {
+  const snapshot = await adminDb.collection("lifestylePosts").where("slug", "==", slug).limit(1).get();
+  if (snapshot.empty) return null;
+  return docToPost(snapshot.docs[0]);
+}
+
+/** True when another document already uses this slug. */
+export async function postSlugExists(slug: string, excludeId?: string): Promise<boolean> {
+  const snapshot = await adminDb.collection("lifestylePosts").where("slug", "==", slug).limit(2).get();
+  return snapshot.docs.some((d) => d.id !== excludeId);
+}
+
 /** Slug + updatedAt for every published document — used by sitemap.xml. */
 export async function getPostSitemapEntries(): Promise<{ slug: string; updatedAt: Date }[]> {
   const snapshot = await adminDb
@@ -83,19 +96,21 @@ export async function getPostById(id: string): Promise<LifestylePost | null> {
   return docToPost(doc as FirebaseFirestore.QueryDocumentSnapshot);
 }
 
-export async function createPost(data: Omit<LifestylePost, "id" | "createdAt" | "updatedAt">): Promise<string> {
+type PostWrite = Omit<LifestylePost, "id" | "createdAt" | "updatedAt" | "publishedAt">;
+
+export async function createPost(data: PostWrite): Promise<string> {
   const now = new Date();
   const docData = {
     ...data,
     createdAt: now,
     updatedAt: now,
-    publishedAt: data.status === "published" ? now : data.publishedAt || null,
+    publishedAt: data.status === "published" ? now : null,
   };
   const ref = await adminDb.collection("lifestylePosts").add(docData);
   return ref.id;
 }
 
-export async function updatePost(id: string, data: Partial<LifestylePost>): Promise<void> {
+export async function updatePost(id: string, data: Partial<PostWrite>): Promise<void> {
   const updateData: Record<string, unknown> = { ...data, updatedAt: new Date() };
 
   if (data.status === "published") {

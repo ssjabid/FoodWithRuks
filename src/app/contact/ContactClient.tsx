@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 export function ContactClient() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "", honeypot: "" });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [serverError, setServerError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,13 +18,15 @@ export function ContactClient() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.name, email: form.email, subject: form.subject, message: form.message }),
+        body: JSON.stringify({ name: form.name, email: form.email, subject: form.subject, message: form.message, website: form.honeypot }),
       });
 
       if (res.ok) {
         setStatus("success");
         setForm({ name: "", email: "", subject: "", message: "", honeypot: "" });
       } else {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setServerError(data.error || "");
         setStatus("error");
       }
     } catch {
@@ -70,7 +73,7 @@ export function ContactClient() {
             <Input id="subject" label="Subject" placeholder="What's this about?" value={form.subject} onChange={(e) => updateField("subject", e.target.value)} required />
             <Textarea id="message" label="Message" placeholder="Your message…" value={form.message} onChange={(e) => updateField("message", e.target.value)} required />
 
-            {status === "error" && <p className="text-sm text-[var(--color-error)]">Something went wrong. Please try again.</p>}
+            {status === "error" && <p className="text-sm text-[var(--color-error)]">{serverError || "Something went wrong. Please try again."}</p>}
 
             <Button type="submit" disabled={status === "submitting"}>
               {status === "submitting" ? "Sending…" : "Send message"}

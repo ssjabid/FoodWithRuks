@@ -64,11 +64,23 @@ export interface Comment {
   id: string;
   recipeId: string;
   recipeSlug: string;
+  /** Reader's display name (older comments may not have one) */
+  name: string;
   text: string;
   rating: number;
   status: "pending" | "approved";
   createdAt: Date;
   ipHash: string;
+}
+
+/** Approved comment as sent to the public recipe page (serialisable). */
+export interface PublicComment {
+  id: string;
+  name: string;
+  text: string;
+  rating: number;
+  /** ISO date */
+  createdAt: string;
 }
 
 export interface ContactMessage {

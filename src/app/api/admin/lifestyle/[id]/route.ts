@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { verifyAdminRequest } from "@/lib/firebase/authCheck";
-import { getPostById, updatePost, deletePost } from "@/lib/firebase/lifestyle";
+import { getPostById, updatePost, deletePost, postSlugExists } from "@/lib/firebase/lifestyle";
+import { normalisePostInput, ValidationError } from "@/lib/validation";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const isAdmin = await verifyAdminRequest(request);
@@ -30,11 +31,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
   try {
     const { id } = await params;
-    const data = await request.json();
+    const existing = await getPostById(id);
+    if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const data = normalisePostInput(await request.json());
+    if (data.slug !== existing.slug && (await postSlugExists(data.slug, id))) {
+      return NextResponse.json({ error: `Another story already uses the slug "${data.slug}".` }, { status: 409 });
+    }
     await updatePost(id, data);
-    revalidatePublic(typeof data?.slug === "string" ? data.slug : undefined);
+    revalidatePublic(data.slug);
+    if (existing.slug !== data.slug) revalidatePath(`/lifestyle/${existing.slug}`);
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof ValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
     console.error("Post update error:", error);
     return NextResponse.json({ error: "Failed to update post" }, { status: 500 });
   }

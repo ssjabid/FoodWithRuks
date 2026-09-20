@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { verifyAdminRequest } from "@/lib/firebase/authCheck";
-import { getAllPosts, createPost } from "@/lib/firebase/lifestyle";
+import { getAllPosts, createPost, postSlugExists } from "@/lib/firebase/lifestyle";
+import { normalisePostInput, ValidationError } from "@/lib/validation";
 
 export async function GET(request: Request) {
   const isAdmin = await verifyAdminRequest(request);
@@ -25,11 +26,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const data = await request.json();
+    const data = normalisePostInput(await request.json());
+    if (await postSlugExists(data.slug)) {
+      return NextResponse.json({ error: `Another story already uses the slug "${data.slug}".` }, { status: 409 });
+    }
     const id = await createPost(data);
-    revalidatePublic(typeof data?.slug === "string" ? data.slug : undefined);
+    revalidatePublic(data.slug);
     return NextResponse.json({ id }, { status: 201 });
   } catch (error) {
+    if (error instanceof ValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
     console.error("Post create error:", error);
     return NextResponse.json({ error: "Failed to create post" }, { status: 500 });
   }

@@ -16,6 +16,12 @@ if (apps.length === 0) {
 }
 
 const adminDb = getFirestore();
+try {
+  // Drop undefined fields instead of throwing (forms send optional fields as undefined)
+  adminDb.settings({ ignoreUndefinedProperties: true });
+} catch {
+  /* settings() can only be called once per instance (dev HMR) */
+}
 const adminAuth = getAuth();
 
 export { adminDb, adminAuth };

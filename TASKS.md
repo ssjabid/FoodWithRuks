@@ -472,6 +472,18 @@ Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of
 
 ---
 
+## Phase 10 — Production audit (2026-09-20)
+
+- [x] Server-side validation + slug uniqueness for recipes and posts (400/409 with messages shown in the forms)
+- [x] Protected fields (rating, viewCount, timestamps) cannot be set from requests; empty sections cleared on update
+- [x] Comments: name field, honeypot, rate limit, server-side recipe lookup, public list + form, moderation recomputes ratings + revalidates
+- [x] View counter (`ViewPing` → `/api/recipes/view`) so Most loved / Popular mean something
+- [x] Signed draft previews + Preview buttons
+- [x] Contact API hardened (honeypot, caps, email check, rate limit); form shows server messages
+- [x] RSS feed + robots update
+- [x] Comments composite index deployed
+- [x] `npm run e2e`: 26 checks through the real routes, self-cleaning
+
 ## Phase 9 — PROPOSED: make it Ruks's site (content pipeline first, then polish)
 
 Ordered by value. Nothing here is started; pick and reorder.
@@ -484,7 +496,7 @@ Ordered by value. Nothing here is started; pick and reorder.
 - [x] **Rich-text editor** for lifestyle posts and the About page (Tiptap 3: headings, bold/italic, links, lists, quote, photos, undo) 2026-09-20
 - [x] **Editable pages**: About title/subtitle/photo/story, home intro, footer blurb via `/admin/pages` (`siteSettings/pages`) 2026-09-20
 - [ ] Admin form polish on mobile (she will write on her phone): sticky Save, autosave draft, "Preview" link, duplicate recipe
-- [ ] Draft preview URLs (`?preview=token`) so she can see a recipe before publishing
+- [x] Draft preview links (signed, `/preview/...`) from the Preview button on both forms 2026-09-20
 
 ### 9.2 Editorial polish (Moribyan-style, needs real photos first)
 - [ ] Home: "Currently cooking" as 3 large cards with photos; hero photo treatment once images exist
@@ -492,12 +504,13 @@ Ordered by value. Nothing here is started; pick and reorder.
 - [ ] Recipe page: sticky in-page nav (Ingredients / Method / Tips), "cook mode" (screen stays awake), author box with photo
 - [ ] Instagram: real latest-posts grid (manual list of reel URLs in admin, or a feed service) instead of the plain band
 - [ ] /recipes pagination or "Load more" once the catalogue passes ~30 recipes
-- [ ] Public comments + ratings UI (API + moderation already exist)
+- [x] Public comments + ratings UI; approval recomputes the recipe rating 2026-09-20
 
 ### 9.3 Growing the audience
 - [ ] Custom domain (e.g. agoohandruks.com) + Search Console + Vercel Analytics
 - [ ] Newsletter sending (Resend) from the subscriber list; welcome email
-- [ ] RSS feed; Pinterest-friendly share image per recipe (OG image from the hero photo)
+- [x] RSS feed (`/feed.xml`) 2026-09-20
+- [ ] Pinterest-friendly share image per recipe (OG image from the hero photo)
 
 ### 9.4 Housekeeping
 - [ ] Convert `/admin` off framer-motion and uninstall it; keep the public Header/Footer off admin routes (route group)

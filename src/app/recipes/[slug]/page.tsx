@@ -5,6 +5,7 @@ import { SAMPLE_RECIPES } from "@/lib/sampleData";
 import { SITE_NAME, AUTHOR_NAME, SITE_URL } from "@/lib/site";
 import { getCategoryLabel } from "@/lib/constants";
 import { RecipePageClient } from "./RecipePageClient";
+import { getApprovedComments } from "@/lib/firebase/comments";
 import type { Recipe } from "@/types";
 
 export const revalidate = 3600;
@@ -64,6 +65,10 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
   if (!recipe) notFound();
 
   const relatedRecipes = await getRelated(recipe);
+  const comments = await getApprovedComments(recipe.slug).catch((error) => {
+    console.error("[recipes/[slug]] comments fetch failed:", error);
+    return [];
+  });
 
   // Schema.org JSON-LD
   const jsonLd = {
@@ -107,7 +112,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <RecipePageClient recipe={recipe} relatedRecipes={relatedRecipes} />
+      <RecipePageClient recipe={recipe} relatedRecipes={relatedRecipes} comments={comments} />
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "./admin";
 import { getSiteSettings } from "./siteSettings";
 import type { Recipe } from "@/types";
@@ -94,6 +95,37 @@ export async function getRecipeBySlug(slug: string): Promise<Recipe | null> {
   return docToRecipe(snapshot.docs[0]);
 }
 
+/** Any status — for signed draft previews only. */
+export async function getRecipeBySlugAnyStatus(slug: string): Promise<Recipe | null> {
+  const snapshot = await adminDb.collection("recipes").where("slug", "==", slug).limit(1).get();
+  if (snapshot.empty) return null;
+  return docToRecipe(snapshot.docs[0]);
+}
+
+/** True when another document already uses this slug. */
+export async function recipeSlugExists(slug: string, excludeId?: string): Promise<boolean> {
+  const snapshot = await adminDb.collection("recipes").where("slug", "==", slug).limit(2).get();
+  return snapshot.docs.some((d) => d.id !== excludeId);
+}
+
+/** +1 view on a published recipe (no-op when the slug is unknown). */
+export async function incrementRecipeViews(slug: string): Promise<void> {
+  const snapshot = await adminDb.collection("recipes").where("slug", "==", slug).where("status", "==", "published").limit(1).get();
+  if (snapshot.empty) return;
+  await snapshot.docs[0].ref.update({ viewCount: FieldValue.increment(1) });
+}
+
+/** Recompute rating.average / rating.count from approved comments. */
+export async function recomputeRecipeRating(recipeId: string): Promise<{ average: number; count: number }> {
+  const snapshot = await adminDb.collection("comments").where("recipeId", "==", recipeId).where("status", "==", "approved").get();
+  const ratings = snapshot.docs.map((d) => Number(d.data().rating)).filter((n) => Number.isFinite(n) && n >= 1 && n <= 5);
+  const count = ratings.length;
+  const average = count ? Math.round((ratings.reduce((a, b) => a + b, 0) / count) * 10) / 10 : 0;
+  const ref = adminDb.collection("recipes").doc(recipeId);
+  if ((await ref.get()).exists) await ref.update({ rating: { average, count } });
+  return { average, count };
+}
+
 export async function getRelatedRecipes(recipe: Recipe, limit = 4): Promise<Recipe[]> {
   if (recipe.category.length === 0) return [];
 
@@ -166,7 +198,10 @@ export async function getRecipeById(id: string): Promise<Recipe | null> {
   return { ...docToRecipe(doc as FirebaseFirestore.QueryDocumentSnapshot) };
 }
 
-export async function createRecipe(data: Omit<Recipe, "id" | "createdAt" | "updatedAt">): Promise<string> {
+type RecipeWrite = Omit<Recipe, "id" | "createdAt" | "updatedAt" | "publishedAt" | "scheduledAt" | "rating" | "viewCount"> &
+  Partial<Pick<Recipe, "rating" | "viewCount">>;
+
+export async function createRecipe(data: RecipeWrite): Promise<string> {
   const now = new Date();
   const docData = {
     ...data,
@@ -180,8 +215,12 @@ export async function createRecipe(data: Omit<Recipe, "id" | "createdAt" | "upda
   return ref.id;
 }
 
-export async function updateRecipe(id: string, data: Partial<Recipe>): Promise<void> {
+export async function updateRecipe(id: string, data: Partial<RecipeWrite>): Promise<void> {
   const updateData: Record<string, unknown> = { ...data, updatedAt: new Date() };
+  // Optional sections sent as undefined are removed from the document
+  for (const key of ["nutrition", "seo"] as const) {
+    if (key in data && data[key] === undefined) updateData[key] = FieldValue.delete();
+  }
 
   if (data.status === "published") {
     const existing = await adminDb.collection("recipes").doc(id).get();

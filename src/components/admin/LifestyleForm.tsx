@@ -38,6 +38,17 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
   const plainText = content.replace(/<[^>]+>/g, " ").trim();
   const readingTime = Math.max(1, Math.ceil(plainText.split(/\s+/).filter(Boolean).length / 200));
 
+  const openPreview = async () => {
+    try {
+      const res = await adminFetch(`/api/admin/preview?type=post&slug=${encodeURIComponent(slug)}`);
+      const data = (await res.json().catch(() => ({}))) as { path?: string; error?: string };
+      if (!res.ok || !data.path) throw new Error(data.error || "Could not create a preview link");
+      window.open(data.path, "_blank", "noopener");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not create a preview link");
+    }
+  };
+
   const handleSave = async (publishOverride?: "draft" | "published") => {
     const finalStatus = publishOverride || status;
     if (!title.trim()) { setError("Title is required"); return; }
@@ -62,10 +73,13 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
       const url = isEdit ? `/api/admin/lifestyle/${post.id}` : "/api/admin/lifestyle";
       const method = isEdit ? "PUT" : "POST";
       const res = await adminFetch(url, { method, body: JSON.stringify(body) });
-      if (!res.ok) throw new Error("Failed to save");
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error || "Failed to save");
+      }
       router.push("/admin/lifestyle");
-    } catch {
-      setError("Failed to save post. Please try again.");
+    } catch (e) {
+      setError(e instanceof Error && e.message !== "Failed to save" ? e.message : "Failed to save post. Please try again.");
     }
     setSaving(false);
   };
@@ -135,6 +149,16 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
         >
           {saving ? "Saving..." : isEdit ? "Update & Publish" : "Publish"}
         </button>
+        {isEdit && (
+          <button
+            type="button"
+            onClick={openPreview}
+            className="h-11 px-6 rounded-[var(--radius-sm)] border border-[var(--color-border)] text-sm font-medium hover:bg-[var(--color-secondary)] transition-colors"
+            title="Opens the saved version of this story in a new tab, even while it is a draft"
+          >
+            Preview
+          </button>
+        )}
         <button
           onClick={() => router.push("/admin/lifestyle")}
           className="h-11 px-6 rounded-[var(--radius-sm)] text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"

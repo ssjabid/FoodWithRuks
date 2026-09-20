@@ -89,6 +89,7 @@ export default function AdminCommentsPage() {
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-xs font-medium text-[var(--color-text-primary)]">{comment.name || "Reader"}</span>
                     <span className="text-xs font-medium text-[var(--color-primary)]">{comment.recipeSlug}</span>
                     <span className="text-xs text-[var(--color-text-tertiary)]">
                       {comment.createdAt ? formatDate(new Date(comment.createdAt)) : ""}

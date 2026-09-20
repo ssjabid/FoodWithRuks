@@ -8,9 +8,9 @@
 
 ## Current State
 
-**Phase**: Phase 9.1 — Ruks publishes alone: photo uploads (live), rich-text editor + editable pages (branch `feat/editor-and-pages`)
+**Phase**: Phase 10 — production audit: server-side validation, comments + ratings end to end, view counts, draft previews, RSS, hardened public forms, e2e test script
 **Last Updated**: 2026-09-20
-**Last Task Completed**: Rich-text editor (Tiptap 3) for lifestyle posts + About page, and editable page copy (`siteSettings/pages`: home intro, footer blurb, About title/subtitle/photo/body) via `/admin/pages`. Photo uploads are LIVE (token verified for real 2026-09-20). Previously: photo uploads (branch `feat/github-photos`): admin forms get an `ImageUpload` field (hero, per-step, lifestyle cover); the browser resizes to 1600/800px WebP, `POST /api/admin/upload` commits both files to the repo in one commit via the Git Data API, the public site renders real photos through `Photo` (plain `<img>` + srcset, placeholder fallback). Live test 2026-09-20: the fine-grained token (user ssjabid) committed two files in one commit to a throwaway branch and the raw preview served them; branch deleted. The token itself is never stored in the repo or memory. Needs `GITHUB_UPLOAD_TOKEN` in Vercel before the first upload. Previously: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened. Merged and LIVE 2026-09-20. The other four palettes remain in globals.css and in /admin/settings; re-enable the picker there to compare again. Page transitions + Appearance panel live since 2026-09-20.
+**Last Task Completed**: Production audit (branch `feat/production-audit`): every admin write goes through `src/lib/validation.ts` (whitelist, caps, enums, slug uniqueness 409, protected fields), public comments UI + moderation recomputes recipe ratings, view counter feeds Most loved, signed draft previews, `/feed.xml`, contact/comment honeypot + rate limit, `npm run e2e` exercises the whole admin → Firestore → public chain through the real routes (26 checks). Previously: rich-text editor (Tiptap 3) for lifestyle posts + About page, and editable page copy (`siteSettings/pages`: home intro, footer blurb, About title/subtitle/photo/body) via `/admin/pages`. Photo uploads are LIVE (token verified for real 2026-09-20). Previously: photo uploads (branch `feat/github-photos`): admin forms get an `ImageUpload` field (hero, per-step, lifestyle cover); the browser resizes to 1600/800px WebP, `POST /api/admin/upload` commits both files to the repo in one commit via the Git Data API, the public site renders real photos through `Photo` (plain `<img>` + srcset, placeholder fallback). Live test 2026-09-20: the fine-grained token (user ssjabid) committed two files in one commit to a throwaway branch and the raw preview served them; branch deleted. The token itself is never stored in the repo or memory. Needs `GITHUB_UPLOAD_TOKEN` in Vercel before the first upload. Previously: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened. Merged and LIVE 2026-09-20. The other four palettes remain in globals.css and in /admin/settings; re-enable the picker there to compare again. Page transitions + Appearance panel live since 2026-09-20.
 
 ## Live deployment (important)
 
@@ -99,6 +99,16 @@
 - `LifestyleForm` uses the editor for `content` (reading time from stripped text). The old HTML textarea is gone.
 - Page copy: `src/lib/firebase/pageContent.ts` (`DEFAULT_PAGE_CONTENT` = the original hardcoded copy; `getPageContentSafe()`), `PageContent` type, `GET/PUT /api/admin/pages` (per-field length caps, revalidates layout + /about), `/admin/pages` (hero intro, footer blurb, About title/subtitle/photo/body). Consumers: `page.tsx` → `HeroSection intro`, async `Footer`, `src/app/about/page.tsx` (AboutPageClient deleted).
 
+## Content pipeline guarantees (audit 2026-09-20)
+
+- **Validation at the API boundary** (`src/lib/validation.ts`): `normaliseRecipeInput` / `normalisePostInput` return a complete, safe payload: unknown fields dropped, strings trimmed + capped, enums checked against `constants.ts`, numbers coerced, ingredients/steps cleaned (blank rows removed, steps renumbered), slug derived from the title when empty, `rating`/`viewCount`/timestamps never settable. Errors are `ValidationError` → 400 with a human message the forms show. Slug collisions → 409. Reading time is computed server-side. `adminDb.settings({ ignoreUndefinedProperties: true })`; empty nutrition/seo are removed on update via `FieldValue.delete()`.
+- **Comments + ratings**: `POST /api/comments` {recipeSlug, name, text, rating, website(honeypot)} → validates, looks the recipe up server-side (404 if not published), rate-limits 5/10 min per IP, stores `pending` with an `ipHash`. `CommentsSection` (recipe page) lists approved comments (`getApprovedComments`, index recipeSlug+status+createdAt desc — deployed) and hosts the form. Approving/unapproving/deleting in `/admin/comments` calls `recomputeRecipeRating` (average to 1dp + count from approved comments) and revalidates the recipe page, /recipes and /. `Comment.name` is new; older docs show "Reader".
+- **Views**: `ViewPing` posts once per session to `POST /api/recipes/view` (1 per IP per slug per hour, `FieldValue.increment`). Feeds "Most loved" and the Popular sort. Skipped on draft previews.
+- **Draft previews**: `/preview/{recipe|post}/{slug}/{token}` (`force-dynamic`, noindex; token = HMAC-SHA256 of type:slug with `REVALIDATION_SECRET`, `src/lib/previewToken.ts`). Admin forms have a Preview button (edit mode) that fetches `GET /api/admin/preview` and opens the link. Public pages are untouched (no searchParams, still ISR).
+- **Public form hardening**: `src/lib/rateLimit.ts` (`rateLimited`, `clientIp`, `honeypotTripped`) used by comments and contact; contact validates lengths/email and reads the `website` honeypot the form already had.
+- **RSS**: `/feed.xml` (recipes + stories, 40 newest, ISR 1h, sample fallback), advertised via `alternates.types` in the layout metadata. `robots.ts` also disallows `/preview`.
+- **End-to-end test**: `npm run e2e` (`scripts/e2e-admin.mjs`) against a running server (`E2E_BASE_URL`, default localhost:3000). It creates a Firebase Auth user `e2e-admin@agoohandruks.test`, mints a custom token, exchanges it for an ID token and drives the real routes: auth refusal, validation 400s, create/duplicate 409/publish/delete recipe, public 404 vs 200, preview link + tampered token, home/sitemap/feed listing, view ping, comment honeypot/404/pending/approve → rating + public render, post create/409, contact + newsletter → admin inboxes, settings pin + pages edit (restored), upload guard. Everything it creates is deleted in `finally`. Locally the test address must be in `.env.development.local` (`ADMIN_EMAIL=...,e2e-admin@agoohandruks.test`, git-ignored). Do not add it to the Vercel allow-list.
+
 ## Newsletter
 
 - `POST /api/newsletter` → Firestore `subscribers` (doc id = normalised email; honeypot `website`; best-effort rate limit; always `{ok:true}` on success/duplicate).
@@ -125,6 +135,9 @@
 | `src/lib/firebase/{recipes,lifestyle,subscribers,siteSettings,comments,messages}.ts` | Admin-SDK data access |
 | `src/lib/github.ts`, `src/app/api/admin/upload/route.ts`, `src/lib/imageResize.ts`, `src/components/admin/ImageUpload.tsx`, `src/components/shared/Photo.tsx` | Photo uploads (GitHub) + rendering |
 | `src/components/admin/RichTextEditor.tsx`, `src/lib/firebase/pageContent.ts`, `src/app/api/admin/pages/route.ts`, `src/app/admin/pages/page.tsx` | Editor + editable page copy |
+| `src/lib/validation.ts`, `src/lib/rateLimit.ts`, `src/lib/previewToken.ts` | API boundary: input normalisation, public-form limits, signed previews |
+| `src/components/recipe/{CommentsSection,ViewPing}.tsx`, `src/app/api/comments/route.ts`, `src/app/api/recipes/view/route.ts`, `src/app/preview/[type]/[slug]/[token]/page.tsx`, `src/app/feed.xml/route.ts` | Comments, views, previews, RSS |
+| `scripts/e2e-admin.mjs` | End-to-end admin → site test (`npm run e2e`) |
 | `scripts/check-contrast.mjs` | Contrast gate for every palette × mode |
 | `firestore.rules`, `firestore.indexes.json`, `firebase.json` | Firestore config (deployed) |
 
@@ -136,8 +149,8 @@
 
 ## Known Issues / Follow-ups
 
-- Public comments UI still not built (API + moderation exist).
-- Real photos: upload flow built; the first real upload happens once `GITHUB_UPLOAD_TOKEN` is set on Vercel (the route returns 503 until then and the form says so).
+- Public comments are live (pending → approve in /admin/comments). Ratings only come from approved comments.
+- Photo uploads are live (`GITHUB_UPLOAD_TOKEN` set on Vercel).
 - `framer-motion` still bundled for `/admin` only; convert admin to CSS and `npm uninstall` later.
 - `npm run lint` passes with ~8 warnings (React Compiler rules downgraded to warn); `RecipesClient` still syncs input state from the URL in an effect.
 - Automated screenshots in the hidden browser pane are stale after scrolling (harness limitation, not a site bug); `:focus` styles cannot be verified there because the document lacks focus.
@@ -154,6 +167,7 @@ npm run lint
 npm run typecheck
 node scripts/check-contrast.mjs
 npx firebase-tools deploy --only firestore   # rules + indexes
+npm run e2e          # end-to-end admin -> site test against a running server (see Content pipeline guarantees)
 ```
 
 ---
