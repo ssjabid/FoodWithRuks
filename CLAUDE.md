@@ -10,7 +10,7 @@
 
 **Phase**: Page transitions + obvious palette picker + CSS bug pass
 **Last Updated**: 2026-09-20
-**Last Task Completed**: Soft page transitions (PageEnter / PageTransitionListener), header Appearance panel (ThemePanel), drawer picker open by default, CSS fixes (focus-ring radius, iOS search/select, Suspense fallback layout, dvh shell) — branch `feat/page-transitions-theme-panel`, verified locally at 375/768/1280.
+**Last Task Completed**: Soft page transitions (PageEnter / PageTransitionListener), header Appearance panel (ThemePanel), drawer picker open by default, CSS fixes (focus-ring radius, iOS search/select, Suspense fallback layout, dvh shell) — merged to `main` and LIVE (2026-09-20), smoke-tested on production (panel, palette persistence, navigation fade, all routes 200).
 
 ## Live deployment (important)
 

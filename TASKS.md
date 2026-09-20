@@ -461,7 +461,7 @@ Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of
 - [x] Shell `min-h-dvh`, drawer `overscroll-contain`, accordion lists leave room for focus rings
 
 ### 8.4 Ship
-- [ ] Preview verified by the owner, merged to main
+- [x] Merged to main and live on production (2026-09-20), smoke-tested
 
 ---
 
