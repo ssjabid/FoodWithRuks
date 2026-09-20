@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BackToTop } from "@/components/shared/BackToTop";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
+import { PageEnter, PageTransitionListener } from "@/components/shared/PageTransition";
 import { getSiteSettingsSafe } from "@/lib/firebase/siteSettings";
 import { PALETTE_IDS } from "@/lib/theme";
 import {
@@ -104,9 +105,12 @@ if(dark){d.classList.add('dark');}else{d.classList.remove('dark');}}catch(e){}})
       </head>
       <body className="font-body antialiased">
         <ThemeProvider defaultPalette={settings.defaultPalette} showPicker={settings.showThemePicker}>
-          <div className="flex flex-col min-h-screen">
+          <PageTransitionListener />
+          <div className="flex flex-col min-h-dvh">
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1">
+              <PageEnter>{children}</PageEnter>
+            </main>
             <Footer />
           </div>
           <BackToTop />

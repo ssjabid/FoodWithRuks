@@ -125,67 +125,69 @@ export function NavDrawer({ isOpen, onClose, returnFocusRef }: NavDrawerProps) {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <ul className="space-y-0.5">
-            {NAV_TREE.map((node, i) => {
-              const isActive = pathname === node.href || (!!node.children && pathname.startsWith(node.href));
-              const expanded = !!node.children && isGroupOpen(node.href);
-              const groupId = `nav-group-${i}`;
-              return (
-                <li key={node.href}>
-                  <div className="flex items-center">
-                    <Link
-                      href={node.href}
-                      onClick={onClose}
-                      aria-current={pathname === node.href ? "page" : undefined}
-                      className={cn(
-                        "flex-1 px-3 py-2.5 rounded-[var(--radius-sm)] font-heading text-[var(--text-nav)] transition-colors",
-                        isActive
-                          ? "text-[var(--color-primary)] font-medium"
-                          : "text-[var(--color-text-primary)] hover:bg-[var(--color-secondary)]"
-                      )}
-                    >
-                      {node.label}
-                    </Link>
-                    {node.children && (
-                      <button
-                        type="button"
-                        aria-expanded={expanded}
-                        aria-controls={groupId}
-                        aria-label={`${expanded ? "Collapse" : "Expand"} ${node.label}`}
-                        onClick={() => setOpenGroups((g) => ({ ...g, [node.href]: !expanded }))}
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-secondary)] transition-colors"
+        <div className="flex-1 overflow-y-auto overscroll-contain">
+          <nav className="px-3 py-4">
+            <ul className="space-y-0.5">
+              {NAV_TREE.map((node, i) => {
+                const isActive = pathname === node.href || (!!node.children && pathname.startsWith(node.href));
+                const expanded = !!node.children && isGroupOpen(node.href);
+                const groupId = `nav-group-${i}`;
+                return (
+                  <li key={node.href}>
+                    <div className="flex items-center">
+                      <Link
+                        href={node.href}
+                        onClick={onClose}
+                        aria-current={pathname === node.href ? "page" : undefined}
+                        className={cn(
+                          "flex-1 px-3 py-2.5 rounded-[var(--radius-sm)] font-heading text-[var(--text-nav)] transition-colors",
+                          isActive
+                            ? "text-[var(--color-primary)] font-medium"
+                            : "text-[var(--color-text-primary)] hover:bg-[var(--color-secondary)]"
+                        )}
                       >
-                        <Chevron open={expanded} className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  {node.children && (
-                    <div id={groupId} className="accordion" data-open={expanded}>
-                      <ul className="pl-3 pb-1">
-                        {node.children.map((child) => (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              onClick={onClose}
-                              tabIndex={expanded ? 0 : -1}
-                              className="block px-3 py-2 rounded-[var(--radius-sm)] text-[15px] text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-secondary)] transition-colors"
-                            >
-                              {child.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
+                        {node.label}
+                      </Link>
+                      {node.children && (
+                        <button
+                          type="button"
+                          aria-expanded={expanded}
+                          aria-controls={groupId}
+                          aria-label={`${expanded ? "Collapse" : "Expand"} ${node.label}`}
+                          onClick={() => setOpenGroups((g) => ({ ...g, [node.href]: !expanded }))}
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-secondary)] transition-colors"
+                        >
+                          <Chevron open={expanded} className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
 
-        {showPicker && <ThemePicker />}
+                    {node.children && (
+                      <div id={groupId} className="accordion" data-open={expanded}>
+                        <ul className="pl-3 pr-1 pb-1">
+                          {node.children.map((child) => (
+                            <li key={child.href}>
+                              <Link
+                                href={child.href}
+                                onClick={onClose}
+                                tabIndex={expanded ? 0 : -1}
+                                className="block px-3 py-2 rounded-[var(--radius-sm)] text-[15px] text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-secondary)] transition-colors"
+                              >
+                                {child.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {showPicker && <ThemePicker />}
+        </div>
 
         <div className="border-t border-[var(--color-border)] px-5 py-4 flex items-center justify-between gap-3">
           <p className="accent-italic text-sm">{TAGLINE_SECONDARY}</p>

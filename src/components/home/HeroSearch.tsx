@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { buildSearchHref } from "@/lib/search";
+import { beginPageTransition } from "@/components/shared/PageTransition";
 
 export function HeroSearch({ className }: { className?: string }) {
   const router = useRouter();
@@ -14,7 +15,9 @@ export function HeroSearch({ className }: { className?: string }) {
       role="search"
       onSubmit={(e) => {
         e.preventDefault();
-        router.push(buildSearchHref(query));
+        const href = buildSearchHref(query);
+        beginPageTransition(href);
+        router.push(href);
       }}
       className={cn("field flex items-center h-12 rounded-full pl-4 pr-1.5", className)}
     >

@@ -13,7 +13,7 @@ The recipe and lifestyle blog for Ruks, an Instagram food creator: wholesome, ea
 | Framework | Next.js 16 (App Router, React 19, TypeScript strict) |
 | Styling | Tailwind CSS v4 (CSS-first `@theme`), design tokens in `src/styles/globals.css` |
 | Fonts | Lora (headings) + Inter (body) via `next/font/google` |
-| Motion | CSS transitions only (public site); five switchable palettes with light/dark |
+| Motion | CSS transitions only (public site) incl. a soft page fade on navigation; five switchable palettes with light/dark |
 | Data | Firebase Firestore via the Admin SDK (server only) |
 | Auth | Firebase Auth, Google sign-in, admin allow-list by email |
 | Hosting | Vercel (Git integration) |

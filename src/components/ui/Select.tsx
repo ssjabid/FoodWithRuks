@@ -26,7 +26,7 @@ export function Select({ options, value, onChange, id, className, variant = "pil
         className={cn(
           "field appearance-none cursor-pointer pr-9",
           variant === "pill"
-            ? "h-9 rounded-full pl-4 text-sm font-medium"
+            ? "h-9 rounded-full pl-4 text-base sm:text-sm font-medium"
             : "h-11 w-full rounded-[var(--radius-sm)] pl-4 text-base",
           "disabled:opacity-60 disabled:cursor-not-allowed"
         )}

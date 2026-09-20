@@ -99,7 +99,7 @@ export default function AdminSettingsPage() {
             </select>
             <p className="text-xs text-[var(--color-text-tertiary)]">{PALETTES[defaultPalette].description}</p>
             <div className="flex gap-2 pt-1" aria-hidden="true">
-              {PALETTES[defaultPalette].preview.light.map((c, i) => (
+              {Object.values(PALETTES[defaultPalette].preview.light).map((c, i) => (
                 <span key={i} className="w-6 h-6 rounded-full border border-[var(--color-border)]" style={{ background: c }} />
               ))}
             </div>

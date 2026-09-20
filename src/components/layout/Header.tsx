@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { ThemePanel } from "@/components/shared/ThemePanel";
+import { useTheme } from "@/components/shared/ThemeProvider";
 import { NavDrawer } from "./NavDrawer";
 import { SearchOverlay } from "./SearchOverlay";
 
@@ -10,6 +12,7 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
+  const { showPicker } = useTheme();
 
   // Ctrl/Cmd + K opens search from anywhere
   useEffect(() => {
@@ -61,7 +64,7 @@ export function Header() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
               </svg>
             </button>
-            <ThemeToggle />
+            {showPicker ? <ThemePanel /> : <ThemeToggle />}
           </div>
         </div>
       </div>

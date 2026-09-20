@@ -443,6 +443,26 @@ Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of
 - [x] Local build + type-check green
 - [x] Vercel preview built, merged to main, production smoke test passed (2026-09-08)
 
+## Phase 8 — Page transitions, obvious picker, CSS bug pass (2026-09-20)
+
+### 8.1 Page transitions
+- [x] `PageEnter` + `PageTransitionListener` (CSS only): outgoing page softens, incoming page fades + settles 280ms; skipped on first load, under /admin and for same-page query/hash links
+- [x] Hero search + search overlay call `beginPageTransition` before `router.push`
+
+### 8.2 Palette picker made obvious
+- [x] Header palette button (live conic swatch + "new" dot) opening the Appearance popover (`ThemePanel`)
+- [x] Mini-page swatch tiles + iconised Light/Dark/System (`PaletteSwatches`, `ModeSwitch`)
+- [x] Drawer "Appearance" open by default and inside the scroll area
+
+### 8.3 CSS fixes
+- [x] `:focus-visible` no longer forces `border-radius: 2px` (round buttons squared off on keyboard focus)
+- [x] Suspense fallbacks for /recipes and /lifestyle match the real page container + heading (no jump)
+- [x] Sort select 16px on mobile (iOS zoom), `input[type=search]` native styling removed
+- [x] Shell `min-h-dvh`, drawer `overscroll-contain`, accordion lists leave room for focus rings
+
+### 8.4 Ship
+- [ ] Preview verified by the owner, merged to main
+
 ---
 
 ## Backlog / Future Ideas

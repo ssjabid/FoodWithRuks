@@ -43,4 +43,6 @@ export const STORAGE_KEYS = {
   mode: "ar_mode",
   palette: "ar_palette",
   favorites: "ar_favorites",
+  /** set once the visitor has opened the palette panel (hides the "new" dot) */
+  pickerSeen: "ar_picker_seen",
 } as const;

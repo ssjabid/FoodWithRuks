@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { WHAT_TO_EAT } from "@/lib/constants";
 import { buildSearchHref } from "@/lib/search";
 import { useIsClient } from "@/hooks/useIsClient";
+import { beginPageTransition } from "@/components/shared/PageTransition";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -32,7 +33,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push(buildSearchHref(query));
+    const href = buildSearchHref(query);
+    beginPageTransition(href);
+    router.push(href);
     setQuery("");
     onClose();
   };

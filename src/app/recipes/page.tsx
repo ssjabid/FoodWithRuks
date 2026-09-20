@@ -14,9 +14,13 @@ export const metadata: Metadata = {
 
 function RecipesFallback() {
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-      <div className="h-10 w-48 rounded-[var(--radius-sm)] bg-[var(--color-secondary)] mb-10" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+    <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <div className="mb-8">
+        <p className="eyebrow mb-2">Recipes</p>
+        <h1 className="h-page text-[var(--color-text-primary)] mb-2">What to eat?</h1>
+        <p className="text-[var(--color-text-secondary)] text-lg">Pick a craving, or search for something specific.</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
         {Array.from({ length: 6 }).map((_, i) => (
           <RecipeCardSkeleton key={i} />
         ))}

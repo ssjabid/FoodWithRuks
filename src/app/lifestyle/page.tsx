@@ -22,7 +22,14 @@ export default async function LifestylePage() {
   }
 
   return (
-    <Suspense fallback={<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 min-h-[50vh]" />}>
+    <Suspense
+      fallback={
+        <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 min-h-[50vh]">
+          <p className="eyebrow mb-2">Lifestyle</p>
+          <h1 className="h-page text-[var(--color-text-primary)] mb-2">Beyond the kitchen</h1>
+        </div>
+      }
+    >
       <LifestyleClient initialPosts={posts} />
     </Suspense>
   );

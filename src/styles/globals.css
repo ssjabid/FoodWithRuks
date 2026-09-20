@@ -32,6 +32,7 @@
   --dur-fast: 120ms;
   --dur-base: 200ms;
   --dur-drawer: 220ms;
+  --dur-page: 280ms;   /* page enter fade */
 
   --text-display: clamp(3rem, 2.25rem + 3.2vw, 4.5rem);   /* 48–72 hero */
   --text-h1: clamp(2.25rem, 1.9rem + 1.5vw, 3rem);        /* 36–48 page titles */
@@ -354,7 +355,28 @@
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
-    border-radius: 2px;
+  }
+
+  /* Search inputs: drop the native iOS inset/rounded styling and the stray cancel button */
+  input[type="search"] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    display: none;
+  }
+
+  /* Page transitions (see components/shared/PageTransition.tsx). The outgoing page
+     softens while the next one loads; the incoming page fades and settles in. */
+  main {
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-navigating] main {
+      opacity: 0.5;
+    }
   }
 
   ::selection {
@@ -488,9 +510,13 @@
     color: var(--color-primary);
   }
 
-  /* The only keyframe left */
   .fade-in {
     animation: fadeIn var(--dur-fast) var(--ease-out) both;
+  }
+
+  /* Incoming page: one soft fade + 4px settle, applied by PageEnter on client navigations only */
+  .page-enter {
+    animation: pageEnter var(--dur-page) var(--ease-out) both;
   }
 
   /* Height-animated disclosure without JS measuring */
@@ -537,6 +563,28 @@
   .overlay-panel[data-state="open"] {
     opacity: 1;
     transform: translate(-50%, 0);
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  /* Header popover (Appearance panel): transparent backdrop so the palette change is visible behind it */
+  .popover-backdrop {
+    position: fixed;
+    inset: 0;
+    visibility: hidden;
+  }
+  .popover-backdrop[data-state="open"] {
+    visibility: visible;
+  }
+  .popover-panel {
+    opacity: 0;
+    transform: translateY(-6px);
+    visibility: hidden;
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out), visibility 0s linear 150ms;
+  }
+  .popover-panel[data-state="open"] {
+    opacity: 1;
+    transform: none;
     visibility: visible;
     transition-delay: 0s;
   }
@@ -588,6 +636,13 @@
 
 @keyframes fadeIn {
   from { opacity: 0; }
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 
 /* ————————————————————————

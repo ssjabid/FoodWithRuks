@@ -31,7 +31,8 @@
 A personal food blog, not a product site. Research (NN/g on animation duration and scroll fading, Feast Design Co's food-blog guidance, and a DOM audit of Pinch of Yum, Smitten Kitchen, Minimalist Baker, Half Baked Harvest and Cookie + Kate) says: no scroll-reveal, no card lift or photo zoom, no running animations, colour-only transitions, serif headings, body text 16–18px, flat chrome that gets out of the way of the food. The layout reference Ruks likes is moribyan.com: slim sticky header, display serif headline with an italic accent word, uppercase eyebrow labels, wide 1240px grid, square flat images, sections such as "Currently cooking", "Explore by category" (with counts) and "Most loved".
 
 **In practice**
-- Motion is functional only: drawer slide (220ms), overlay fades (150ms), accordions (200ms), `.fade-in` for swapped labels (120ms), hover/focus colour changes (150ms). `prefers-reduced-motion` disables all of it.
+- Motion is functional only: drawer slide (220ms), overlay/popover fades (150ms), accordions (200ms), `.fade-in` for swapped labels (120ms), hover/focus colour changes (150ms). `prefers-reduced-motion` disables all of it.
+- One page-level transition on client navigation: the outgoing page softens to 50% while the next loads, the incoming page fades and settles in over 280ms (`PageEnter` in the root layout). No per-element entrances, no exit choreography, nothing on first load.
 - Hover on cards = title underline + image opacity 0.9. Links underline. Buttons change colour only.
 - Flat: no shadows, hairline `--color-border` dividers, radii 6/8/12px.
 - Generous but not empty: sections `py-12 sm:py-16`, `max-w-wide` (1240px) grids, `max-w-prose` (720px) articles.
@@ -52,7 +53,7 @@ Each palette has a light block and a `[data-palette].dark` block in `globals.css
 
 Rules: `--color-accent` is decorative only in light modes. Text on tinted surfaces uses `--color-text-primary`. Anything on a primary background uses `--color-on-primary`. Colour declarations live only in the palette blocks — never hardcode hex in components (the OG image and apple icon are the exception; they follow the cream palette).
 
-Visitors pick a palette and Light/Dark/System from the "Appearance" section of the drawer (stored in `localStorage` as `ar_palette` / `ar_mode`). Admin sets the site default and can hide the picker (`siteSettings/general`).
+Visitors pick a palette and Light/Dark/System from the palette button in the header (a live swatch of the current palette that opens the Appearance panel) or the "Appearance" section of the drawer (stored in `localStorage` as `ar_palette` / `ar_mode`). Admin sets the site default and can hide the picker (`siteSettings/general`); the header then shows the plain light/dark toggle.
 
 ### Typography
 - Headings: Lora 500 (`h-display` 48–72px hero, `h-page` 36–48px, `h-section` 26–32px, `h-card` 18px), line-height 1.05–1.3, `-0.01em`
