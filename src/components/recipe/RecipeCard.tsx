@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { FavoriteButton } from "@/components/shared/FavoriteButton";
-import { FoodPlaceholder } from "@/components/shared/FoodPlaceholder";
+import { Photo } from "@/components/shared/Photo";
 import { formatCookTime } from "@/lib/utils";
 import { getCategoryLabel } from "@/lib/constants";
 import type { Recipe } from "@/types";
@@ -20,7 +20,7 @@ export function RecipeCard({ recipe, ratio = "landscape" }: RecipeCardProps) {
     <article className="group relative h-full">
       <Link href={`/recipes/${recipe.slug}`} className="block h-full rounded-[var(--radius-md)]">
         <div className="relative">
-          <FoodPlaceholder ratio={ratio} className="w-full group-hover:opacity-90 transition-opacity" />
+          <Photo src={recipe.heroImage} alt={recipe.title} ratio={ratio} className="w-full group-hover:opacity-90 transition-opacity" />
         </div>
 
         <div className="pt-3">

@@ -10,6 +10,7 @@ function docToPost(doc: FirebaseFirestore.QueryDocumentSnapshot): LifestylePost 
     slug: data.slug,
     excerpt: data.excerpt || "",
     content: data.content || "",
+    coverImage: data.coverImage || "",
     category: (data.category || "") as LifestyleCategory,
     readingTime: data.readingTime || 0,
     status: data.status || "draft",

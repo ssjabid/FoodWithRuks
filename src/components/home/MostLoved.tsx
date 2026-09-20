@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SectionHeader } from "@/components/shared/SectionHeader";
-import { FoodPlaceholder } from "@/components/shared/FoodPlaceholder";
+import { Photo } from "@/components/shared/Photo";
 import { getCategoryLabel } from "@/lib/constants";
 import type { Recipe } from "@/types";
 
@@ -20,7 +20,7 @@ export function MostLoved({ recipes }: MostLovedProps) {
           {recipes.slice(0, 4).map((recipe) => (
             <li key={recipe.id} className="border-b border-[var(--color-border)]">
               <Link href={`/recipes/${recipe.slug}`} className="group grid grid-cols-[96px_1fr] gap-4 py-4">
-                <FoodPlaceholder ratio="square" className="w-24 group-hover:opacity-90 transition-opacity" />
+                <Photo src={recipe.heroImage} alt={recipe.title} ratio="square" sizes="96px" className="w-24 group-hover:opacity-90 transition-opacity" />
                 <div className="min-w-0">
                   <p className="eyebrow mb-1">{recipe.category[0] ? getCategoryLabel(recipe.category[0]) : "Recipe"}</p>
                   <h3 className="h-card text-[var(--color-text-primary)] group-hover:underline underline-offset-[3px] decoration-1 mb-1">

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { Chevron } from "@/components/ui/Chevron";
 import { FavoriteButton } from "@/components/shared/FavoriteButton";
-import { FoodPlaceholder } from "@/components/shared/FoodPlaceholder";
+import { Photo } from "@/components/shared/Photo";
 import { ServingsAdjuster } from "@/components/recipe/ServingsAdjuster";
 import { IngredientList } from "@/components/recipe/IngredientList";
 import { InstructionStep } from "@/components/recipe/InstructionStep";
@@ -66,7 +66,13 @@ export function RecipePageClient({ recipe, relatedRecipes }: RecipePageClientPro
 
       {/* Hero: placeholder (+ Instagram reel when provided) */}
       <div className={hasEmbed ? "mb-10 grid gap-6 lg:grid-cols-[1fr_360px] items-start" : "mb-10 max-w-prose"}>
-        <FoodPlaceholder className={hasEmbed ? "w-full h-72 sm:h-96 lg:h-full lg:min-h-[480px]" : "w-full h-72 sm:h-96"} />
+        <Photo
+          src={recipe.heroImage}
+          alt={recipe.title}
+          priority
+          sizes="(min-width: 1024px) 720px, 100vw"
+          className={hasEmbed ? "w-full h-72 sm:h-96 lg:h-full lg:min-h-[480px]" : "w-full h-72 sm:h-96"}
+        />
         {hasEmbed && <InstagramEmbed url={recipe.instagramUrl!} />}
       </div>
 

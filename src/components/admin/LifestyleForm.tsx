@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input, Textarea } from "@/components/ui/Input";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { adminFetch } from "@/lib/adminFetch";
 import { slugify } from "@/lib/utils";
 import { LIFESTYLE_CATEGORIES } from "@/lib/constants";
@@ -19,6 +20,7 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
   const [title, setTitle] = useState(post?.title || "");
   const [slug, setSlug] = useState(post?.slug || "");
   const [excerpt, setExcerpt] = useState(post?.excerpt || "");
+  const [coverImage, setCoverImage] = useState(post?.coverImage || "");
   const [content, setContent] = useState(post?.content || "");
   const [category, setCategory] = useState(post?.category || "");
   const [status, setStatus] = useState<"draft" | "published">(post?.status || "draft");
@@ -45,6 +47,7 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
       title,
       slug,
       excerpt,
+      coverImage,
       content,
       category,
       readingTime,
@@ -74,6 +77,8 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
       <Input label="Title" value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Post title" />
       <Input label="Slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="post-slug" />
       <Textarea label="Excerpt" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="Short summary..." />
+
+      <ImageUpload label="Cover photo" value={coverImage} onChange={setCoverImage} folder="lifestyle" hint="Shown on the story cards and at the top of the post." />
 
       <div className="space-y-1.5">
         <label className="block text-sm font-medium text-[var(--color-text-primary)]">Category</label>

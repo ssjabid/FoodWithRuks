@@ -477,7 +477,9 @@ Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of
 Ordered by value. Nothing here is started; pick and reorder.
 
 ### 9.1 Ruks can publish without a developer (highest value)
-- [ ] **Image uploads** in the admin forms (hero, steps, lifestyle cover, About photo). Options: Vercel Blob (simplest, same platform) or Firebase Storage (needs Blaze). Replace `FoodPlaceholder` with `next/image` when a URL exists.
+- [x] **Image uploads** in the admin forms (hero, steps, lifestyle cover) — GitHub as the store (`public/images/uploads`), browser-side resize to 1600/800 WebP, one commit per upload, plain `<img>` + srcset via `Photo` (2026-09-20)
+- [ ] Set `GITHUB_UPLOAD_TOKEN` on Vercel and do the first real upload from /admin
+- [ ] About photo (needs the editable About page below)
 - [ ] **Rich-text editor** for lifestyle posts (Tiptap or Markdown with preview) instead of the raw HTML textarea
 - [ ] **Editable pages**: About page copy + photo, hero tagline/intro, footer blurb from `/admin/settings` (or a `pages` collection)
 - [ ] Admin form polish on mobile (she will write on her phone): sticky Save, autosave draft, "Preview" link, duplicate recipe

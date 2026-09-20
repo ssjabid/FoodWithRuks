@@ -1,4 +1,4 @@
-import { FoodPlaceholder } from "@/components/shared/FoodPlaceholder";
+import { Photo } from "@/components/shared/Photo";
 import type { Instruction } from "@/types";
 
 interface InstructionStepProps {
@@ -13,7 +13,7 @@ export function InstructionStep({ instruction }: InstructionStepProps) {
       </div>
       <div className="flex-1 pt-0.5">
         <p className="text-body text-[var(--color-text-primary)]">{instruction.text}</p>
-        {instruction.image && <FoodPlaceholder className="mt-3 h-44 w-full" />}
+        {instruction.image && <Photo src={instruction.image} alt="" fit="natural" sizes="(min-width: 1024px) 680px, 100vw" className="mt-3 w-full max-w-xl" />}
       </div>
     </li>
   );

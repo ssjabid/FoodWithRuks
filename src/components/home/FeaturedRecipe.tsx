@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FoodPlaceholder } from "@/components/shared/FoodPlaceholder";
+import { Photo } from "@/components/shared/Photo";
 import { getCategoryLabel } from "@/lib/constants";
 import { formatCookTime } from "@/lib/utils";
 import type { Recipe } from "@/types";
@@ -14,7 +14,7 @@ export function FeaturedRecipe({ recipe }: FeaturedRecipeProps) {
   return (
     <Link href={`/recipes/${recipe.slug}`} className="group block rounded-[var(--radius-md)]">
       <p className="eyebrow mb-3">New this week</p>
-      <FoodPlaceholder ratio="landscape" className="w-full group-hover:opacity-90 transition-opacity" />
+      <Photo src={recipe.heroImage} alt={recipe.title} ratio="landscape" priority sizes="(min-width: 1024px) 600px, 100vw" className="w-full group-hover:opacity-90 transition-opacity" />
       <div className="pt-4">
         <h2 className="h-section text-[var(--color-text-primary)] group-hover:underline underline-offset-4 decoration-1 mb-2">
           {recipe.title}

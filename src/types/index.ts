@@ -108,6 +108,8 @@ export interface LifestylePost {
   slug: string;
   excerpt: string;
   content: string;
+  /** Cover photo URL (uploaded or pasted); empty = placeholder */
+  coverImage?: string;
   category: LifestyleCategory;
   readingTime: number;
   status: "draft" | "published";

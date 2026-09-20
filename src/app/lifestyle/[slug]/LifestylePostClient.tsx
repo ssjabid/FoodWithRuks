@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { ShareButtons } from "@/components/recipe/ShareButtons";
-import { FoodPlaceholder } from "@/components/shared/FoodPlaceholder";
+import { Photo } from "@/components/shared/Photo";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { formatDate } from "@/lib/utils";
 import { getLifestyleCategoryLabel } from "@/lib/constants";
@@ -24,7 +24,7 @@ export function LifestylePostClient({ post, relatedPosts }: LifestylePostClientP
           </p>
         </header>
 
-        <FoodPlaceholder className="w-full h-64 sm:h-80 mb-10" />
+        <Photo src={post.coverImage} alt={post.title} priority sizes="(min-width: 1024px) 720px, 100vw" className="w-full h-64 sm:h-80 mb-10" />
 
         <div className="prose mb-10" dangerouslySetInnerHTML={{ __html: post.content }} />
 
@@ -39,7 +39,7 @@ export function LifestylePostClient({ post, relatedPosts }: LifestylePostClientP
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
             {relatedPosts.map((p) => (
               <Link key={p.slug} href={`/lifestyle/${p.slug}`} className="group block rounded-[var(--radius-md)]">
-                <FoodPlaceholder ratio="landscape" className="w-full group-hover:opacity-90 transition-opacity" />
+                <Photo src={p.coverImage} alt={p.title} ratio="landscape" className="w-full group-hover:opacity-90 transition-opacity" />
                 <div className="pt-3">
                   <Badge variant="accent" className="mb-2">{getLifestyleCategoryLabel(p.category)}</Badge>
                   <h3 className="h-card text-[var(--color-text-primary)] group-hover:underline underline-offset-[3px] decoration-1 mb-1 line-clamp-2">

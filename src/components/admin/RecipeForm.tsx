@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input, Textarea } from "@/components/ui/Input";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { adminFetch } from "@/lib/adminFetch";
 import { slugify } from "@/lib/utils";
 import {
@@ -191,13 +192,13 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
 
       {/* Media */}
       <Section title="Media">
-        <Input
-          label="Hero Image URL"
+        <ImageUpload
+          label="Hero photo"
           value={heroImage}
-          onChange={(e) => setHeroImage(e.target.value)}
-          placeholder="https://..."
+          onChange={setHeroImage}
+          folder="recipes"
+          hint="Landscape works best. Phone photos are shrunk automatically before upload."
         />
-        <p className="text-xs text-[var(--color-text-tertiary)]">Image upload coming soon. For now, paste an image URL.</p>
         <Input
           label="Instagram URL"
           value={instagramUrl}
@@ -298,7 +299,6 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   value={inst.text}
                   onChange={(e) => updateInstruction(i, "text", e.target.value)}
                 />
-                <Input className="hidden sm:block w-40" placeholder="Image URL" value={inst.image || ""} onChange={(e) => updateInstruction(i, "image", e.target.value)} />
                 <button
                   onClick={() => removeInstruction(i)}
                   className="h-11 w-11 flex-shrink-0 flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] hover:bg-red-50 dark:hover:bg-red-900/20 text-[var(--color-text-tertiary)] hover:text-red-600 transition-colors"
@@ -308,8 +308,8 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   </svg>
                 </button>
               </div>
-              <div className="sm:hidden pl-10">
-                <Input className="w-full" placeholder="Image URL (optional)" value={inst.image || ""} onChange={(e) => updateInstruction(i, "image", e.target.value)} />
+              <div className="pl-10">
+                <ImageUpload compact label="Step photo (optional)" value={inst.image || ""} onChange={(v) => updateInstruction(i, "image", v)} folder="steps" />
               </div>
             </div>
           ))}

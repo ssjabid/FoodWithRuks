@@ -36,6 +36,17 @@ export const SOCIAL_LINKS = {
   },
 } as const;
 
+/**
+ * Where uploaded photos are committed (public repo). Client-safe; the server
+ * reads GITHUB_REPO/GITHUB_BRANCH for the real values, these are the defaults.
+ */
+export const CONTENT_REPO = { repo: "ssjabid/FoodWithRuks", branch: "main" } as const;
+
+/** Raw GitHub URL for a repo path, e.g. "public/images/uploads/..." — available seconds after upload. */
+export function rawContentUrl(repoPath: string): string {
+  return `https://raw.githubusercontent.com/${CONTENT_REPO.repo}/${CONTENT_REPO.branch}/${repoPath}`;
+}
+
 /** localStorage keys — namespaced so a future rebrand can't collide. */
 export const STORAGE_KEYS = {
   /** legacy light|dark key, migrated to mode on first read */

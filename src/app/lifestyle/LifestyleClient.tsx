@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { FilterPill } from "@/components/ui/FilterPill";
-import { FoodPlaceholder } from "@/components/shared/FoodPlaceholder";
+import { Photo } from "@/components/shared/Photo";
 import { LIFESTYLE_CATEGORIES, getLifestyleCategoryLabel, isLifestyleCategory } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import type { LifestylePost } from "@/types";
@@ -54,7 +54,7 @@ export function LifestyleClient({ initialPosts }: LifestyleClientProps) {
       <div key={selectedCategory} className="fade-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
         {filteredPosts.map((post) => (
           <Link key={post.slug} href={`/lifestyle/${post.slug}`} className="group block rounded-[var(--radius-md)]">
-            <FoodPlaceholder ratio="landscape" className="w-full group-hover:opacity-90 transition-opacity" />
+            <Photo src={post.coverImage} alt={post.title} ratio="landscape" className="w-full group-hover:opacity-90 transition-opacity" />
             <div className="pt-3">
               <Badge variant="accent" className="mb-2">{getLifestyleCategoryLabel(post.category)}</Badge>
               <h2 className="h-card text-[var(--color-text-primary)] group-hover:underline underline-offset-[3px] decoration-1 mb-1.5 line-clamp-2">

@@ -8,9 +8,9 @@
 
 ## Current State
 
-**Phase**: Clay locked as the site palette; Phase 9 (content pipeline for Ruks + design polish) proposed in TASKS.md
+**Phase**: Phase 9.1 — photo uploads via GitHub (built, awaiting `GITHUB_UPLOAD_TOKEN` on Vercel)
 **Last Updated**: 2026-09-20
-**Last Task Completed**: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened. Merged and LIVE 2026-09-20. The other four palettes remain in globals.css and in /admin/settings; re-enable the picker there to compare again. Page transitions + Appearance panel live since 2026-09-20.
+**Last Task Completed**: Photo uploads (branch `feat/github-photos`): admin forms get an `ImageUpload` field (hero, per-step, lifestyle cover); the browser resizes to 1600/800px WebP, `POST /api/admin/upload` commits both files to the repo in one commit via the Git Data API, the public site renders real photos through `Photo` (plain `<img>` + srcset, placeholder fallback). Needs `GITHUB_UPLOAD_TOKEN` in Vercel before the first upload. Previously: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened. Merged and LIVE 2026-09-20. The other four palettes remain in globals.css and in /admin/settings; re-enable the picker there to compare again. Page transitions + Appearance panel live since 2026-09-20.
 
 ## Live deployment (important)
 
@@ -83,6 +83,14 @@
 | `/admin/*` | Dashboard, recipes, lifestyle, comments, messages, subscribers (CSV), settings (featured recipe, Instagram handle, default palette, picker toggle) |
 | Metadata routes | `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx`, `robots.ts`, `sitemap.ts` (Firestore + sample fallback) |
 
+## Photo uploads (GitHub as the image store)
+
+- Photos are committed into the repo at `public/images/uploads/<folder>/<yyyy>/<mm>/<slug>-<id>-w<width>.webp` (folders: recipes, lifestyle, steps, misc) and served as static files by the next production deploy (every push to `main` redeploys, so a photo is live ~1–2 min after upload). Until then the admin previews it from `raw.githubusercontent.com` (`rawContentUrl()` in `site.ts`).
+- Client: `src/lib/imageResize.ts` (`createImageBitmap` with EXIF orientation → canvas → WebP q0.82, widths `PHOTO_WIDTHS = [1600, 800]`) and `src/components/admin/ImageUpload.tsx` (choose/replace/remove, "paste a link" fallback, status line). Used in `RecipeForm` (hero + each step) and `LifestyleForm` (cover → new optional `LifestylePost.coverImage`).
+- Server: `src/lib/github.ts` (`commitFiles()` = ref → commit → blobs → tree → commit → ref PATCH, retries once on 422 when the branch moved; `isUploadConfigured()`, `rawUrlFor()`) and `src/app/api/admin/upload/route.ts` (admin token check, validates data URLs and sizes, 503 when the token is missing). Env: `GITHUB_UPLOAD_TOKEN` (fine-grained PAT, only this repo, Contents read+write), `GITHUB_REPO`, `GITHUB_BRANCH`.
+- Public rendering: `src/components/shared/Photo.tsx` — plain `<img loading=lazy>` (no Vercel image-optimisation quota), `srcset` derived from the `-w1600/-w800` naming, `ratio` (square/landscape/portrait) or `fit="natural"`, falls back to `FoodPlaceholder` when `src` is empty. Used by RecipeCard, FeaturedRecipe, MostLoved, LifestyleTeaser, LifestyleClient, LifestylePostClient, InstructionStep, RecipePageClient.
+- Uploads from the admin move `main`; always `git pull --ff-only` before pushing. Repo growth: ~300 KB per photo pair.
+
 ## Newsletter
 
 - `POST /api/newsletter` → Firestore `subscribers` (doc id = normalised email; honeypot `website`; best-effort rate limit; always `{ok:true}` on success/duplicate).
@@ -107,6 +115,7 @@
 | `src/components/ui/{Button (+ButtonLink, buttonClasses),Card,Badge,FilterPill,Select,Chevron,Input,Logo,Modal,Skeleton,StarRating}.tsx` | Primitives (no motion) |
 | `src/components/home/*` | HeroSection + HeroSearch + FeaturedRecipe, CurrentlyCooking, ExploreByCategory, MostLoved, LifestyleTeaser, InstagramBlock, NewsletterSection |
 | `src/lib/firebase/{recipes,lifestyle,subscribers,siteSettings,comments,messages}.ts` | Admin-SDK data access |
+| `src/lib/github.ts`, `src/app/api/admin/upload/route.ts`, `src/lib/imageResize.ts`, `src/components/admin/ImageUpload.tsx`, `src/components/shared/Photo.tsx` | Photo uploads (GitHub) + rendering |
 | `scripts/check-contrast.mjs` | Contrast gate for every palette × mode |
 | `firestore.rules`, `firestore.indexes.json`, `firebase.json` | Firestore config (deployed) |
 
@@ -114,12 +123,12 @@
 
 - **Firestore**: enabled; rules deny all client access; indexes deployed.
 - **Auth**: Google sign-in; `ADMIN_EMAIL` allow-list, **comma-separated** (`authCheck.ts`, `api/admin/verify`). Verified 2026-09-20: Google provider enabled; authorized domains = localhost, foodwithruks-site.firebaseapp.com, foodwithruks-site.web.app, foodwithruks.vercel.app. Local `.env.local` lists two emails; the **Vercel** `ADMIN_EMAIL` must list the same (only the account owner can check).
-- **Storage**: not enabled (Blaze plan). Image fields are URL text inputs. `FoodPlaceholder` used site-wide.
+- **Storage**: not enabled (Blaze plan). Photos are committed to the GitHub repo instead (see Photo uploads). `FoodPlaceholder` remains the fallback when a document has no photo.
 
 ## Known Issues / Follow-ups
 
 - Public comments UI still not built (API + moderation exist).
-- Real images await Firebase Storage.
+- Real photos: upload flow built; the first real upload happens once `GITHUB_UPLOAD_TOKEN` is set on Vercel (the route returns 503 until then and the form says so).
 - `framer-motion` still bundled for `/admin` only; convert admin to CSS and `npm uninstall` later.
 - `npm run lint` passes with ~8 warnings (React Compiler rules downgraded to warn); `RecipesClient` still syncs input state from the URL in an effect.
 - Automated screenshots in the hidden browser pane are stale after scrolling (harness limitation, not a site bug); `:focus` styles cannot be verified there because the document lacks focus.

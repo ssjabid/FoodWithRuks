@@ -14,6 +14,7 @@ The recipe and lifestyle blog for Ruks, an Instagram food creator: wholesome, ea
 | Styling | Tailwind CSS v4 (CSS-first `@theme`), design tokens in `src/styles/globals.css` |
 | Fonts | Lora (headings) + Inter (body) via `next/font/google` |
 | Motion | CSS transitions only (public site) incl. a soft page fade on navigation; five switchable palettes with light/dark |
+| Photos | Uploaded from the admin, resized in the browser, committed to this repo under `public/images/uploads` (needs `GITHUB_UPLOAD_TOKEN`) |
 | Data | Firebase Firestore via the Admin SDK (server only) |
 | Auth | Firebase Auth, Google sign-in, admin allow-list by email |
 | Hosting | Vercel (Git integration) |
