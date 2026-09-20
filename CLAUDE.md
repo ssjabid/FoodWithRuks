@@ -8,16 +8,17 @@
 
 ## Current State
 
-**Phase**: Page transitions + obvious palette picker + CSS bug pass
+**Phase**: Clay locked as the site palette; Phase 9 (content pipeline for Ruks + design polish) proposed in TASKS.md
 **Last Updated**: 2026-09-20
-**Last Task Completed**: Soft page transitions (PageEnter / PageTransitionListener), header Appearance panel (ThemePanel), drawer picker open by default, CSS fixes (focus-ring radius, iOS search/select, Suspense fallback layout, dvh shell) — merged to `main` and LIVE (2026-09-20), smoke-tested on production (panel, palette persistence, navigation fade, all routes 200).
+**Last Task Completed**: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened (branch `feat/clay-default`). Page transitions + Appearance panel live since 2026-09-20.
 
 ## Live deployment (important)
 
 - **Production**: https://foodwithruks.vercel.app — Vercel Git integration, **every push to `main` deploys to production**.
 - Work on a branch; Vercel builds a preview per branch (URL on the commit's deployment status in GitHub; previews are behind Vercel login, so the account owner opens them). Merge to `main` only after the preview is verified.
 - `foodwithruks.com` is NOT registered. `SITE_URL` (src/lib/site.ts) resolves `NEXT_PUBLIC_SITE_URL` → Vercel production URL → `https://foodwithruks.vercel.app`.
-- Firestore rules + composite indexes are deployed (2026-09-07). Firestore is empty, so the public site shows sample content until recipes/posts are published in `/admin`.
+- Firestore rules + composite indexes are deployed (2026-09-07). Firestore is empty (0 recipes, 0 posts, no `siteSettings/general` doc as of 2026-09-20), so the public site shows sample content until recipes/posts are published in `/admin`.
+- Local dev: `.env.local` has the service-account key pasted with a mix of escaped and real newlines; `admin.ts` normalises it. Scratch scripts that use the Admin SDK must do the same (see the inspection script pattern: `@next/env` loadEnvConfig + collapse newlines).
 
 ## Tech Stack
 
@@ -40,7 +41,7 @@
 ## Brand + Design System
 
 - **Swatches**: clay `#C7A491`, blush `#EECFCA`, sage `#919682`, light sage `#C7CDBF`, olive `#595E48`.
-- **Palettes** (`data-palette` on `<html>`, each with light + `.dark`): `cream` (Cream & Olive, default), `sage`, `blush`, `clay`, `olive` (Evening Olive). Token sets live in `globals.css` (light blocks first, then `[data-palette].dark` blocks). 21 tokens each: primary, primary-hover, on-primary, secondary, accent, accent-soft, accent-text, background, surface, elevated, text-primary/secondary/tertiary, border, success, warning, error, placeholder-bg, placeholder-icon, band, on-band. Run `node scripts/check-contrast.mjs` after touching them.
+- **Palettes** (`data-palette` on `<html>`, each with light + `.dark`): `clay` (**site default since 2026-09-20, Ruks's choice**), `cream` (Cream & Olive), `sage`, `blush`, `olive` (Evening Olive). Token sets live in `globals.css` (light blocks first, then `[data-palette].dark` blocks). 21 tokens each: primary, primary-hover, on-primary, secondary, accent, accent-soft, accent-text, background, surface, elevated, text-primary/secondary/tertiary, border, success, warning, error, placeholder-bg, placeholder-icon, band, on-band. Run `node scripts/check-contrast.mjs` after touching them.
 - Rules: `--color-accent` is decorative only in light modes; text on clay/blush/sage tints uses `text-primary`; links use `--color-accent-text` or `--color-primary`; anything on a primary background uses `--color-on-primary`. No shadows anywhere (flat, hairline borders). Radii 6/8/12px.
 - **Typography scale** (`:root` tokens + `@utility`): `h-display` (48–72px hero, Lora 500), `h-page` (36–48), `h-section` (26–32), `h-card` (18), `eyebrow` (12px Inter 500 uppercase 0.16em), `accent-italic` (Lora italic in accent-text), `text-body` (17px/1.65 article text). Body 16px/1.6. Headings weight 500.
 - **Focus**: global `:focus-visible` 2px primary outline for keyboard (never sets `border-radius` — that squared off round buttons); inputs use `.field` (border darkens + 1px inset on focus, no glow) and `.field-bare` inside wrappers. Links use `.link` (underline that brightens on hover). Inputs/selects are 16px+ on mobile (iOS zoom); `input[type=search]` has native appearance removed.
@@ -52,8 +53,8 @@
 - Pickers (`src/components/shared/ThemePicker.tsx`): `PaletteSwatches` (5 mini-page tiles: ground, headline bar, button pill, accent dot) + `ModeSwitch` (Light/Dark/System with icons) + `ThemePicker` (drawer "Appearance" accordion, **open by default**, inside the drawer's scroll area).
 - **Header**: while `showThemePicker` is on, `ThemePanel` replaces the sun/moon toggle — a live conic swatch of the current palette (with a "new" dot until first opened, `ar_picker_seen`) that opens a popover (`.popover-panel`, transparent backdrop so the page recolours visibly behind it, Escape/focus trap/`inert`). When the picker is hidden, the plain `ThemeToggle` returns.
 - Root layout reads `siteSettings/general.defaultPalette` (server) and renders `<html data-palette>` plus an inline no-FOUC script that applies the stored choice before paint.
-- Admin `/admin/settings`: default palette + "show theme picker to visitors" (`siteSettings.showThemePicker`). Turn the picker off once Ruks has chosen.
-- `opengraph-image.tsx` / `apple-icon.tsx` are hardcoded to the cream palette — update by hand if the default changes.
+- Admin `/admin/settings`: default palette + "show theme picker to visitors" (`siteSettings.showThemePicker`, **default false**). While the picker is hidden the palette is **locked**: `ThemeProvider` and the no-FOUC script ignore `ar_palette` and use the site default (`DEFAULT_PALETTE` in `theme.ts` = `clay`, or `siteSettings.defaultPalette` once that doc exists). Light/dark still follows the visitor.
+- `opengraph-image.tsx` / `apple-icon.tsx` / `icon.svg` are hardcoded to the **clay** palette — update by hand if the default changes.
 
 ## Navigation
 
@@ -112,7 +113,7 @@
 ## Firebase Services Status
 
 - **Firestore**: enabled; rules deny all client access; indexes deployed.
-- **Auth**: Google sign-in; `ADMIN_EMAIL` allow-list (`verifyAdminRequest`). Authorized domains must include the Vercel host.
+- **Auth**: Google sign-in; `ADMIN_EMAIL` allow-list, **comma-separated** (`authCheck.ts`, `api/admin/verify`). Verified 2026-09-20: Google provider enabled; authorized domains = localhost, foodwithruks-site.firebaseapp.com, foodwithruks-site.web.app, foodwithruks.vercel.app. Local `.env.local` lists two emails; the **Vercel** `ADMIN_EMAIL` must list the same (only the account owner can check).
 - **Storage**: not enabled (Blaze plan). Image fields are URL text inputs. `FoodPlaceholder` used site-wide.
 
 ## Known Issues / Follow-ups

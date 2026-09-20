@@ -87,7 +87,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   // Runs before first paint: applies the visitor's stored palette/mode (or the OS mode) so nothing flashes.
   const themeScript = `(function(){try{var d=document.documentElement,P=${JSON.stringify(PALETTE_IDS)};
-var p=localStorage.getItem('${STORAGE_KEYS.palette}');if(P.indexOf(p)>-1){d.setAttribute('data-palette',p);}
+var p=${settings.showThemePicker ? `localStorage.getItem('${STORAGE_KEYS.palette}')` : "null"};if(P.indexOf(p)>-1){d.setAttribute('data-palette',p);}
 var m=localStorage.getItem('${STORAGE_KEYS.mode}')||localStorage.getItem('${STORAGE_KEYS.theme}');
 var dark=m==='dark'||((!m||m==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);
 if(dark){d.classList.add('dark');}else{d.classList.remove('dark');}}catch(e){}})();`;

@@ -9,7 +9,8 @@ if (apps.length === 0) {
     credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      // Accept a key pasted with escaped \n, real newlines, CRLF, or a mix of them.
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n").replace(/\r/g, "").replace(/\n+/g, "\n"),
     }),
   });
 }

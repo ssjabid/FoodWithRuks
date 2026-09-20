@@ -9,7 +9,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   recipeOfTheWeekSlug: "",
   instagramHandle: SOCIAL_LINKS.instagram.handle,
   defaultPalette: DEFAULT_PALETTE,
-  showThemePicker: true,
+  showThemePicker: false,
 };
 
 /** Reads siteSettings/general merged over defaults. Never throws on a missing doc. */
@@ -24,7 +24,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         ? data.instagramHandle
         : DEFAULT_SITE_SETTINGS.instagramHandle,
     defaultPalette: isPaletteId(data.defaultPalette) ? data.defaultPalette : DEFAULT_PALETTE,
-    showThemePicker: typeof data.showThemePicker === "boolean" ? data.showThemePicker : true,
+    showThemePicker: typeof data.showThemePicker === "boolean" ? data.showThemePicker : false,
     updatedAt: data.updatedAt?.toDate?.() ?? undefined,
   };
 }

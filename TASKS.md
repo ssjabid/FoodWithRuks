@@ -463,6 +463,43 @@ Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of
 ### 8.4 Ship
 - [x] Merged to main and live on production (2026-09-20), smoke-tested
 
+### 8.5 Clay locked (Ruks's choice)
+- [x] `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked while hidden (stored choices ignored)
+- [x] OG image, apple icon and icon.svg recoloured to Clay
+- [x] Admin private-key parsing tolerant of mixed newline formats (local dev can reach Firestore)
+- [x] Verified: Google provider on, Vercel host in authorized domains, allow-list supports several emails
+- [ ] Merged to main
+
+---
+
+## Phase 9 — PROPOSED: make it Ruks's site (content pipeline first, then polish)
+
+Ordered by value. Nothing here is started; pick and reorder.
+
+### 9.1 Ruks can publish without a developer (highest value)
+- [ ] **Image uploads** in the admin forms (hero, steps, lifestyle cover, About photo). Options: Vercel Blob (simplest, same platform) or Firebase Storage (needs Blaze). Replace `FoodPlaceholder` with `next/image` when a URL exists.
+- [ ] **Rich-text editor** for lifestyle posts (Tiptap or Markdown with preview) instead of the raw HTML textarea
+- [ ] **Editable pages**: About page copy + photo, hero tagline/intro, footer blurb from `/admin/settings` (or a `pages` collection)
+- [ ] Admin form polish on mobile (she will write on her phone): sticky Save, autosave draft, "Preview" link, duplicate recipe
+- [ ] Draft preview URLs (`?preview=token`) so she can see a recipe before publishing
+
+### 9.2 Editorial polish (Moribyan-style, needs real photos first)
+- [ ] Home: "Currently cooking" as 3 large cards with photos; hero photo treatment once images exist
+- [ ] Category landing pages (`/recipes/category/[slug]`) with intro copy and their own metadata
+- [ ] Recipe page: sticky in-page nav (Ingredients / Method / Tips), "cook mode" (screen stays awake), author box with photo
+- [ ] Instagram: real latest-posts grid (manual list of reel URLs in admin, or a feed service) instead of the plain band
+- [ ] /recipes pagination or "Load more" once the catalogue passes ~30 recipes
+- [ ] Public comments + ratings UI (API + moderation already exist)
+
+### 9.3 Growing the audience
+- [ ] Custom domain (e.g. agoohandruks.com) + Search Console + Vercel Analytics
+- [ ] Newsletter sending (Resend) from the subscriber list; welcome email
+- [ ] RSS feed; Pinterest-friendly share image per recipe (OG image from the hero photo)
+
+### 9.4 Housekeeping
+- [ ] Convert `/admin` off framer-motion and uninstall it; keep the public Header/Footer off admin routes (route group)
+- [ ] Remaining lint warnings (7)
+
 ---
 
 ## Backlog / Future Ideas

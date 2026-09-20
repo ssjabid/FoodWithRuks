@@ -33,7 +33,9 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ defaultPalette, showPicker, children }: ThemeProviderProps) {
   const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const palette = snap.palette ?? defaultPalette;
+  // With the picker hidden the palette is locked to the site default (a choice stored during the
+  // evaluation phase would otherwise leave a visitor stuck on it with no UI to change it).
+  const palette = (showPicker ? snap.palette : null) ?? defaultPalette;
   const resolvedMode = resolveMode(snap.mode, snap.systemDark);
   const firstRun = useRef(true);
 

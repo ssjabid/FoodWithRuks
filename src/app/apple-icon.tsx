@@ -13,9 +13,9 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#595E48",
+          background: "#825540",
           borderRadius: 40,
-          color: "#F1EEE7",
+          color: "#F7F1EE",
           fontSize: 84,
           fontWeight: 600,
           fontFamily: "Georgia, 'Times New Roman', serif",
@@ -23,7 +23,7 @@ export default function AppleIcon() {
         }}
       >
         <span>A</span>
-        <span style={{ color: "#C7A491" }}>&amp;</span>
+        <span style={{ color: "#E9DBD3" }}>&amp;</span>
         <span>R</span>
       </div>
     ),

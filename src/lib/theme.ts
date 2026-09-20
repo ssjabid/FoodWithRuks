@@ -11,7 +11,7 @@ export const MODES = ["light", "dark", "system"] as const;
 export type ThemeMode = (typeof MODES)[number];
 export type ResolvedMode = "light" | "dark";
 
-export const DEFAULT_PALETTE: PaletteId = "cream";
+export const DEFAULT_PALETTE: PaletteId = "clay";
 export const DEFAULT_MODE: ThemeMode = "system";
 
 /** Swatches for the mini "page" preview tiles (ground, headline, button, accent). */

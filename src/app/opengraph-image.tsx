@@ -39,8 +39,8 @@ export default async function OpenGraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #EECFCA 0%, #FCFBF8 45%, #E4E8DD 100%)",
-          color: "#2A2D22",
+          background: "linear-gradient(135deg, #E9DBD3 0%, #F7F1EE 45%, #E4E8DD 100%)",
+          color: "#322924",
           fontFamily: serif,
           position: "relative",
         }}
@@ -56,15 +56,15 @@ export default async function OpenGraphImage() {
             borderRadius: 32,
           }}
         />
-        <div style={{ display: "flex", fontSize: 30, fontStyle: "italic", color: "#8F624B", marginBottom: 18 }}>
+        <div style={{ display: "flex", fontSize: 30, fontStyle: "italic", color: "#595E48", marginBottom: 18 }}>
           {SITE_BYLINE}
         </div>
         <div style={{ display: "flex", fontSize: 128, fontWeight: 600, letterSpacing: -3, lineHeight: 1 }}>
           <span>Agooh</span>
-          <span style={{ color: "#C7A491", margin: "0 28px" }}>&amp;</span>
+          <span style={{ color: "#825540", margin: "0 28px" }}>&amp;</span>
           <span>Ruks</span>
         </div>
-        <div style={{ display: "flex", fontSize: 40, color: "#595E48", marginTop: 28 }}>{TAGLINE_PRIMARY}</div>
+        <div style={{ display: "flex", fontSize: 40, color: "#5A4A41", marginTop: 28 }}>{TAGLINE_PRIMARY}</div>
       </div>
     ),
     { ...size, fonts }
