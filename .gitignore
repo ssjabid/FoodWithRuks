@@ -41,3 +41,8 @@ next-env.d.ts
 # Firebase
 serviceAccountKey.json
 *-firebase-adminsdk-*.json
+
+# Redesign working files (private brief, notes, prototypes, screenshots) - never committed
+/redesign/
+/.snapshots/
+/FoodWithRuks-redesign-pack.zip
