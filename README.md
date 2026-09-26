@@ -27,7 +27,7 @@ cp .env.example .env.local   # fill in the values below
 npm run dev                  # http://localhost:3000
 ```
 
-Other scripts: `npm run build`, `npm run start`, `npm run lint`, `npx tsc --noEmit`.
+Other scripts: `npm run build`, `npm run start`, `npm run lint`, `npm run typecheck`, `npm run e2e` (end-to-end admin test against a running dev server), `npm run snap <label>` (gate screenshots into `.snapshots/`; run `npx playwright install chromium` once first).
 
 ## Environment variables
 
