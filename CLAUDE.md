@@ -8,7 +8,7 @@
 
 ## Current State
 
-**Phase**: Redesign, branch `redesign/care-package`. Phases 0 to 4 built (foundations, content model, home, recipe, every other page, admin fields). Next: gate screenshots and e2e on this branch, then Phase 5 (signature moments), Phase 6 (admin at 390px + HOW-TO-POST.md), Phase 7 (QA, PR the owner merges).
+**Phase**: Redesign, branch `redesign/care-package`. Phases 0 to 4 built and gated (commit 09a786a: typecheck, lint, build, unit tests 16/16, tells, contrast, e2e 27/27, 70 screenshots with 0 axe issues, production console clean). Waiting for the owner's review. Next: Phase 5 (signature moments), Phase 6 (admin at 390px + HOW-TO-POST.md), Phase 7 (QA, PR the owner merges).
 **Last Updated**: 2026-09-27
 **Last Task Completed**: Phases 2 to 4 of the care-package redesign in one sweep: one palette with semantic tokens (Daylight / After hours, device-following), Lora + Inter + Kalam, the squish mark and brand parts, Bakes / Cooking / Stories / About navigation with a top menu sheet, the Offering home page (kitchen-time line, Currently card, New out of the oven, collections, stories, email line), the recipe page (facts line, scaler, oven line, tappable method, cook mode, print card, verdicts, keeps, click-to-load Instagram, comments with a 3-rating floor), recipes index with group tabs / category chips / charm filters, `/bakes`, `/cooking`, `/collections/[slug]`, `/privacy`, `/bakery` (hidden), new 404, About with the pair mark, admin recipe form with the new fields and "The personal bits", settings (front-page bake, her line, lead collection, bakery switch), pages (Currently + photo alt), dashboard Currently card, new icons and OG cards, fixtures policy (dev: six example bakes; production: one labelled example), e2e extended. Previously (all live on `main`): production audit, rich-text editor + editable pages, photo uploads to the GitHub repo, Clay palette lock, page transitions.
 
@@ -135,6 +135,7 @@ Built on `redesign/care-package`, phase by phase, with the owner reviewing at ev
 
 ## Known Issues / Follow-ups
 
+- Firestore `siteSettings/pages.heroIntro` still holds the old sentence from the previous design (written back by an earlier e2e restore); it shows under the front-page bake until it is cleared or rewritten in /admin/pages. Claude does not write to Firestore.
 - Every line in Ruks's voice is a draft (`grep -rn "DRAFT: needs Ruks" src`); she approves or rewrites before launch (launch gate in the redesign plan).
 - The per-recipe OG card inlines the uploaded WebP; confirm it renders once the first real photo exists (fallback is the mark-only card).
 - `framer-motion` remains in a few admin pages (layout sidebar, list pages); remove in Phase 6.
