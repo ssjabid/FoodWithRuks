@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminBrand } from "@/components/admin/AdminBrand";
 
@@ -43,11 +42,8 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="w-full max-w-md p-8 rounded-[var(--radius-lg)] bg-[var(--color-elevated)] border border-[var(--color-border)] shadow-[var(--shadow-lg)]"
+      <div
+        className="fade-in w-full max-w-md p-8 rounded-[var(--radius-lg)] bg-[var(--color-elevated)] border border-[var(--color-border)] shadow-[var(--shadow-lg)]"
       >
         <div className="text-center mb-8">
           <h1>
@@ -94,7 +90,7 @@ export default function AdminLoginPage() {
             )}
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }

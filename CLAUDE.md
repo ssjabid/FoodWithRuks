@@ -30,8 +30,9 @@ Built on `redesign/care-package`, phase by phase, with the owner reviewing at ev
 - Tailwind CSS v4 (CSS-first `@theme` / `@utility` in `src/styles/globals.css`, no tailwind.config)
 - Fonts via next/font: **Lora** (display and headings), **Inter** (text), **Kalam** (her handwriting layer, `.note`). Variables on `<html>`, `lang="en-GB"`.
 - Firebase: Firestore via Admin SDK (server only), Auth (Google sign-in, client SDK auth only)
-- **No animation library on the public site** (CSS only). `framer-motion` is still installed for a few `/admin` pages; do not import it in public components.
+- **No animation library anywhere.** `framer-motion` was removed on 2026-09-27; the admin uses the same CSS transitions as the public site.
 - Vercel hosting; react-social-media-embed (Instagram, click-to-load on recipe pages); Playwright + axe for gate screenshots; node:test for the small libraries.
+- **Design guards read one config**, `scripts/design.config.mjs` (tells, banned words, legacy aliases, contrast roles and pairs, ornament budgets). `scripts/gen-tokens.mjs` writes `src/lib/tokens.ts` from `globals.css` so OG images and icons never carry their own hex (`npm run gen:tokens`, run automatically by `npm run gen:mark`).
 
 ## Design system (v2, the care package)
 
@@ -124,7 +125,8 @@ Built on `redesign/care-package`, phase by phase, with the owner reviewing at ev
 | `src/lib/firebase/{recipes,lifestyle,subscribers,siteSettings,comments,messages,pageContent}.ts` | Admin-SDK data access with read-time defaults |
 | `src/lib/validation.ts`, `src/lib/rateLimit.ts`, `src/lib/previewToken.ts`, `src/lib/revalidate.ts` | API boundary |
 | `src/components/admin/{RecipeForm,LifestyleForm,ImageUpload,RichTextEditor,AdminBrand}.tsx`, `src/app/admin/*` | Admin |
-| `scripts/{e2e-admin,snap,tells,gen-mark,check-contrast}.mjs`, `src/lib/__tests__/*` | Gates |
+| `scripts/{e2e-admin,snap,tells,gen-mark,gen-tokens,check-contrast}.mjs`, `scripts/design.config.mjs`, `src/lib/tokens.ts`, `src/lib/__tests__/*` | Gates and their one config; generated token hex |
+| `HOW-TO-POST.md` | Ruks's ten-step guide to posting a bake (public-safe) |
 | `firestore.rules`, `firestore.indexes.json`, `firebase.json` | Firestore config (deployed) |
 
 ## Firebase Services Status
@@ -138,8 +140,8 @@ Built on `redesign/care-package`, phase by phase, with the owner reviewing at ev
 - Firestore `siteSettings/pages.heroIntro` still holds the old sentence from the previous design (written back by an earlier e2e restore); it shows under the front-page bake until it is cleared or rewritten in /admin/pages. Claude does not write to Firestore.
 - Every line in Ruks's voice is a draft (`grep -rn "DRAFT: needs Ruks" src`); she approves or rewrites before launch (launch gate in the redesign plan).
 - The per-recipe OG card inlines the uploaded WebP; confirm it renders once the first real photo exists (fallback is the mark-only card).
-- `framer-motion` remains in a few admin pages (layout sidebar, list pages); remove in Phase 6.
 - `npm run lint` passes with 5 pre-existing admin warnings (React Compiler rules on `loadRecipes` / `loadMessages`, admin `<img>`).
+- The v3 design overhaul is in progress: four prototypes live in the git-ignored `redesign/prototypes-v3/` (build with `node redesign/prototypes-v3/tools/build.mjs`, serve with `node redesign/prototypes-v3/tools/serve.mjs`, shoot with `node redesign/prototypes-v3/shoot.mjs`); the owner and Ruks choose a direction before the re-skin (see `redesign/NOTES.md`).
 - Automated screenshots in the hidden browser pane are stale after scrolling (harness limitation); `:focus` styles cannot be verified there.
 - Dev-only hydration mismatch at the top of `<body>` on some routes under `next dev`; production is clean.
 
@@ -151,8 +153,9 @@ npm run build        # production build
 npm run lint
 npm run typecheck
 npm test             # node:test for facts, oven, scale, kitchenTime
-npm run tells        # template-tell + banned-word guard for public code
-node scripts/check-contrast.mjs
+npm run tells        # template tells, banned words and legacy colour aliases in public code (rules: scripts/design.config.mjs)
+npm run contrast     # every colour pair in both modes (node scripts/check-contrast.mjs [some.css] checks another stylesheet)
+npm run gen:tokens   # src/lib/tokens.ts from globals.css
 npm run gen:mark     # regenerate src/app/icon.svg + public/icon-asleep.svg from src/lib/mark.ts
 npm run snap <label> # gate screenshots + axe into .snapshots/<label>/ (needs a running server)
 npm run e2e          # end-to-end admin -> site test against a running server

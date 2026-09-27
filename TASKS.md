@@ -559,6 +559,31 @@ Ordered by value. Nothing here is started; pick and reorder.
 - [ ] Lighthouse mobile (home + recipe), axe clean, keyboard pass, print check, JSON-LD for a makes and a serves recipe
 - [ ] Launch gate: real bakes published, every `DRAFT: needs Ruks` approved or rewritten, About approved, no fixtures in production, pull request for the owner to merge
 
+## Phase 12 — Design overhaul v3: four prototypes, then the winner (2026-09-27 onwards)
+
+> The owner judged v2 "basic, static, no umph". Plan approved 2026-09-27: keep the v2 build as prototype 1, build three bolder prototypes in the git-ignored `redesign/prototypes-v3/`, owner + Ruks choose, then re-skin the Next app on the winner. Owner decisions: motion tier "character", heritage as food and dates only, type free per direction, materials to follow (reminded every report).
+
+### 12.A Deep dive (private)
+- [x] `redesign/BRIEF-v3.md` (themes, tensions, materials, will-not-do, theme-to-decision matrix, questions), `PHOTO-NOTES.md` (read-only look at the public Instagram grid), `DIRECTIONS-v3.md` (the note for the owner), `photos/reference/`, `tools/private-words.mjs`
+- [ ] Owner's reaction to the directions note and the five answers; materials in `redesign/photos/` and `VOICE.md`
+
+### 12.B Four prototypes
+- [x] Harness (`shared/base.css` on the shipped token names, `mark.js` with frames and panda patches, `motion.css` + `moments.js`, `photos.js` + `tools/intake.mjs`, `decor.js`, templates + `tools/build.mjs`, `shoot.mjs`, `tools/serve.mjs`)
+- [x] P1 baseline page, P2 The tin, P3 Rings on, P4 The walk (home, recipe, about, components, motion), contact sheet, tick sheet for Ruks
+- [x] 77 screenshots in `.snapshots/proto-v3/`, axe clean on the phone pages, contrast gate passing on all three stylesheets
+- [ ] Re-shoot with her photos; owner + Ruks choose or mix (recorded in NOTES.md)
+
+### 12.C Build the winner (direction-agnostic parts done ahead)
+- [x] `scripts/design.config.mjs` drives tells (with `allowIn`), banned words, the legacy-alias check, contrast pairs (generated from roles + optional pairs) and snap budgets (gold, ornament, running animations)
+- [x] `scripts/gen-tokens.mjs` writes `src/lib/tokens.ts`; `og.ts`, `apple-icon` and `gen-mark` read it
+- [x] Legacy colour aliases removed from every public component (ThemeToggle, Input, Select, Modal, Skeleton, BackToTop, InstagramEmbed); the alias block in globals.css stays for the admin
+- [ ] Tokens, fonts, textures, mark family, motion system and component rewrites for the chosen direction; docs; gate; preview
+
+### 12.D Her phone and launch
+- [x] `framer-motion` removed from the admin (CSS fades instead); the story form gets the sticky Save / Publish / Preview bar
+- [x] `HOW-TO-POST.md`
+- [ ] Every admin page checked at 390px; handover run posting a bake as her; Lighthouse, keyboard, print, JSON-LD; PR for the owner to merge; clear the stale home intro in /admin/pages at the end
+
 ## Backlog / Future Ideas
 
 - [ ] Scheduled publishing (scheduledAt field ready — needs UI + cron/Cloud Function)

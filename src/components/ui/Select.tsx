@@ -37,7 +37,7 @@ export function Select({ options, value, onChange, id, className, variant = "pil
           </option>
         ))}
       </select>
-      <Chevron className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-tertiary)]" />
+      <Chevron className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-3)]" />
     </span>
   );
 }

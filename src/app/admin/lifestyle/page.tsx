@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { adminFetch } from "@/lib/adminFetch";
 import { formatDate } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
@@ -90,12 +89,9 @@ export default function AdminLifestylePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)]">
-                {filtered.map((post, i) => (
-                  <motion.tr
+                {filtered.map((post) => (
+                  <tr
                     key={post.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.02 }}
                     className="hover:bg-[var(--color-secondary)] transition-colors"
                   >
                     <td className="px-4 py-3 font-medium">{post.title}</td>
@@ -118,7 +114,7 @@ export default function AdminLifestylePage() {
                         <button onClick={() => setDeleteId(post.id)} className="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))}
               </tbody>
             </table>

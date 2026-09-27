@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { adminFetch } from "@/lib/adminFetch";
 import { formatDate } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
@@ -78,12 +77,9 @@ export default function AdminCommentsPage() {
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-sm text-[var(--color-text-secondary)] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-elevated)]">No comments found.</div>
         ) : (
-          filtered.map((comment, i) => (
-            <motion.div
+          filtered.map((comment) => (
+            <div
               key={comment.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
               className="p-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-elevated)]"
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
@@ -121,7 +117,7 @@ export default function AdminCommentsPage() {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))
         )}
       </div>

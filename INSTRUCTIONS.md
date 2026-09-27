@@ -18,7 +18,7 @@
 | Framework | Next.js 16 (App Router) + React 19 + TypeScript strict |
 | Styling | Tailwind CSS v4 (CSS-first) + semantic tokens in `src/styles/globals.css` |
 | Fonts | Lora (display, headings), Inter (text), Kalam (her handwriting, `.note`), all via `next/font/google` |
-| Motion | CSS only on the public site, within a fixed ceiling (see below). `framer-motion` lingers in a few `/admin` pages only. |
+| Motion | CSS only, everywhere, within a fixed ceiling (see below). No animation library. |
 | Database | Firebase Firestore (Admin SDK, server only) |
 | Auth | Firebase Auth (Google sign-in) for the admin |
 | Photos | Resized in the browser, committed to this repo under `public/images/uploads` |
@@ -52,7 +52,7 @@ Tokens live on `:root` (Daylight) and `.dark` (After hours). The device decides 
 | `--color-sage` / `-ink` / `-soft` | #919682 / #56604A / #E6E9E0 | #AEB89F / … | outdoor content only (Trail-tested) |
 | `--color-success`, `--color-error`, `--color-warning-bg` | | | status |
 
-`node scripts/check-contrast.mjs` verifies text ≥ 7:1 on the ground, secondary text and interactive colours ≥ 4.5:1, gold ≥ 3:1, in both modes. Legacy aliases (`--color-primary`, `--color-text-primary`, `--color-border`, …) stay defined for the admin only. Never hardcode hex in public components; `src/lib/og.ts` (generated images) is the exception and mirrors the Daylight tokens.
+`npm run contrast` verifies text ≥ 7:1 on the ground, secondary text and interactive colours ≥ 4.5:1, gold ≥ 3:1, in both modes; the pairs, the tells and the ornament budgets all come from `scripts/design.config.mjs`. Legacy aliases (`--color-primary`, `--color-text-primary`, `--color-border`, …) stay defined for the admin only. Never hardcode hex in public components; `src/lib/og.ts` (generated images) is the exception and mirrors the Daylight tokens.
 
 ### Type
 

@@ -93,7 +93,7 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 pb-24">
       {error && (
         <div className="p-3 rounded-[var(--radius-sm)] bg-[var(--color-warning-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)]" role="alert">
           {error}
@@ -140,7 +140,7 @@ export function LifestyleForm({ post }: LifestyleFormProps) {
         <span className="text-sm font-medium">Published</span>
       </label>
 
-      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[var(--color-border)]">
+      <div className="sticky bottom-0 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 bg-[var(--color-background)] border-t border-[var(--color-border)] flex flex-col sm:flex-row gap-3">
         <button
           onClick={() => handleSave("draft")}
           disabled={saving}

@@ -1,22 +1,64 @@
-// Contrast gate for the one palette (Daylight = :root, After hours = .dark) in src/styles/globals.css.
-// Usage: node scripts/check-contrast.mjs   (exit 1 if any pair is below its threshold)
+// Contrast gate for the palette. Reads the token blocks (Daylight = :root, After hours = .dark, or a
+// prefers-color-scheme: dark media block) and checks the pairs generated from scripts/design.config.mjs.
+//   node scripts/check-contrast.mjs                 -> src/styles/globals.css
+//   node scripts/check-contrast.mjs path/to.css     -> any stylesheet that defines --color-* tokens
+// Exit 1 if any pair is below its threshold or a required token is missing.
 import { readFileSync } from "node:fs";
+import { contrast } from "./design.config.mjs";
 
-const css = readFileSync(new URL("../src/styles/globals.css", import.meta.url), "utf8");
+const file = process.argv[2] || new URL("../src/styles/globals.css", import.meta.url);
+const css = readFileSync(file, "utf8");
 
-// Collect the token blocks: the first `:root {` that defines --color-ground, and `.dark {`
-function block(selector) {
-  const re = new RegExp(`(^|\\n)${selector.replace(".", "\\.")}\\s*\\{([^}]*)\\}`, "g");
+/** Returns the text between the braces that open at `open` (index of "{"). */
+function braced(text, open) {
+  let depth = 0;
+  for (let i = open; i < text.length; i++) {
+    if (text[i] === "{") depth++;
+    else if (text[i] === "}" && --depth === 0) return { body: text.slice(open + 1, i), end: i + 1 };
+  }
+  return { body: text.slice(open + 1), end: text.length };
+}
+
+function tokensIn(body) {
   const vars = {};
-  let m;
-  while ((m = re.exec(css))) {
-    for (const line of m[2].split(";")) {
-      const kv = line.match(/--color-([a-z0-9-]+):\s*(#[0-9A-Fa-f]{6})/);
-      if (kv) vars[kv[1]] = kv[2];
-    }
+  for (const line of body.split(";")) {
+    const kv = line.match(/--color-([a-z0-9-]+):\s*(#[0-9A-Fa-f]{6})\b/);
+    if (kv) vars[kv[1]] = kv[2].toUpperCase();
   }
   return vars;
 }
+
+/** All `selector {` blocks at the top level of `text` (nested ones are skipped). */
+function blocks(text, selector) {
+  const out = [];
+  const re = new RegExp(`(^|[\\n}])\\s*${selector.replace(/[.:]/g, "\\$&")}\\s*\\{`, "g");
+  let m;
+  while ((m = re.exec(text))) {
+    const open = text.indexOf("{", m.index + m[0].length - 1);
+    const { body, end } = braced(text, open);
+    out.push(body);
+    re.lastIndex = end;
+  }
+  return out;
+}
+
+// split out the dark media block(s) so their :root does not pollute the light set
+let lightText = "";
+let darkText = "";
+const mediaRe = /@media[^{]*prefers-color-scheme\s*:\s*dark[^{]*\{/g;
+let cursor = 0;
+let mm;
+while ((mm = mediaRe.exec(css))) {
+  const open = mm.index + mm[0].length - 1;
+  const { body, end } = braced(css, open);
+  darkText += body + "\n";
+  lightText += css.slice(cursor, mm.index);
+  cursor = end;
+  mediaRe.lastIndex = end;
+}
+lightText += css.slice(cursor);
+const light = Object.assign({}, ...blocks(lightText, ":root").map(tokensIn));
+const dark = Object.assign({}, ...blocks(lightText, ".dark").map(tokensIn), ...blocks(darkText, ":root").map(tokensIn), ...blocks(darkText, ".dark").map(tokensIn));
 
 function lum(hex) {
   const c = [0, 2, 4]
@@ -29,52 +71,35 @@ const ratio = (a, b) => {
   return (hi + 0.05) / (lo + 0.05);
 };
 
-// [foreground, background, minimum]. Gold is non-text (3:1); everything else is text.
-const PAIRS = [
-  ["text", "ground", 7],
-  ["text-2", "ground", 4.5],
-  ["text-3", "ground", 4.5],
-  ["text", "surface", 4.5],
-  ["text-2", "surface", 4.5],
-  ["text-3", "surface", 4.5],
-  ["text", "elevated", 4.5],
-  ["text-3", "elevated", 4.5],
-  ["on-blush", "blush", 4.5],
-  ["text-2", "blush", 4.5],
-  ["cheek", "ground", 4.5],
-  ["cheek", "surface", 4.5],
-  ["cheek", "blush", 4.5],
-  ["cheek-hover", "ground", 4.5],
-  ["on-cheek", "cheek", 4.5],
-  ["on-cheek", "cheek-hover", 4.5],
-  ["gold", "ground", 3],
-  ["sage-ink", "ground", 4.5],
-  ["sage-ink", "sage-soft", 4.5],
-  ["success", "ground", 4.5],
-  ["error", "ground", 4.5],
-  ["text", "warning-bg", 4.5],
-  ["mark-ink", "mark-body", 3],
-];
+const pairs = [];
+for (const fg of contrast.textRoles) for (const bg of contrast.surfaceRoles) pairs.push([fg, bg, fg === "text" && bg === "ground" ? contrast.textOnGround : contrast.text]);
+pairs.push(...contrast.pairs);
 
-const light = block(":root");
-const dark = block(".dark");
 let failures = 0;
 for (const [name, vars] of [
   ["Daylight (:root)", light],
   ["After hours (.dark)", dark],
 ]) {
   console.log(`\n${name}`);
-  for (const [fg, bg, min] of PAIRS) {
+  if (Object.keys(vars).length === 0) {
+    console.log("MISS no --color-* tokens found");
+    failures++;
+    continue;
+  }
+  const check = ([fg, bg, min], optional) => {
     if (!vars[fg] || !vars[bg]) {
+      if (optional) return;
       console.log(`MISS ${fg} / ${bg} (token not found)`);
       failures++;
-      continue;
+      return;
     }
     const r = ratio(vars[fg], vars[bg]);
     const ok = r >= min;
     if (!ok) failures++;
-    console.log(`${ok ? "  ok " : "FAIL "} ${fg.padEnd(12)} on ${bg.padEnd(12)} ${r.toFixed(2)} (min ${min})`);
-  }
+    console.log(`${ok ? "  ok " : "FAIL "} ${fg.padEnd(16)} on ${bg.padEnd(16)} ${r.toFixed(2)} (min ${min})`);
+  };
+  for (const p of pairs) check(p, false);
+  for (const p of contrast.optionalPairs) check(p, true);
 }
 console.log(failures ? `\n${failures} pair(s) below threshold` : "\nAll contrast pairs pass");
 process.exit(failures ? 1 : 0);

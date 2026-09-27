@@ -12,7 +12,9 @@
     "snap": "node scripts/snap.mjs",
     "test": "node --experimental-transform-types --test \"src/lib/__tests__/*.test.ts\"",
     "tells": "node scripts/tells.mjs",
-    "gen:mark": "node --experimental-transform-types scripts/gen-mark.mjs"
+    "gen:mark": "node scripts/gen-tokens.mjs && node --experimental-transform-types scripts/gen-mark.mjs",
+    "gen:tokens": "node scripts/gen-tokens.mjs",
+    "contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "@tiptap/extension-image": "^3.31.3",
@@ -23,7 +25,6 @@
     "clsx": "^2.1.1",
     "firebase": "^12.10.0",
     "firebase-admin": "^13.7.0",
-    "framer-motion": "^12.35.2",
     "next": "^16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

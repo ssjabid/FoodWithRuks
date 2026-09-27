@@ -12,6 +12,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { budgets } from "./design.config.mjs";
 
 const label = process.argv[2];
 if (!label) {
@@ -87,22 +88,29 @@ async function settle(page) {
   await page.waitForTimeout(400);
 }
 
-async function maxGoldInViewport(page) {
+// Walks the page one viewport at a time: the most gold shapes and ornaments seen at once, and how many
+// animations are still running after the walk (budgets in design.config.mjs).
+async function auditViewport(page) {
   return page.evaluate(async () => {
     const vh = window.innerHeight;
     const total = document.documentElement.scrollHeight;
-    let max = 0;
-    for (let y = 0; y <= total; y += vh) {
-      window.scrollTo(0, y);
-      await new Promise((r) => setTimeout(r, 40));
-      const n = [...document.querySelectorAll("[data-gold]")].filter((el) => {
+    const visible = (sel) =>
+      [...document.querySelectorAll(sel)].filter((el) => {
         const r = el.getBoundingClientRect();
         return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < vh;
       }).length;
-      max = Math.max(max, n);
+    let gold = 0;
+    let ornament = 0;
+    for (let y = 0; y <= total; y += vh) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 40));
+      gold = Math.max(gold, visible("[data-gold]"));
+      ornament = Math.max(ornament, visible("[data-ornament]"));
     }
+    await new Promise((r) => setTimeout(r, 400));
+    const anim = typeof document.getAnimations === "function" ? document.getAnimations().filter((a) => a.playState === "running").length : 0;
     window.scrollTo({ top: 0, behavior: "instant" });
-    return max;
+    return { gold, ornament, anim };
   });
 }
 
@@ -114,9 +122,9 @@ for (const route of routes) {
       try {
         await page.goto(base + route.path, { waitUntil: "domcontentloaded" });
         await settle(page);
-        const gold = await maxGoldInViewport(page);
+        const audit = await auditViewport(page);
         await page.screenshot({ path: path.join(outDir, file), fullPage: true, animations: "disabled" });
-        results.push({ route: route.name, width, theme, reduced: false, file, gold });
+        results.push({ route: route.name, width, theme, reduced: false, file, ...audit });
         process.stdout.write(".");
       } catch (error) {
         results.push({ route: route.name, width, theme, reduced: false, file, error: String(error.message || error) });
@@ -181,8 +189,27 @@ for (const r of routes) {
   console.log(`  ${r.name.padEnd(12)} ${v.length} issue(s)${serious ? `, ${serious} serious/critical` : ""}${v.length ? ": " + v.map((x) => x.id).join(", ") : ""}`);
 }
 const goldMax = {};
-for (const r of results) if (!r.reduced && r.gold !== undefined) goldMax[r.route] = Math.max(goldMax[r.route] || 0, r.gold);
-console.log("gold (max visible in one viewport):", Object.entries(goldMax).map(([k, v]) => `${k}=${v}`).join("  ") || "none tagged");
+const ornMax = {};
+const animMax = {};
+for (const r of results) {
+  if (r.reduced || r.gold === undefined) continue;
+  goldMax[r.route] = Math.max(goldMax[r.route] || 0, r.gold);
+  ornMax[r.route] = Math.max(ornMax[r.route] || 0, r.ornament || 0);
+  animMax[r.route] = Math.max(animMax[r.route] || 0, r.anim || 0);
+}
+const fmt = (o) => Object.entries(o).map(([k, v]) => `${k}=${v}`).join("  ") || "none";
+console.log("gold (max visible in one viewport, budget " + budgets.goldPerViewport + "):", fmt(goldMax));
+console.log("ornament (max visible in one viewport, budget " + budgets.ornamentPerViewport + "):", fmt(ornMax));
+console.log("animations running after the scroll pass (budget " + budgets.animationsAfterScroll + "):", fmt(animMax));
+const over = [
+  ...Object.entries(goldMax).filter(([, v]) => v > budgets.goldPerViewport).map(([k, v]) => `${k}: ${v} gold`),
+  ...Object.entries(ornMax).filter(([, v]) => v > budgets.ornamentPerViewport).map(([k, v]) => `${k}: ${v} ornaments`),
+  ...Object.entries(animMax).filter(([, v]) => v > budgets.animationsAfterScroll).map(([k, v]) => `${k}: ${v} animations`),
+];
+if (over.length) {
+  console.log("OVER BUDGET: " + over.join("; "));
+  process.exitCode = 1;
+}
 const failed = results.filter((r) => r.error);
 if (failed.length) console.log(`\n${failed.length} screenshot(s) failed:`, failed.map((f) => `${f.file}: ${f.error}`).join("\n  "));
 

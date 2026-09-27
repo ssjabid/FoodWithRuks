@@ -10,7 +10,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ className, label, erro
   return (
     <div className="space-y-1.5">
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-[var(--color-text-primary)]">
+        <label htmlFor={id} className="block text-sm font-medium text-[var(--color-text)]">
           {label}
         </label>
       )}
@@ -40,7 +40,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({ className, la
   return (
     <div className="space-y-1.5">
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-[var(--color-text-primary)]">
+        <label htmlFor={id} className="block text-sm font-medium text-[var(--color-text)]">
           {label}
         </label>
       )}

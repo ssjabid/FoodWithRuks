@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { adminFetch } from "@/lib/adminFetch";
 import { formatDate } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
@@ -60,12 +59,9 @@ export default function AdminMessagesPage() {
         ) : messages.length === 0 ? (
           <div className="p-8 text-center text-sm text-[var(--color-text-secondary)] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-elevated)]">No messages yet.</div>
         ) : (
-          messages.map((msg, i) => (
-            <motion.div
+          messages.map((msg) => (
+            <div
               key={msg.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
               className={`rounded-[var(--radius-lg)] border bg-[var(--color-elevated)] overflow-hidden ${
                 msg.read ? "border-[var(--color-border)]" : "border-[var(--color-primary)]/30"
               }`}
@@ -92,14 +88,9 @@ export default function AdminMessagesPage() {
                 </span>
               </button>
 
-              <AnimatePresence>
                 {expandedId === msg.id && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
+                  <div
+                    className="overflow-hidden fade-in"
                   >
                     <div className="px-4 pb-4 border-t border-[var(--color-border)]">
                       <p className="text-sm text-[var(--color-text-primary)] mt-3 whitespace-pre-wrap">{msg.message}</p>
@@ -118,10 +109,9 @@ export default function AdminMessagesPage() {
                         </button>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
-            </motion.div>
+            </div>
           ))
         )}
       </div>

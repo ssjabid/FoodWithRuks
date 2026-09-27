@@ -40,7 +40,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
         aria-modal="true"
         className={cn(
           "fade-in relative z-10 w-full max-w-md mx-4 p-6 rounded-[var(--radius-lg)]",
-          "bg-[var(--color-elevated)] border border-[var(--color-border)]",
+          "bg-[var(--color-elevated)] border border-[var(--color-line-strong)]",
           className
         )}
       >
@@ -50,7 +50,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded-full hover:bg-[var(--color-secondary)] transition-colors"
+              className="p-1 rounded-full hover:bg-[var(--color-surface)] transition-colors"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

@@ -1,24 +1,26 @@
 import { markSvg, type MarkState } from "@/lib/mark";
 import { SITE_URL } from "@/lib/site";
+import { TOKENS } from "@/lib/tokens";
 
 /**
  * Shared bits for the generated images (Open Graph cards, the Apple touch icon).
- * Colours are literal because these render outside the page's CSS; keep them in
- * step with the Daylight tokens in globals.css.
+ * Colours come from src/lib/tokens.ts (generated from globals.css), so they follow the palette.
  */
+const L = TOKENS.light;
+
 export const OG = {
-  ground: "#FFFAF8",
-  surface: "#F8EFEC",
-  text: "#2B1E1B",
-  text2: "#5E4843",
-  cheek: "#9E3A53",
-  blush: "#EECFCA",
-  line: "#EBDAD4",
+  ground: L.ground,
+  surface: L.surface,
+  text: L.text,
+  text2: L["text-2"],
+  cheek: L.cheek,
+  blush: L.blush,
+  line: L.line,
 } as const;
 
 /** The mark as a data URL so Satori can draw it with an <img>. */
 export function markDataUrl(state: MarkState = "squished"): string {
-  return `data:image/svg+xml;utf8,${encodeURIComponent(markSvg(state))}`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(markSvg(state, { body: L["mark-body"], ink: L["mark-ink"], cheek: L["mark-cheek"] }))}`;
 }
 
 /**
@@ -27,8 +29,12 @@ export function markDataUrl(state: MarkState = "squished"): string {
  * Returns null when the fetch fails: the image must never 500.
  */
 export async function loadLora(weight: 500 | 600 = 500): Promise<ArrayBuffer | null> {
+  return loadDisplayFont("Lora", weight);
+}
+
+export async function loadDisplayFont(family: string, weight: number): Promise<ArrayBuffer | null> {
   try {
-    const css = await fetch(`https://fonts.googleapis.com/css2?family=Lora:wght@${weight}&display=swap`, {
+    const css = await fetch(`https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weight}&display=swap`, {
       headers: { "User-Agent": "Mozilla/5.0" },
       cache: "force-cache",
     }).then((r) => r.text());

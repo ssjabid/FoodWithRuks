@@ -17,7 +17,7 @@ interface InstagramEmbedProps {
 export function InstagramEmbed({ url, className }: InstagramEmbedProps) {
   return (
     <div className={className}>
-      <div className="flex justify-center rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-elevated)]">
+      <div className="flex justify-center rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-line-strong)] bg-[var(--color-elevated)]">
         <Embed url={url.trim()} width={328} captioned={false} />
       </div>
     </div>

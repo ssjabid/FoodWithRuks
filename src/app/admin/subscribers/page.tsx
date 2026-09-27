@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { adminFetch } from "@/lib/adminFetch";
 import { formatDate } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
@@ -120,12 +119,9 @@ export default function AdminSubscribersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)]">
-                {visible.map((s, i) => (
-                  <motion.tr
+                {visible.map((s) => (
+                  <tr
                     key={s.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: Math.min(i, 20) * 0.02 }}
                   >
                     <td className="px-4 py-3 text-[var(--color-text-primary)] break-all">{s.email}</td>
                     <td className="px-4 py-3 text-[var(--color-text-secondary)] hidden sm:table-cell">{SOURCE_LABEL[s.source] ?? s.source}</td>
@@ -151,7 +147,7 @@ export default function AdminSubscribersPage() {
                         Delete
                       </button>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))}
               </tbody>
             </table>

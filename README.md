@@ -27,7 +27,7 @@ cp .env.example .env.local   # fill in the values below
 npm run dev                  # http://localhost:3000
 ```
 
-Other scripts: `npm run build`, `npm run start`, `npm run lint`, `npm run typecheck`, `npm test` (unit tests for the recipe helpers), `npm run tells` (guards public copy against template tells and banned words), `node scripts/check-contrast.mjs` (every colour pair in both modes), `npm run gen:mark` (regenerates the favicon files from the mark), `npm run e2e` (end-to-end admin test against a running dev server), `npm run snap <label>` (gate screenshots and an axe run into `.snapshots/`; run `npx playwright install chromium` once first).
+Other scripts: `npm run build`, `npm run start`, `npm run lint`, `npm run typecheck`, `npm test` (unit tests for the recipe helpers), `npm run tells` (guards public code against template tells, banned words and legacy colour aliases; rules in `scripts/design.config.mjs`), `npm run contrast` (every colour pair in both modes), `npm run gen:tokens` (writes `src/lib/tokens.ts` from the stylesheet), `npm run gen:mark` (regenerates the favicon files from the mark), `npm run e2e` (end-to-end admin test against a running dev server), `npm run snap <label>` (gate screenshots and an axe run into `.snapshots/`; run `npx playwright install chromium` once first).
 
 With an empty database the site shows example content so the layout can be judged: six example bakes in development and preview deployments, exactly one clearly labelled example in production. They disappear as soon as a real recipe is published.
 
@@ -76,3 +76,4 @@ Environment variables live in the Vercel project settings (Production + Preview)
 - `CLAUDE.md` — current project state and conventions (read first)
 - `INSTRUCTIONS.md` — design system, architecture and data models
 - `TASKS.md` — task tracker
+- `HOW-TO-POST.md` — how to post a bake, for the person who bakes
