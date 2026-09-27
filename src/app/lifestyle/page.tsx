@@ -2,31 +2,30 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LifestyleClient } from "./LifestyleClient";
 import { getPublishedPosts } from "@/lib/firebase/lifestyle";
-import { SAMPLE_LIFESTYLE_POSTS } from "@/lib/sampleData";
+import { postsOrFixtures } from "@/lib/content";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Lifestyle",
-  description: "Days out, eating out, travel, parenting and crafts — life beyond the kitchen with Agooh & Ruks.",
+  title: "Stories",
+  description: "Days out, eating out, travel, parenting and the odd craft, from Ruks.",
+  alternates: { canonical: "/lifestyle" },
 };
 
 export default async function LifestylePage() {
   let posts;
   try {
-    posts = await getPublishedPosts();
-    if (posts.length === 0) posts = SAMPLE_LIFESTYLE_POSTS;
+    posts = postsOrFixtures(await getPublishedPosts());
   } catch (error) {
-    console.error("[lifestyle] Firestore fetch failed, using sample data:", error);
-    posts = SAMPLE_LIFESTYLE_POSTS;
+    console.error("[lifestyle] Firestore fetch failed:", error);
+    posts = postsOrFixtures([]);
   }
 
   return (
     <Suspense
       fallback={
         <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 min-h-[50vh]">
-          <p className="eyebrow mb-2">Lifestyle</p>
-          <h1 className="h-page text-[var(--color-text-primary)] mb-2">Beyond the kitchen</h1>
+          <h1 className="h-page text-[var(--color-text)] mb-8">Stories</h1>
         </div>
       }
     >

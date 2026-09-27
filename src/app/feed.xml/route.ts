@@ -1,26 +1,25 @@
 import { getPublishedRecipes } from "@/lib/firebase/recipes";
 import { getPublishedPosts } from "@/lib/firebase/lifestyle";
-import { SAMPLE_RECIPES, SAMPLE_LIFESTYLE_POSTS } from "@/lib/sampleData";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import type { LifestylePost, Recipe } from "@/types";
 
 export const revalidate = 3600;
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** RSS 2.0 feed of recipes and stories, newest first. */
+/** RSS 2.0 feed of recipes and stories, newest first. Real published content only. */
 export async function GET() {
-  let recipes, posts;
+  let recipes: Recipe[] = [];
+  let posts: LifestylePost[] = [];
   try {
-    recipes = await getPublishedRecipes({ limit: 30 });
-    if (recipes.length === 0) recipes = SAMPLE_RECIPES;
-  } catch {
-    recipes = SAMPLE_RECIPES;
+    recipes = (await getPublishedRecipes({ limit: 40 })).filter((r) => !r.sample);
+  } catch (error) {
+    console.error("[feed] recipes unavailable:", error);
   }
   try {
     posts = await getPublishedPosts();
-    if (posts.length === 0) posts = SAMPLE_LIFESTYLE_POSTS;
-  } catch {
-    posts = SAMPLE_LIFESTYLE_POSTS;
+  } catch (error) {
+    console.error("[feed] stories unavailable:", error);
   }
 
   const items = [

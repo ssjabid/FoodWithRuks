@@ -4,7 +4,8 @@ import { useState } from "react";
 import { StarRating } from "@/components/ui/StarRating";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { formatDate } from "@/lib/utils";
+import { formatDateLong } from "@/lib/facts";
+import { COPY } from "@/lib/copy";
 import type { PublicComment } from "@/types";
 
 interface CommentsSectionProps {
@@ -15,7 +16,10 @@ interface CommentsSectionProps {
 
 type Status = "idle" | "submitting" | "sent" | "error";
 
-/** Approved comments + a "leave a comment" form. New comments wait for approval in /admin/comments. */
+/** Minimum number of real ratings before an average is shown. */
+export const MIN_RATINGS = 3;
+
+/** Approved comments + "Made it? Tell Ruks." New comments wait for approval in /admin/comments. */
 export function CommentsSection({ recipeSlug, comments, rating }: CommentsSectionProps) {
   const [name, setName] = useState("");
   const [text, setText] = useState("");
@@ -47,7 +51,7 @@ export function CommentsSection({ recipeSlug, comments, rating }: CommentsSectio
         return;
       }
       setStatus("sent");
-      setMessage("Thank you! Your comment will appear once it has been approved.");
+      setMessage(COPY.commentsThanks); // DRAFT: needs Ruks
       setName("");
       setText("");
       setStars(0);
@@ -57,35 +61,33 @@ export function CommentsSection({ recipeSlug, comments, rating }: CommentsSectio
     }
   };
 
+  const showAverage = rating.count >= MIN_RATINGS;
+
   return (
     <section id="comments" className="comments-section mt-16 scroll-mt-20">
-      <div className="flex items-end justify-between gap-6 border-b border-[var(--color-border)] pb-4 mb-8">
-        <div>
-          <p className="eyebrow mb-2">Comments</p>
-          <h2 className="h-section text-[var(--color-text-primary)]">
-            {comments.length === 0 ? "Be the first to leave a note" : `${comments.length} ${comments.length === 1 ? "note" : "notes"} from readers`}
-          </h2>
-        </div>
-        {rating.count > 0 && (
-          <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] shrink-0">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+        {/* DRAFT: needs Ruks */}
+        <h2 className="h-section text-[var(--color-text)]">{COPY.commentsInvite}</h2>
+        {showAverage && (
+          <p className="flex items-center gap-2 text-sm text-[var(--color-text-2)]">
             <StarRating rating={Math.round(rating.average)} size="sm" />
             <span>
-              {rating.average.toFixed(1)} · {rating.count} {rating.count === 1 ? "rating" : "ratings"}
+              {rating.average.toFixed(1)} from {rating.count} ratings
             </span>
-          </div>
+          </p>
         )}
       </div>
 
       {comments.length > 0 && (
-        <ul className="divide-y divide-[var(--color-border)] mb-12">
+        <ul className="border-t border-[var(--color-line)] mb-10">
           {comments.map((c) => (
-            <li key={c.id} className="py-5">
+            <li key={c.id} className="py-5 border-b border-[var(--color-line)]">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
-                <span className="font-medium text-[var(--color-text-primary)]">{c.name}</span>
+                <span className="font-medium text-[var(--color-text)]">{c.name}</span>
                 <StarRating rating={c.rating} size="sm" />
-                <span className="text-xs text-[var(--color-text-tertiary)]">{formatDate(new Date(c.createdAt))}</span>
+                <span className="text-xs text-[var(--color-text-3)]">{formatDateLong(new Date(c.createdAt))}</span>
               </div>
-              <p className="text-body text-[var(--color-text-primary)] whitespace-pre-line">{c.text}</p>
+              <p className="text-body text-[var(--color-text)] whitespace-pre-line">{c.text}</p>
             </li>
           ))}
         </ul>
@@ -97,8 +99,6 @@ export function CommentsSection({ recipeSlug, comments, rating }: CommentsSectio
         </p>
       ) : (
         <form onSubmit={submit} className="max-w-lg space-y-5">
-          <h3 className="h-card text-[var(--color-text-primary)]">Made it? Leave a note</h3>
-
           <input
             type="text"
             name="website"
@@ -111,7 +111,7 @@ export function CommentsSection({ recipeSlug, comments, rating }: CommentsSectio
           />
 
           <div className="space-y-1.5">
-            <span className="block text-sm font-medium text-[var(--color-text-primary)]">Your rating</span>
+            <span className="block text-sm font-medium text-[var(--color-text)]">Your rating</span>
             <StarRating rating={stars} interactive onRate={setStars} size="lg" />
           </div>
 
@@ -121,7 +121,7 @@ export function CommentsSection({ recipeSlug, comments, rating }: CommentsSectio
             label="Comment"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="How did it turn out? Any tweaks?"
+            placeholder="How did it go? Any tweaks?"
             maxLength={2000}
             required
           />
@@ -135,7 +135,8 @@ export function CommentsSection({ recipeSlug, comments, rating }: CommentsSectio
           <Button type="submit" disabled={status === "submitting"}>
             {status === "submitting" ? "Sending…" : "Post comment"}
           </Button>
-          <p className="text-xs text-[var(--color-text-tertiary)]">Comments are checked before they appear. No email needed.</p>
+          {/* DRAFT: needs Ruks */}
+          <p className="text-xs text-[var(--color-text-3)]">{COPY.commentsHint}</p>
         </form>
       )}
     </section>

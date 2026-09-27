@@ -3,7 +3,7 @@ import type { Subscriber, SubscriberSource } from "@/types";
 
 const COLLECTION = "subscribers";
 
-export const SUBSCRIBER_SOURCES: readonly SubscriberSource[] = ["home", "footer", "newsletter-page"];
+export const SUBSCRIBER_SOURCES: readonly SubscriberSource[] = ["home", "footer", "newsletter-page", "bakery"];
 
 export function normaliseEmail(email: string): string {
   return email.trim().toLowerCase();

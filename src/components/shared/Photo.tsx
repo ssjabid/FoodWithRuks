@@ -1,11 +1,13 @@
 import { cn } from "@/lib/utils";
-import { FoodPlaceholder } from "./FoodPlaceholder";
+import { Placeholder } from "@/components/brand/Placeholder";
 
 interface PhotoProps {
   src?: string | null;
   alt: string;
+  /** What the photo would show, for the honest placeholder caption ("Natas: photo coming") */
+  label?: string;
   /** Fixed aspect ratio; omit when the parent sets the size via className. */
-  ratio?: "square" | "landscape" | "portrait";
+  ratio?: "square" | "landscape" | "portrait" | "wide";
   /** natural = let the image keep its own height (step photos, article images) */
   fit?: "cover" | "natural";
   className?: string;
@@ -13,6 +15,8 @@ interface PhotoProps {
   sizes?: string;
   /** Above-the-fold images load eagerly */
   priority?: boolean;
+  /** Show the placeholder caption (off for tiny thumbnails) */
+  caption?: boolean;
 }
 
 const UPLOAD_WIDTHS = [1600, 800];
@@ -27,25 +31,28 @@ export function buildSrcSet(src: string): string | undefined {
   return widths.map((x) => `${base}-w${x}.${ext} ${x}w`).join(", ");
 }
 
-/** A real photo when one exists, otherwise the flat placeholder. Plain <img>, no optimisation quota. */
+/** A real photo when one exists, otherwise the honest placeholder. Plain <img>, crisp corners, no optimisation quota. */
 export function Photo({
   src,
   alt,
+  label,
   ratio,
   fit = "cover",
   className,
   sizes = "(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw",
   priority = false,
+  caption = true,
 }: PhotoProps) {
-  if (!src) return <FoodPlaceholder ratio={ratio} className={className} />;
+  if (!src) return <Placeholder label={label ?? alt} ratio={ratio} className={className} caption={caption} />;
 
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-placeholder-bg)]",
+        "overflow-hidden rounded-[var(--radius-crisp)] bg-[var(--color-placeholder-bg)]",
         fit === "cover" && ratio === "square" && "aspect-square",
         fit === "cover" && ratio === "landscape" && "aspect-[5/4]",
         fit === "cover" && ratio === "portrait" && "aspect-[4/5]",
+        fit === "cover" && ratio === "wide" && "aspect-[16/10]",
         className
       )}
     >

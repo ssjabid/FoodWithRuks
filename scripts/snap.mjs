@@ -101,7 +101,7 @@ async function maxGoldInViewport(page) {
       }).length;
       max = Math.max(max, n);
     }
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
     return max;
   });
 }

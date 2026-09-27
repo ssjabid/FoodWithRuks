@@ -4,19 +4,22 @@ interface FilterPillProps {
   label: string;
   selected: boolean;
   onClick: () => void;
+  className?: string;
 }
 
-export function FilterPill({ label, selected, onClick }: FilterPillProps) {
+/** A round filter chip, 44px tall so it works with floury fingers. */
+export function FilterPill({ label, selected, onClick, className }: FilterPillProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={selected}
       className={cn(
-        "h-9 px-4 rounded-full text-sm font-medium border inline-flex items-center gap-1.5 transition-colors",
+        "h-11 px-4 rounded-full text-sm font-medium border-[1.5px] inline-flex items-center gap-1.5 transition-colors",
         selected
-          ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] border-[var(--color-primary)]"
-          : "bg-transparent text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+          ? "bg-[var(--color-cheek)] text-[var(--color-on-cheek)] border-[var(--color-cheek)]"
+          : "bg-transparent text-[var(--color-text-2)] border-[var(--color-line-strong)] hover:border-[var(--color-cheek)] hover:text-[var(--color-cheek)]",
+        className
       )}
     >
       {label}

@@ -1,18 +1,10 @@
-"use client";
+import { ButtonLink } from "@/components/ui/Button";
 
-import { Button } from "@/components/ui/Button";
-
+/** A real link to the ingredients; smooth scrolling comes from CSS (and is off under reduced motion). */
 export function JumpToRecipe() {
-  const scrollToIngredients = () => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.getElementById("ingredients")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-  };
-
   return (
-    <div className="no-print">
-      <Button onClick={scrollToIngredients} size="sm">
-        Jump to recipe
-      </Button>
-    </div>
+    <ButtonLink href="#ingredients" className="no-print">
+      Jump to recipe
+    </ButtonLink>
   );
 }

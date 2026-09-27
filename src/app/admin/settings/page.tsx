@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { adminFetch } from "@/lib/adminFetch";
 import { SOCIAL_LINKS } from "@/lib/site";
-import { DEFAULT_PALETTE, PALETTES, PALETTE_IDS, type PaletteId } from "@/lib/theme";
+import { COLLECTIONS } from "@/lib/collections";
 
 interface RecipeOption {
   id: string;
@@ -12,15 +12,20 @@ interface RecipeOption {
   status: string;
 }
 
+const HERO_NOTE_MAX = 80;
+
 const fieldClass =
-  "w-full h-11 px-4 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:border-[var(--color-primary)]";
+  "w-full h-11 px-4 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] text-base sm:text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:border-[var(--color-primary)]";
+const labelClass = "block text-sm font-medium text-[var(--color-text-primary)]";
+const hintClass = "text-xs text-[var(--color-text-tertiary)]";
 
 export default function AdminSettingsPage() {
   const [recipes, setRecipes] = useState<RecipeOption[]>([]);
   const [recipeOfTheWeekSlug, setRecipeOfTheWeekSlug] = useState("");
+  const [heroNote, setHeroNote] = useState("");
+  const [activeCollection, setActiveCollection] = useState("");
   const [instagramHandle, setInstagramHandle] = useState<string>(SOCIAL_LINKS.instagram.handle);
-  const [defaultPalette, setDefaultPalette] = useState<PaletteId>(DEFAULT_PALETTE);
-  const [showThemePicker, setShowThemePicker] = useState(true);
+  const [showBakery, setShowBakery] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -32,9 +37,10 @@ export default function AdminSettingsPage() {
         if (settingsRes.ok) {
           const s = await settingsRes.json();
           setRecipeOfTheWeekSlug(s.recipeOfTheWeekSlug ?? "");
+          setHeroNote(s.heroNote ?? "");
+          setActiveCollection(s.activeCollection ?? "");
           setInstagramHandle(s.instagramHandle ?? SOCIAL_LINKS.instagram.handle);
-          setDefaultPalette(s.defaultPalette ?? DEFAULT_PALETTE);
-          setShowThemePicker(s.showThemePicker ?? true);
+          setShowBakery(Boolean(s.showBakery));
         }
         if (recipesRes.ok) {
           const all: RecipeOption[] = await recipesRes.json();
@@ -55,13 +61,13 @@ export default function AdminSettingsPage() {
     try {
       const res = await adminFetch("/api/admin/settings", {
         method: "PUT",
-        body: JSON.stringify({ recipeOfTheWeekSlug, instagramHandle, defaultPalette, showThemePicker }),
+        body: JSON.stringify({ recipeOfTheWeekSlug, instagramHandle, heroNote, activeCollection, showBakery }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setMessage({ type: "error", text: data.error || "Could not save settings." });
       } else {
-        setMessage({ type: "success", text: "Saved. The site will update within a minute." });
+        setMessage({ type: "success", text: "Saved. The site updates within a minute." });
       }
     } catch {
       setMessage({ type: "error", text: "Could not save settings." });
@@ -72,90 +78,90 @@ export default function AdminSettingsPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Site Settings</h1>
-        <p className="text-sm text-[var(--color-text-secondary)] mt-1">Home page highlights, appearance and social links.</p>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Site settings</h1>
+        <p className="text-sm text-[var(--color-text-secondary)] mt-1">What the front page leads with, and a couple of switches.</p>
       </div>
 
       <form onSubmit={save} className="space-y-8 p-6 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-elevated)]">
         <fieldset className="space-y-6">
-          <legend className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2">Appearance</legend>
+          <legend className="text-sm font-semibold text-[var(--color-text-primary)] mb-2">Front page</legend>
 
           <div className="space-y-1.5">
-            <label htmlFor="palette" className="block text-sm font-medium text-[var(--color-text-primary)]">
-              Default palette
-            </label>
-            <select
-              id="palette"
-              value={defaultPalette}
-              onChange={(e) => setDefaultPalette(e.target.value as PaletteId)}
-              disabled={loading}
-              className={fieldClass}
-            >
-              {PALETTE_IDS.map((id) => (
-                <option key={id} value={id}>
-                  {PALETTES[id].label}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-[var(--color-text-tertiary)]">{PALETTES[defaultPalette].description}</p>
-            <div className="flex gap-2 pt-1" aria-hidden="true">
-              {Object.values(PALETTES[defaultPalette].preview.light).map((c, i) => (
-                <span key={i} className="w-6 h-6 rounded-full border border-[var(--color-border)]" style={{ background: c }} />
-              ))}
-            </div>
-          </div>
-
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showThemePicker}
-              onChange={(e) => setShowThemePicker(e.target.checked)}
-              disabled={loading}
-              className="mt-1 size-4 accent-[var(--color-primary)]"
-            />
-            <span>
-              <span className="block text-sm font-medium text-[var(--color-text-primary)]">Show the theme picker to visitors</span>
-              <span className="block text-xs text-[var(--color-text-tertiary)]">
-                Adds an &ldquo;Appearance&rdquo; section to the menu so visitors can try each palette. Turn off once you have settled on one.
-                Visitors who already chose a palette keep it.
-              </span>
-            </span>
-          </label>
-        </fieldset>
-
-        <fieldset className="space-y-6">
-          <legend className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2">Home page</legend>
-
-          <div className="space-y-1.5">
-            <label htmlFor="rotw" className="block text-sm font-medium text-[var(--color-text-primary)]">
-              New this week (featured recipe)
+            <label htmlFor="rotw" className={labelClass}>
+              The bake on the front page
             </label>
             <select id="rotw" value={recipeOfTheWeekSlug} onChange={(e) => setRecipeOfTheWeekSlug(e.target.value)} disabled={loading} className={fieldClass}>
-              <option value="">Latest published recipe (automatic)</option>
+              <option value="">The newest published bake (automatic)</option>
               {recipes.map((r) => (
                 <option key={r.id} value={r.slug}>
                   {r.title}
                 </option>
               ))}
             </select>
-            <p className="text-xs text-[var(--color-text-tertiary)]">Pins a recipe beside the home page headline. Leave on automatic to always show the newest one.</p>
+            <p className={hintClass}>The first thing visitors see. Leave on automatic and it is always your latest.</p>
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="ig" className="block text-sm font-medium text-[var(--color-text-primary)]">
-              Instagram handle
+            <label htmlFor="heroNote" className={labelClass}>
+              Your line under it
             </label>
             <input
-              id="ig"
+              id="heroNote"
               type="text"
-              value={instagramHandle}
-              onChange={(e) => setInstagramHandle(e.target.value)}
+              value={heroNote}
+              onChange={(e) => setHeroNote(e.target.value.slice(0, HERO_NOTE_MAX))}
               disabled={loading}
-              placeholder="@yourhandle"
+              maxLength={HERO_NOTE_MAX}
+              placeholder="made these for you x"
               className={fieldClass}
             />
-            <p className="text-xs text-[var(--color-text-tertiary)]">Stored for reference. Public links use the handle in the site config until a redeploy picks this up.</p>
+            <p className={hintClass}>
+              Shown in your handwriting next to the bake. Short is best. {heroNote.length}/{HERO_NOTE_MAX}. Empty means the bake&apos;s own note is used.
+            </p>
+            {heroNote && (
+              <p className="note text-[var(--color-text-secondary)] pt-1" aria-hidden="true">
+                {heroNote}
+              </p>
+            )}
           </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="collection" className={labelClass}>
+              Lead with a collection
+            </label>
+            <select id="collection" value={activeCollection} onChange={(e) => setActiveCollection(e.target.value)} disabled={loading} className={fieldClass}>
+              <option value="">None (collections in their usual order)</option>
+              {COLLECTIONS.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.title}
+                  {c.seasonal ? " (seasonal)" : ""}
+                </option>
+              ))}
+            </select>
+            <p className={hintClass}>Puts one collection first on the front page, for Ramadan or Eid say. It only shows once it has a bake in it.</p>
+          </div>
+        </fieldset>
+
+        <fieldset className="space-y-6">
+          <legend className="text-sm font-semibold text-[var(--color-text-primary)] mb-2">Elsewhere</legend>
+
+          <div className="space-y-1.5">
+            <label htmlFor="ig" className={labelClass}>
+              Instagram handle
+            </label>
+            <input id="ig" type="text" value={instagramHandle} onChange={(e) => setInstagramHandle(e.target.value)} disabled={loading} placeholder="@yourhandle" className={fieldClass} />
+            <p className={hintClass}>Stored for reference. The public links use the handle in the site config until a redeploy picks this up.</p>
+          </div>
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={showBakery} onChange={(e) => setShowBakery(e.target.checked)} disabled={loading} className="mt-1 size-5 accent-[var(--color-primary)]" />
+            <span>
+              <span className={labelClass}>Show the someday bakery page</span>
+              <span className={hintClass}>
+                A hidden page at /bakery with a waiting list. Search engines are told to ignore it. Off means the address returns a 404.
+              </span>
+            </span>
+          </label>
         </fieldset>
 
         {message && (
@@ -167,7 +173,7 @@ export default function AdminSettingsPage() {
         <button
           type="submit"
           disabled={saving || loading}
-          className="h-11 px-6 rounded-[var(--radius-sm)] bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="h-12 px-6 rounded-full bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save settings"}
         </button>

@@ -11,6 +11,7 @@ const SOURCE_LABEL: Record<Subscriber["source"], string> = {
   home: "Home page",
   footer: "Footer",
   "newsletter-page": "Newsletter page",
+  bakery: "Bakery waitlist",
 };
 
 export default function AdminSubscribersPage() {

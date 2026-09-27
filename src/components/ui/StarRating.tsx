@@ -14,28 +14,21 @@ interface StarRatingProps {
 const sizes = {
   sm: "w-3.5 h-3.5",
   md: "w-5 h-5",
-  lg: "w-6 h-6",
+  lg: "w-8 h-8",
 };
 
+/** Stars in cheek, never gold (gold is rationed to two pieces per screen). */
 export function StarRating({ rating, maxStars = 5, interactive = false, onRate, size = "md" }: StarRatingProps) {
   const [hovered, setHovered] = useState(0);
 
   return (
-    <div
-      className="inline-flex gap-0.5"
-      role={interactive ? "radiogroup" : "img"}
-      aria-label={`Rating: ${rating} out of ${maxStars}`}
-    >
+    <div className={cn("inline-flex", interactive ? "gap-1" : "gap-0.5")} role={interactive ? "radiogroup" : "img"} aria-label={`Rating: ${rating} out of ${maxStars}`}>
       {Array.from({ length: maxStars }, (_, i) => {
         const starNumber = i + 1;
         const filled = interactive ? starNumber <= (hovered || rating) : starNumber <= rating;
         const Star = (
           <svg
-            className={cn(
-              sizes[size],
-              "transition-colors",
-              filled ? "text-[var(--color-warning)]" : "text-[var(--color-border)]"
-            )}
+            className={cn(sizes[size], "transition-colors", filled ? "text-[var(--color-cheek)]" : "text-[var(--color-line-strong)]")}
             fill="currentColor"
             viewBox="0 0 20 20"
             aria-hidden="true"
@@ -52,11 +45,11 @@ export function StarRating({ rating, maxStars = 5, interactive = false, onRate, 
             type="button"
             role="radio"
             aria-checked={starNumber === rating}
-            className="cursor-pointer"
+            className="p-1 -m-1 rounded-full cursor-pointer"
             onClick={() => onRate?.(starNumber)}
             onMouseEnter={() => setHovered(starNumber)}
             onMouseLeave={() => setHovered(0)}
-            aria-label={`${starNumber} star${starNumber !== 1 ? "s" : ""}`}
+            aria-label={`${starNumber} ${starNumber === 1 ? "star" : "stars"}`}
           >
             {Star}
           </button>

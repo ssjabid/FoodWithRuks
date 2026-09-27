@@ -484,7 +484,7 @@ Research: NN/g animation duration + scroll fading, Feast Design Co, DOM audit of
 - [x] Comments composite index deployed
 - [x] `npm run e2e`: 26 checks through the real routes, self-cleaning
 
-## Phase 9 — PROPOSED: make it Ruks's site (content pipeline first, then polish)
+## Phase 9 — SUPERSEDED by Phase 11 (kept for the record)
 
 Ordered by value. Nothing here is started; pick and reorder.
 
@@ -517,6 +517,47 @@ Ordered by value. Nothing here is started; pick and reorder.
 - [ ] Remaining lint warnings (7)
 
 ---
+
+## Phase 11 — Care-package redesign v2 (branch `redesign/care-package`, 2026-09-26 onwards)
+
+> Built phase by phase on the branch; the owner reviews at every stop and merges the pull request at the end. Working notes and the private brief live in the git-ignored `redesign/` folder. Never push to or merge into `main` from Claude.
+
+### 11.0 Guard rails + baseline
+- [x] Ignore `/redesign/`, `/.snapshots/`, the pack zips and `START-HERE_redesign.md`; baseline screenshots (`.snapshots/phase-0`)
+- [x] `scripts/snap.mjs` (Playwright, 390/768/1440, light + dark, reduced motion, axe, gold count, contact sheet)
+
+### 11.1 Direction prototypes
+- [x] Static prototypes A (Daylight) and B (After hours) + the mark sheet; mirror test in NOTES.md; owner said carry on with A
+
+### 11.2 Foundations
+- [x] One palette with semantic tokens (`:root` + `.dark`), device-following mode, palette picker retired
+- [x] Lora + Inter + Kalam, type scale, `.note`, `npm run tells` guard, contrast script rewritten
+- [x] Brand parts: Mark (squish), Wordmark, Necklace, Note, Charm, Placeholder; favicon + asleep favicon generated
+- [x] Header with visible nav (Bakes, Cooking, Stories, About), menu sheet, search overlay, footer
+
+### 11.3 Content model + admin
+- [x] New optional recipe fields (yield kind/noun, oven, extra time, note, charms, verdicts, inspired by, keeps, alts), settings (heroNote, activeCollection, showBakery), pages (Currently + about photo alt), subscriber source `bakery`
+- [x] Validation limits, read-time defaults, revalidation helper, fixtures policy (dev: six; production: one labelled example)
+- [x] Recipe form fields + "The personal bits", story cover alt, settings page, pages page, dashboard Currently card
+- [x] `npm test` for facts, oven, scale, kitchenTime
+
+### 11.4 Pages
+- [x] Home: kitchen-time line, empty state, the Offering, New out of the oven, Currently, collections, come back for (gated), stories, email line
+- [x] Recipe: facts line, scaler, oven line, tappable method, cook mode, print card, verdicts, keeps, click-to-load Instagram, comments floor, More like this, JSON-LD, per-recipe OG card
+- [x] Recipes index (group tabs, chips, charm filters, sort, search, empty states), `/bakes`, `/cooking`, `/collections/[slug]`
+- [x] About (pair mark placeholder, sign-off), Stories restyle, Say hello (subject pre-fill), newsletter copy, `/privacy`, 404, hidden `/bakery`, robots / sitemap / feed
+- [x] e2e extended (new fields, limits, front-page bake + note, Currently, bakery switch)
+- [ ] Gate on the branch: build, unit tests, tells, contrast, e2e, `npm run snap phase-2-4`, mirror test in NOTES.md
+
+### 11.5 Signature moments + restraint
+- [ ] Squish polish, necklace placement audit, `data-gold` count ≤ 2 per viewport, easter eggs behind `EASTER_EGGS`, Chanel-rule pass
+
+### 11.6 Easy for Ruks
+- [ ] Admin at 390px (sticky actions, large targets, plain-English hints), `HOW-TO-POST.md`, handover check, remove `framer-motion` from the admin
+
+### 11.7 QA + launch
+- [ ] Lighthouse mobile (home + recipe), axe clean, keyboard pass, print check, JSON-LD for a makes and a serves recipe
+- [ ] Launch gate: real bakes published, every `DRAFT: needs Ruks` approved or rewritten, About approved, no fixtures in production, pull request for the owner to merge
 
 ## Backlog / Future Ideas
 

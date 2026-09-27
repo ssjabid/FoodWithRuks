@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "e2e": "node scripts/e2e-admin.mjs",
-    "snap": "node scripts/snap.mjs"
+    "snap": "node scripts/snap.mjs",
+    "test": "node --experimental-transform-types --test \"src/lib/__tests__/*.test.ts\"",
+    "tells": "node scripts/tells.mjs",
+    "gen:mark": "node --experimental-transform-types scripts/gen-mark.mjs"
   },
   "dependencies": {
     "@tiptap/extension-image": "^3.31.3",

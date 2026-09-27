@@ -1,4 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="14" fill="#825540"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Lora, Georgia, 'Times New Roman', serif" font-size="30" font-weight="600" fill="#F7F1EE" letter-spacing="-1">A<tspan fill="#E9DBD3">&amp;</tspan>R</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Agooh and Ruks">
+<mask id="bite"><rect width="64" height="64" fill="white"/><circle cx="50" cy="14" r="8.5" fill="black"/></mask>
+<g mask="url(#bite)"><circle cx="32" cy="34" r="26" fill="#E3C4A6" stroke="#2B1E1B" stroke-width="2.6"/></g>
+<path d="M44.730000000000004 20.63 a8.5 8.5 0 0 0 11.22 -2.9749999999999996" fill="none" stroke="#2B1E1B" stroke-width="2.6" stroke-linecap="round"/>
+<circle cx="17" cy="41" r="4.6" fill="#EBB2B0"/><circle cx="47" cy="41" r="4.6" fill="#EBB2B0"/>
+<path d="M18.5 33.5 q5.5 -6.5 11 0" fill="none" stroke="#2B1E1B" stroke-width="3.6" stroke-linecap="round"/><path d="M34.5 33.5 q5.5 -6.5 11 0" fill="none" stroke="#2B1E1B" stroke-width="3.6" stroke-linecap="round"/>
 </svg>

@@ -2,12 +2,12 @@
 
 ## Project Overview
 
-**Agooh & Ruks** is the recipe and lifestyle blog of Ruks, an Instagram food creator. The energy is "food made with love": recipes that are easy to follow and wholesome, food for your soul, and the joy of cooking and devouring food with flavour. Beyond the kitchen it covers days out, eating out, travel, parenting and crafts.
+**Agooh & Ruks** is Ruks's recipe site: bakes first, some cooking, and the odd story. The design idea is **a care package from Ruks**. The home page hands you a bake; the recipe is the note inside; every tool (the scaler, the oven line, cook mode, the print card) looks after the reader.
 
 - **Name**: Agooh & Ruks
 - **Byline**: Pass the Butter, Ruks
-- **Taglines**: "Pure comfort, cooked simply" (hero) · "Warmth in every bite" (secondary)
 - **Primary social**: Instagram @foodwithruks
+- **Voice**: hers. Every line written for her is `// DRAFT: needs Ruks` until she approves it. British spelling, sentence case, dates like "26 September 2026". Halal-conscious defaults. No AI images.
 
 ---
 
@@ -16,83 +16,91 @@
 | Layer | Technology |
 |-------|-----------|
 | Framework | Next.js 16 (App Router) + React 19 + TypeScript strict |
-| Styling | Tailwind CSS v4 (CSS-first) + design tokens in `src/styles/globals.css` |
-| Fonts | Lora (headings, italic accents) + Inter (body, eyebrows), `next/font/google` |
-| Animation | CSS transitions only on the public site (120–220ms, ease-out). `framer-motion` remains for `/admin` only. |
+| Styling | Tailwind CSS v4 (CSS-first) + semantic tokens in `src/styles/globals.css` |
+| Fonts | Lora (display, headings), Inter (text), Kalam (her handwriting, `.note`), all via `next/font/google` |
+| Motion | CSS only on the public site, within a fixed ceiling (see below). `framer-motion` lingers in a few `/admin` pages only. |
 | Database | Firebase Firestore (Admin SDK, server only) |
-| Auth | Firebase Auth (Google sign-in) for the admin CMS |
+| Auth | Firebase Auth (Google sign-in) for the admin |
+| Photos | Resized in the browser, committed to this repo under `public/images/uploads` |
 | Hosting | Vercel (Git integration; `main` = production) |
-| Embeds | react-social-media-embed (Instagram) |
+| Tests | `node:test` for the small libraries, Playwright + axe for gate screenshots, an end-to-end admin script |
 
 ---
 
-## Design Philosophy — calm editorial
+## Design principles
 
-A personal food blog, not a product site. Research (NN/g on animation duration and scroll fading, Feast Design Co's food-blog guidance, and a DOM audit of Pinch of Yum, Smitten Kitchen, Minimalist Baker, Half Baked Harvest and Cookie + Kate) says: no scroll-reveal, no card lift or photo zoom, no running animations, colour-only transitions, serif headings, body text 16–18px, flat chrome that gets out of the way of the food. The layout reference Ruks likes is moribyan.com: slim sticky header, display serif headline with an italic accent word, uppercase eyebrow labels, wide 1240px grid, square flat images, sections such as "Currently cooking", "Explore by category" (with counts) and "Most loved".
+1. **"Here, I made you something."** The first thing on the home page is a bake, its name and her line, not a hero slogan.
+2. **Crisp outside, soft inside.** Sharp type, hairlines, flat chrome; blush, handwriting and the squish mark carry the warmth.
+3. **One or two rings on.** Gold appears at most twice per screen, as shapes (the necklace pendant, a selected charm), never as text. Every gold element carries `data-gold` so the screenshot script can count them.
+4. **Alive, not animated.** The Squish on save, one page fade, state changes under 220ms. Nothing moves on scroll.
+5. **Real over generic.** No stock photos, no invented quotes, no placeholder text presented as hers. An honest placeholder says "photo coming".
 
-**In practice**
-- Motion is functional only: drawer slide (220ms), overlay/popover fades (150ms), accordions (200ms), `.fade-in` for swapped labels (120ms), hover/focus colour changes (150ms). `prefers-reduced-motion` disables all of it.
-- One page-level transition on client navigation: the outgoing page softens to 50% while the next loads, the incoming page fades and settles in over 280ms (`PageEnter` in the root layout). No per-element entrances, no exit choreography, nothing on first load.
-- Hover on cards = title underline + image opacity 0.9. Links underline. Buttons change colour only.
-- Flat: no shadows, hairline `--color-border` dividers, radii 6/8/12px.
-- Generous but not empty: sections `py-12 sm:py-16`, `max-w-wide` (1240px) grids, `max-w-prose` (720px) articles.
+### Colour (one palette, two modes)
 
-### Colour System — five palettes from one set of swatches
+Tokens live on `:root` (Daylight) and `.dark` (After hours). The device decides the mode by default; the header toggle overrides per visitor. There is no palette picker.
 
-Swatches: clay `#C7A491` · blush `#EECFCA` · sage `#919682` · light sage `#C7CDBF` · olive `#595E48`
+| Token | Daylight | After hours | Use |
+|---|---|---|---|
+| `--color-ground` | #FFFAF8 | #1E1614 | the page |
+| `--color-surface` / `--color-elevated` | #F8EFEC / #FFFFFF | #2A201D / #342925 | bands, cards, fields / panels |
+| `--color-text` / `-2` / `-3` | #2B1E1B / #5E4843 / #7A625C | #FBEFEB / #D9C3BD / #B39B94 | cocoa text |
+| `--color-blush` (+ `on-blush`) | #EECFCA | #4A2F30 | the signature: Currently card, charms, cheeks. Never text. |
+| `--color-cheek` / `-hover` (+ `on-cheek`) | #9E3A53 / #85304A | #F2A5B6 / #F7BCC9 | links, buttons, focus, selected |
+| `--color-gold` | #B08A3C | #D9B56A | jewellery only, two per screen |
+| `--color-clay` | #C7A491 | #C7A491 | hairlines, strokes, the parcel tag. Never text. |
+| `--color-line` / `-strong` | #EBDAD4 / #D9C2BA | #3E302C / #55433E | dividers / borders that must be seen |
+| `--color-sage` / `-ink` / `-soft` | #919682 / #56604A / #E6E9E0 | #AEB89F / … | outdoor content only (Trail-tested) |
+| `--color-success`, `--color-error`, `--color-warning-bg` | | | status |
 
-| Palette (`data-palette`) | Character |
+`node scripts/check-contrast.mjs` verifies text ≥ 7:1 on the ground, secondary text and interactive colours ≥ 4.5:1, gold ≥ 3:1, in both modes. Legacy aliases (`--color-primary`, `--color-text-primary`, `--color-border`, …) stay defined for the admin only. Never hardcode hex in public components; `src/lib/og.ts` (generated images) is the exception and mirrors the Daylight tokens.
+
+### Type
+
+- `h-display` 40–64px (the bake's name), `h-page` 32–44, `h-section` 24–30, `h-card` 20, all Lora 500.
+- Body Inter 16px/1.6; `text-body` 17px/1.65 for recipe text and stories; `.prose` for editor HTML.
+- `.note` Kalam 22px for her handwriting (`Note` component: real text, never essential information, one or two per screen, `tilt` at most once).
+- Sentence case everywhere. Banned: eyebrows, uppercase labels, an italic accent word, middle-dot metas ("4 servings · 40 min" becomes "Serves 4. About 40 minutes."), arrows on links, keyboard-shortcut hints, bracket counts. `npm run tells` fails on them and on a list of banned words.
+
+### Brand parts (`src/components/brand/`)
+
+- **Mark**: the squish, a round bake with closed smiling eyes, rosy cheeks and a bite out of the top right. States `squished` (resting face), `open`, `asleep` (easter eggs only). Variants `single` (logo, favicon) and `pair` (About placeholder, 404 with `crumbs`). Geometry in `src/lib/mark.ts`; `npm run gen:mark` writes the static SVGs.
+- **Wordmark**: "Agooh & Ruks" with the ampersand in cheek.
+- **Necklace**: a hairline with one gold pendant; one or two per page, never inside cards.
+- **Charm**: badge chips (First try, Travels well, Little helpers, Trail-tested in sage, Make ahead, Taste-tester's pick) with tiny line icons; each links to its collection. As a filter it is a `button` with `aria-pressed` and a gold ring when selected.
+- **Placeholder**: the honest "photo coming" frame; `Photo` renders it whenever `src` is empty.
+
+### Motion ceiling
+
+| What | Duration |
 |---|---|
-| `cream` — Cream & Olive (default) | Warm cream ground, olive type and buttons, clay and blush accents |
-| `sage` | Light sage everywhere, olive type, clay links (the most palette-true) |
-| `blush` | Soft pink ground and surfaces, olive buttons, clay links |
-| `clay` | Clay buttons and links, light-sage sections, blush callouts |
-| `olive` — Evening Olive | Sage ground with deep olive bands; dark mode is olive itself |
+| The Squish on save (`.squish-btn[data-squish]`) | 360ms, once, reduced motion = instant |
+| Page fade on client navigation (`PageEnter`) | 280ms, never on first load, never under `/admin` |
+| Menu sheet / overlay | 220ms / 150ms |
+| State changes, `.fade-in`, hover colour | 120–200ms |
 
-Each palette has a light block and a `[data-palette].dark` block in `globals.css` with the same 21 tokens (`primary`, `primary-hover`, `on-primary`, `secondary`, `accent`, `accent-soft`, `accent-text`, `background`, `surface`, `elevated`, `text-primary`, `text-secondary`, `text-tertiary`, `border`, `success`, `warning`, `error`, `placeholder-bg`, `placeholder-icon`, `band`, `on-band`). `node scripts/check-contrast.mjs` verifies text ≥ 7:1 / secondary ≥ 4.5:1 / buttons and links ≥ 4.5:1 for every set.
+No scroll reveals, entrances, card lifts, photo zooms, pulses or progress bars. Hover on a card = title underline + image opacity 0.9. `prefers-reduced-motion` zeroes everything.
 
-Rules: `--color-accent` is decorative only in light modes. Text on tinted surfaces uses `--color-text-primary`. Anything on a primary background uses `--color-on-primary`. Colour declarations live only in the palette blocks — never hardcode hex in components (the OG image and apple icon are the exception; they follow the cream palette).
+### Surfaces and controls
 
-Visitors pick a palette and Light/Dark/System from the palette button in the header (a live swatch of the current palette that opens the Appearance panel) or the "Appearance" section of the drawer (stored in `localStorage` as `ar_palette` / `ar_mode`). Admin sets the site default and can hide the picker (`siteSettings/general`); the header then shows the plain light/dark toggle.
-
-### Typography
-- Headings: Lora 500 (`h-display` 48–72px hero, `h-page` 36–48px, `h-section` 26–32px, `h-card` 18px), line-height 1.05–1.3, `-0.01em`
-- Accent: `accent-italic` (Lora italic 400 in `--color-accent-text`) for the byline and one hero word
-- Eyebrows: `eyebrow` (Inter 500, 12px, uppercase, 0.16em tracking, tertiary colour)
-- Body: Inter 16px/1.6 UI, `text-body` 17px/1.65 for recipe text, `.prose` 17px/1.65 with 68ch measure
-
-### Focus and forms
-- Keyboard focus: global `:focus-visible` 2px primary outline, 2px offset
-- Inputs: `.field` (hairline border; on focus the border turns primary with a 1px inset — no glow), `.field-bare` for inputs inside a `.field` wrapper (hero search, inline newsletter)
-- Links: `.link` underline, offset 3px, brightens on hover
+Flat: no shadows, hairline borders, radii 6/8/12px. Buttons and fields are round (`rounded-full`), 48px tall on phones, every target ≥ 44px. Focus = 2px cheek outline. `.field` / `.field-bare` for inputs, `.link` / `.link-cheek` for text links.
 
 ---
 
 ## Site Architecture
 
 ### Navigation
-Hamburger menu on the **left at every breakpoint**, minimalist 56px sticky header (hamburger · centred wordmark · search + theme toggle). The drawer is an always-mounted portal (`data-state`, `inert` when closed) with accordion groups, an Appearance picker and a tagline/Instagram footer:
-
-1. **Recipes** → Starters, Main Courses, Side Dishes, Desserts, Bread, Drinks, Baby Weaning
-2. **Lifestyle** → Days Out, Eating Out, Travel, Parenting, Craft & Hobbies
-3. **About Me** · 4. **Newsletter** · 5. **Contact**
-
-Ctrl/Cmd+K opens the search overlay from anywhere.
+Header (56px, sticky): Wordmark, visible nav **Bakes · Cooking · Stories · About** from 768px (Cooking hides while nothing is published in that group), search, light/dark toggle, and a menu button below 768px that opens a top sheet (nav + Say hello + New bakes by email). Footer: Necklace, "Baked by Ruks. Tested by Agooh.", her footer line, links (+ Privacy), Instagram, RSS.
 
 ### Public pages
 
-**Home (`/`)**: Hero (byline, "Pure comfort, *cooked simply*", tagline, search, Browse recipes / About me) with the "New this week" featured recipe beside it → Currently cooking (3 latest) → Explore by category (two-column list with counts) → Most loved (4 rows) → Beyond the kitchen (3 posts) → Instagram band → Newsletter.
-
-**Recipes (`/recipes`)**: compact "What to eat?" grid, search, **Meal Type** pills, native sort select, favourites. State lives in the URL (`?q=`, `?category=`, `?mealType=a,b`).
-
-**Recipe (`/recipes/[slug]`)**: header with badges, placeholder hero (+ Instagram reel embed when set), italic personal story, stats strip, jump/print/share, ingredients with real checkboxes and servings scaling, numbered method, tips callout, nutrition accordion, related recipes. Schema.org Recipe JSON-LD.
-
-**Lifestyle (`/lifestyle`, `/lifestyle/[slug]`)**: category pills with `?category=` deep links, prose article, share, more stories.
-
-**About**, **Contact**, **Newsletter**, custom 404. `/shop` redirects to `/`.
+- **Home `/`**: kitchen-time line → (production, empty database: the honest empty state) → the **Offering** (photo, the bake's name, her handwritten line, the facts line, "Get the recipe") → **New out of the oven** + the blush **Currently** card → collections row → "The ones people come back for" (only with real data) → Stories → Instagram link + newsletter line.
+- **Recipes `/recipes`, `/bakes`, `/cooking`**: group tabs, category chips, charm filters, Saved, sort Newest / Quickest, search. URL = state (`group`, `category`, `badge`, `sort`, `q`).
+- **Recipe `/recipes/[slug]`**: photo, name, note, charms, facts line, Jump to recipe + Save (the squish), a short story, ingredients with the scaler and fraction glyphs, the oven line, tappable method + cook mode (Wake Lock), keeps / tips / verdicts / inspired by, click-to-load Instagram, print card, comments (average from 3 ratings), More like this. JSON-LD Recipe.
+- **Collections `/collections/[slug]`**: filters over the published list; care packages carry "How to pack a tin"; Trail-tested is sage; empty ones are never linked.
+- **Stories `/lifestyle`, `/lifestyle/[slug]`**, **About**, **Say hello `/contact`** (subject pre-fill from `?subject=`), **New bakes by email `/newsletter`**, **Privacy**, 404 ("Someone's eaten this page."), the hidden **`/bakery`** waitlist (404 + noindex until switched on in settings).
 
 ### Admin (`/admin`, Google sign-in, `ADMIN_EMAIL` allow-list)
-Dashboard · Recipes · Lifestyle · Comments · Subscribers (CSV export) · Messages · Settings (featured recipe, Instagram handle, default palette, show theme picker). Mutations revalidate the affected public pages.
+Dashboard (Currently card first) · Recipes (yield kind and noun, oven, extra time, photo descriptions, "The personal bits") · Stories · Pages (Currently, front-page line, footer line, About) · Comments · Subscribers (CSV) · Messages · Settings (front-page bake, her line, lead collection, Instagram handle, bakery switch). Mutations revalidate the affected public pages.
 
 ---
 
@@ -101,52 +109,52 @@ Dashboard · Recipes · Lifestyle · Comments · Subscribers (CSV export) · Mes
 ```
 recipes/{id}
   title, slug, description, personalStory, instagramUrl?
-  category: RecipeCategory[]   // starters|mains|sides|snacks|desserts|bread|drinks|baby-weaning
-  mealType: MealType[]         // breakfast|brunch|lunch|dinner
-  tags[], dietaryTags[], specialOccasion[]
-  prepTime, cookTime, servings, difficulty
-  ingredients[{id, amount, unit, name, group?}], instructions[{step, text, image?}]
-  heroImage, tips, nutrition?, seo?
+  category: RecipeCategory[]   // grouped: bakes | cooking | little-ones (see constants.ts)
+  mealType[], tags[], dietaryTags[], specialOccasion[]
+  prepTime, cookTime, extraTime? {minutes, label} | null
+  servings, yieldKind: serves|makes, yieldNoun? {one, other}
+  oven? {tempC, fan} | null
+  ruksNote?, badges: BadgeId[], verdicts? {tasteTester?, agooh?}, inspiredBy?, keeps?
+  difficulty, ingredients[{id, amount, unit, name, group?}], instructions[{step, text, image?, imageAlt?}]
+  heroImage, heroImageAlt?, tips, nutrition?, seo?
   status: draft|published, featured, rating{average,count}, viewCount
-  createdAt, updatedAt, publishedAt?, scheduledAt?
+  createdAt, updatedAt, publishedAt?
 
 lifestylePosts/{id}
-  title, slug, excerpt, content (HTML)
-  category: LifestyleCategory  // days-out|eating-out|travel|parenting|craft-hobbies
-  readingTime, status, createdAt, updatedAt, publishedAt
+  title, slug, excerpt, content (HTML), coverImage?, coverImageAlt?
+  category: LifestyleCategory, readingTime, status, createdAt, updatedAt, publishedAt
 
 subscribers/{normalisedEmail}
-  email, source: home|footer|newsletter-page, status: subscribed|unsubscribed, createdAt
+  email, source: home|footer|newsletter-page|bakery, status, createdAt
 
-siteSettings/general
-  recipeOfTheWeekSlug, instagramHandle, defaultPalette, showThemePicker, updatedAt
-
-comments/{id}, contactMessages/{id}   (unchanged)
+siteSettings/general   recipeOfTheWeekSlug, instagramHandle, heroNote, activeCollection, showBakery, updatedAt
+siteSettings/pages     heroIntro, footerBlurb, aboutTitle, aboutSubtitle, aboutBody, aboutPhoto, aboutPhotoAlt,
+                       currently {baking, craving, lastWalk, latestParcel, updatedAt}, updatedAt
+comments/{id}, contactMessages/{id}
 ```
 
-Composite indexes are checked in at `firestore.indexes.json` and deployed; rules (`firestore.rules`) deny all client access because every read/write is server-side via the Admin SDK.
+Every new field is optional with a read-time default (`docToRecipe` and friends), so older documents need no migration. Composite indexes are in `firestore.indexes.json`; rules deny all client access.
 
 ---
 
 ## SEO
-- Metadata API on every page; `metadataBase` = `SITE_URL` (env-driven)
-- `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx` (1200×630, Lora when fetchable)
-- `robots.ts`, `sitemap.ts` from Firestore with sample fallback
-- JSON-LD: WebSite (+SearchAction) and Organization in the layout, Recipe on recipe pages
-- Public pages and the root layout `revalidate = 3600`; admin mutations call `revalidatePath`
+- Metadata API on every page; `metadataBase` = `SITE_URL`; canonical `alternates` on the main pages.
+- `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx`, per-recipe `recipes/[slug]/opengraph-image.tsx` (photo + name, mark fallback).
+- `robots.ts` (disallows /admin, /api, /preview, /bakery), `sitemap.ts` and `feed.xml` list real published content only, plus non-empty collections.
+- JSON-LD Recipe on recipe pages (`recipeYield` from `facts.ts`, ISO durations including extra time, `aggregateRating` only with ≥3 real ratings). The production example bake is `noindex` and carries no JSON-LD.
 
 ---
 
 ## Key Technical Decisions
 
-1. Server Components by default; client components only for interactivity (`useIsClient` for portals instead of mount effects)
-2. All Firestore access via Admin SDK; client SDK is auth-only
-3. URL is the source of truth for recipe/lifestyle filters (shareable, back-button friendly, Suspense-wrapped)
-4. Brand strings live in `src/lib/site.ts`; taxonomy + nav tree in `src/lib/constants.ts`; palettes in `src/lib/theme.ts` + `globals.css`
-5. Theme state is an external store read with `useSyncExternalStore`; the root layout injects the admin default and a no-FOUC script
-6. Newsletter stored in Firestore (no third-party ESP); admin exports CSV
-7. Images intentionally placeholder-only until Firebase Storage is enabled
-8. Favourites in localStorage with a `favorites-changed` event for reactive filtering
+1. Server Components by default; client components only for interactivity.
+2. All Firestore access via the Admin SDK; the client SDK is auth-only.
+3. The URL is the source of truth for index filters (shareable, back-button friendly, Suspense-wrapped).
+4. Brand strings in `src/lib/site.ts`; taxonomy, badges and nav in `src/lib/constants.ts`; collections in `src/lib/collections.ts`; every line in her voice in `src/lib/copy.ts`.
+5. Fixtures (`src/lib/sampleData.ts`) are development furniture: six example bakes in development and preview deployments, exactly one labelled example in production, none once a real recipe exists (`src/lib/content.ts`).
+6. Newsletter stored in Firestore (no third-party ESP); the admin exports CSV.
+7. Photos live in the repo (no Storage, no image-optimisation quota); `Photo` renders plain `<img>` with a srcset.
+8. Saved recipes in `localStorage` (`ar_favorites`) with a change event; light/dark in `ar_mode`.
 
 ---
 
@@ -154,23 +162,23 @@ Composite indexes are checked in at `firestore.indexes.json` and deployed; rules
 ```
 src/
 ├── app/
-│   ├── layout.tsx (fonts, settings, ThemeProvider, no-FOUC script), page.tsx, not-found.tsx
-│   ├── sitemap.ts, robots.ts, icon.svg, apple-icon.tsx, opengraph-image.tsx
-│   ├── recipes/ (page.tsx, RecipesClient.tsx, [slug]/)
-│   ├── lifestyle/ (page.tsx, LifestyleClient.tsx, [slug]/)
-│   ├── about/, contact/ (page.tsx + ContactClient.tsx), newsletter/
-│   ├── admin/ (layout, dashboard, recipes, lifestyle, comments, messages, subscribers, settings, login)
-│   └── api/ (newsletter, contact, comments, revalidate, admin/*)
+│   ├── layout.tsx (fonts, ThemeProvider, no-FOUC mode script, skip link, chrome), page.tsx, not-found.tsx
+│   ├── sitemap.ts, robots.ts, icon.svg, apple-icon.tsx, opengraph-image.tsx, feed.xml/
+│   ├── recipes/ (page.tsx, RecipesClient.tsx, [slug]/{page,RecipePageClient,opengraph-image}.tsx), bakes/, cooking/, collections/[slug]/
+│   ├── lifestyle/ (page.tsx, LifestyleClient.tsx, [slug]/), about/, contact/, newsletter/, privacy/, bakery/, preview/
+│   ├── admin/ (layout, dashboard, recipes, lifestyle, pages, comments, messages, subscribers, settings, login)
+│   └── api/ (newsletter, contact, comments, recipes/view, revalidate, admin/*)
 ├── components/
-│   ├── layout/ (Header, NavDrawer, SearchOverlay, Footer)
-│   ├── home/ (HeroSection, HeroSearch, FeaturedRecipe, CurrentlyCooking, ExploreByCategory, MostLoved, LifestyleTeaser, InstagramBlock, NewsletterSection)
-│   ├── recipe/ (WhatToEatGrid, RecipeCard, RecipeGrid, InstagramEmbed, IngredientList, InstructionStep, ShareButtons, ...)
-│   ├── shared/ (ThemeProvider, ThemePicker, ThemeToggle, SectionHeader, NewsletterForm, FoodPlaceholder, FavoriteButton, BackToTop, InstagramIcon)
-│   ├── admin/ (AdminBrand, RecipeForm, LifestyleForm)
-│   └── ui/ (Button + ButtonLink, Card, Badge, Input, FilterPill, Select, Chevron, Modal, Skeleton, StarRating, Logo)
+│   ├── brand/ (Mark, Wordmark, Necklace, Note, Charm, Placeholder)
+│   ├── layout/ (Header, NavDrawer = MenuSheet, SearchOverlay, Footer)
+│   ├── home/ (KitchenTime, Offering, CurrentlyCard, NewOutOfTheOven, CollectionsRow, ComeBackFor, StoriesTeaser, EmailLine, EmptyKitchen)
+│   ├── recipe/ (RecipeCard, RecipeGrid, SaveButton, IngredientList, ServingsAdjuster, OvenLine, MethodSteps, CookModeToggle, InstagramCard, InstagramEmbed, ShareButtons, PrintButton, JumpToRecipe, CommentsSection, ExampleBanner, ViewPing)
+│   ├── lifestyle/ (StoryCard), shared/ (Photo, SectionHeader, NewsletterForm, ThemeProvider, ThemeToggle, PageTransition, FaviconNod, InstagramIcon, BackToTop)
+│   ├── admin/ (AdminBrand, RecipeForm, LifestyleForm, ImageUpload, RichTextEditor)
+│   └── ui/ (Button + ButtonLink, Badge, Input, FilterPill, Select, Chevron, Modal, Skeleton, StarRating)
 ├── hooks/ (useDebounce, useIsClient, useAuth)
-├── lib/ (site.ts, constants.ts, theme.ts, themeStore.ts, categoryCounts.ts, search.ts, favorites.ts, utils.ts, adminFetch.ts, firebase/*)
+├── lib/ (site, constants, collections, copy, theme, themeStore, mark, facts, oven, scale, kitchenTime, content, recipePool, og, favorites, utils, adminFetch, validation, rateLimit, previewToken, revalidate, github, imageResize, firebase/*, __tests__/*)
 ├── styles/globals.css
 └── types/index.ts
-scripts/check-contrast.mjs · firestore.rules · firestore.indexes.json · firebase.json · .firebaserc · README.md
+scripts/ (e2e-admin, snap, tells, gen-mark, check-contrast) · firestore.rules · firestore.indexes.json · firebase.json
 ```

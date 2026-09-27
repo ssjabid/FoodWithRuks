@@ -111,6 +111,16 @@ try {
     prepTime: 10,
     cookTime: 5,
     servings: 4,
+    yieldKind: "makes",
+    yieldNoun: { one: "naan", other: "naans" },
+    oven: { tempC: 240, fan: true },
+    extraTime: { minutes: 60, label: "proving" },
+    ruksNote: `e2e note ${stamp}`,
+    badges: ["make-ahead"],
+    verdicts: { tasteTester: "Good.", agooh: "More." },
+    keeps: "Two days wrapped.",
+    inspiredBy: "a takeaway",
+    heroImageAlt: "Two naans on a board",
     ingredients: [{ id: "a", amount: "2", unit: "cups", name: "flour" }, { id: "b", amount: "", unit: "", name: "" }],
     instructions: [{ step: 5, text: "Mix." }, { step: 1, text: "Cook." }, { step: 9, text: "" }],
     nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 },
@@ -131,6 +141,22 @@ try {
     assert.deepEqual(g.json.instructions.map((s) => s.step), [1, 2]);
     assert.equal(g.json.ingredients.length, 1);
     assert.equal(g.json.nutrition, undefined, "empty nutrition stored as none");
+    assert.equal(g.json.yieldKind, "makes");
+    assert.equal(g.json.yieldNoun?.other, "naans");
+    assert.equal(g.json.oven?.tempC, 240);
+    assert.equal(g.json.oven?.fan, true);
+    assert.equal(g.json.extraTime?.minutes, 60);
+    assert.deepEqual(g.json.badges, ["make-ahead"]);
+    assert.equal(g.json.verdicts?.agooh, "More.");
+    assert.equal(g.json.heroImageAlt, "Two naans on a board");
+  });
+  await check("limits rejected: note too long, oven out of range, unknown charm", async () => {
+    const tooLong = await api("/api/admin/recipes", { method: "POST", body: { ...recipeBody, slug: `${SLUG}-long`, ruksNote: "x".repeat(121) } });
+    assert.equal(tooLong.status, 400, tooLong.text);
+    const hot = await api("/api/admin/recipes", { method: "POST", body: { ...recipeBody, slug: `${SLUG}-hot`, oven: { tempC: 400, fan: false } } });
+    assert.equal(hot.status, 400, hot.text);
+    const charm = await api("/api/admin/recipes", { method: "POST", body: { ...recipeBody, slug: `${SLUG}-charm`, badges: ["nonsense"] } });
+    assert.equal(charm.status, 400, charm.text);
   });
   await check("duplicate slug rejected with 409", async () => {
     const r = await api("/api/admin/recipes", { method: "POST", body: recipeBody });
@@ -157,6 +183,21 @@ try {
     assert.equal(p.status, 200);
     assert.ok(p.html.includes(recipeBody.title));
     assert.ok(p.html.includes('"@type":"Recipe"'), "JSON-LD present");
+  });
+  await check("public page shows the facts line, the oven line, her note, the charm and keeps", async () => {
+    const p = await page(`/recipes/${SLUG}`);
+    assert.equal(p.status, 200);
+    assert.ok(p.html.includes("Makes 4 naans"), "yield text");
+    assert.ok(p.html.includes("plus an hour proving"), "extra time");
+    assert.ok(p.html.includes("240") && p.html.includes("fan"), "oven line");
+    assert.ok(p.html.includes(`e2e note ${stamp}`), "her note");
+    assert.ok(p.html.includes("Make ahead"), "charm");
+    assert.ok(p.html.includes("Two days wrapped."), "keeps");
+    const b = await page("/bakes");
+    assert.ok(b.html.includes(recipeBody.title), "listed under Bakes");
+    const c = await page("/collections/make-ahead");
+    assert.equal(c.status, 200);
+    assert.ok(c.html.includes(recipeBody.title), "listed in its collection");
   });
   await check("published recipe appears in the admin list and on the home page", async () => {
     const l = await api("/api/admin/recipes");
@@ -258,14 +299,20 @@ try {
   });
 
   step("Settings + pages");
-  await check("pin the test recipe as New this week, then restore", async () => {
+  await check("pin the test recipe as the front-page bake, set her line, then restore", async () => {
     const before = await api("/api/admin/settings");
     created.prevSettings = before.json;
     const r = await api("/api/admin/settings", { method: "PUT", body: { recipeOfTheWeekSlug: SLUG } });
     assert.equal(r.status, 200, r.text);
     const h = await page("/");
-    const idx = h.html.indexOf("New this week");
-    assert.ok(idx > 0 && h.html.slice(idx, idx + 3000).includes(recipeBody.title), "pinned recipe beside the headline");
+    const idx = h.html.indexOf("<h1");
+    assert.ok(idx > 0 && h.html.slice(idx, idx + 600).includes(recipeBody.title), "pinned recipe is the front-page bake");
+    const note = await api("/api/admin/settings", { method: "PUT", body: { heroNote: `E2E handwritten ${stamp}` } });
+    assert.equal(note.status, 200, note.text);
+    const h2 = await page("/");
+    assert.ok(h2.html.includes(`E2E handwritten ${stamp}`), "her line under the bake");
+    const tooLong = await api("/api/admin/settings", { method: "PUT", body: { heroNote: "x".repeat(81) } });
+    assert.equal(tooLong.status, 400);
   });
   await check("edit the home intro, then restore", async () => {
     const before = await api("/api/admin/pages");
@@ -274,8 +321,30 @@ try {
     assert.equal(r.status, 200, r.text);
     const h = await page("/");
     assert.ok(h.html.includes(`E2E intro ${stamp}`));
+    const cur = await api("/api/admin/pages", { method: "PUT", body: { currently: { baking: `E2E baking ${stamp}`, craving: "", lastWalk: "", latestParcel: "" } } });
+    assert.equal(cur.status, 200, cur.text);
+    const h3 = await page("/");
+    assert.ok(h3.html.includes(`E2E baking ${stamp}`) && h3.html.includes("Currently"), "Currently card on the front page");
+    const curLong = await api("/api/admin/pages", { method: "PUT", body: { currently: { baking: "x".repeat(61) } } });
+    assert.equal(curLong.status, 400);
     const tooLong = await api("/api/admin/pages", { method: "PUT", body: { heroIntro: "x".repeat(301) } });
     assert.equal(tooLong.status, 400);
+  });
+
+  step("The someday bakery switch");
+  await check("bakery hidden by default, shown when switched on, kept out of search", async () => {
+    const off = await api("/api/admin/settings", { method: "PUT", body: { showBakery: false } });
+    assert.equal(off.status, 200, off.text);
+    const hidden = await page("/bakery");
+    assert.equal(hidden.status, 404);
+    const on = await api("/api/admin/settings", { method: "PUT", body: { showBakery: true } });
+    assert.equal(on.status, 200, on.text);
+    const shown = await page("/bakery");
+    assert.equal(shown.status, 200);
+    assert.ok(shown.html.includes("noindex"), "noindex meta");
+    assert.ok(shown.html.includes("Keep me posted"), "waitlist form");
+    const robots = await page("/robots.txt");
+    assert.ok(robots.html.includes("/bakery"), "robots disallows /bakery");
   });
 
   step("Upload endpoint guard rails");
@@ -294,8 +363,18 @@ try {
   });
 } finally {
   step("Cleanup");
-  if (created.prevSettings) await api("/api/admin/settings", { method: "PUT", body: { recipeOfTheWeekSlug: created.prevSettings.recipeOfTheWeekSlug ?? "" } });
-  if (created.prevPages) await api("/api/admin/pages", { method: "PUT", body: { heroIntro: created.prevPages.heroIntro } });
+  if (created.prevSettings) {
+    const s = created.prevSettings;
+    await api("/api/admin/settings", { method: "PUT", body: { recipeOfTheWeekSlug: s.recipeOfTheWeekSlug ?? "", heroNote: s.heroNote ?? "", showBakery: Boolean(s.showBakery) } });
+  }
+  if (created.prevPages) {
+    const p = created.prevPages;
+    const c = p.currently || {};
+    await api("/api/admin/pages", {
+      method: "PUT",
+      body: { heroIntro: p.heroIntro ?? "", currently: { baking: c.baking ?? "", craving: c.craving ?? "", lastWalk: c.lastWalk ?? "", latestParcel: c.latestParcel ?? "" } },
+    });
+  }
   if (created.recipeId) await api(`/api/admin/recipes/${created.recipeId}`, { method: "DELETE" });
   if (created.postId) await api(`/api/admin/lifestyle/${created.postId}`, { method: "DELETE" });
   if (created.commentId) await api(`/api/admin/comments/${created.commentId}`, { method: "DELETE" });

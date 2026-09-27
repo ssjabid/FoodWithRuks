@@ -1,188 +1,230 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
-import { WhatToEatGrid } from "@/components/recipe/WhatToEatGrid";
-import { Input } from "@/components/ui/Input";
+import { Charm } from "@/components/brand/Charm";
 import { FilterPill } from "@/components/ui/FilterPill";
 import { Select } from "@/components/ui/Select";
+import { ButtonLink } from "@/components/ui/Button";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
-  MEAL_TYPES,
+  BADGES,
+  CATEGORY_GROUPS,
+  RECIPE_CATEGORIES,
   SORT_OPTIONS,
-  WHAT_TO_EAT,
+  getCategoryGroup,
+  isBadgeId,
+  isCategoryGroup,
   isRecipeCategory,
-  isMealType,
-  getCategoryLabel,
-  getMealTypeLabel,
+  type CategoryGroup,
 } from "@/lib/constants";
 import { getFavorites, onFavoritesChange } from "@/lib/favorites";
+import { COPY } from "@/lib/copy";
+import { cn } from "@/lib/utils";
 import type { Recipe } from "@/types";
 
-interface RecipesClientProps {
-  initialRecipes: Recipe[];
+type Group = CategoryGroup | "all";
+
+const TITLES: Record<Group, string> = { all: "Recipes", bakes: "Bakes", cooking: "Cooking", "little-ones": "Little ones" };
+
+function inGroup(recipe: Recipe, group: Group): boolean {
+  if (group === "all") return true;
+  return recipe.category.some((c) => getCategoryGroup(c) === group);
 }
 
-export function RecipesClient({ initialRecipes }: RecipesClientProps) {
+const byNewest = (a: Recipe, b: Recipe) =>
+  new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime();
+/** Quickest = prep + cook (extra time such as chilling is shown, not sorted on). */
+const byQuickest = (a: Recipe, b: Recipe) => a.prepTime + a.cookTime - (b.prepTime + b.cookTime) || byNewest(a, b);
+
+const subscribeFavorites = (cb: () => void) => onFavoritesChange(cb);
+const favoritesSnapshot = () => getFavorites().join(",");
+const favoritesServer = () => "";
+
+const tabClass = (selected: boolean) =>
+  cn(
+    "h-11 px-4 rounded-full text-sm font-medium border-[1.5px] inline-flex items-center transition-colors",
+    selected
+      ? "bg-[var(--color-cheek)] text-[var(--color-on-cheek)] border-[var(--color-cheek)]"
+      : "text-[var(--color-text-2)] border-[var(--color-line-strong)] hover:border-[var(--color-cheek)] hover:text-[var(--color-cheek)]"
+  );
+
+/** Mirrors the real page header so nothing jumps when the client component mounts. */
+export function RecipesFallback({ title = "Recipes" }: { title?: string }) {
+  return (
+    <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <h1 className="h-page text-[var(--color-text)] mb-8">{title}</h1>
+      <RecipeGrid recipes={[]} loading />
+    </div>
+  );
+}
+
+interface RecipesClientProps {
+  recipes: Recipe[];
+  /** /bakes and /cooking fix the group; /recipes reads it from the URL */
+  fixedGroup?: CategoryGroup;
+}
+
+/**
+ * The recipes index. The URL is the source of truth (group, category, badge, sort, q);
+ * "Saved" is a local toggle because saved recipes live in this browser only.
+ */
+export function RecipesClient({ recipes, fixedGroup }: RecipesClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
 
-  // URL is the source of truth for q / category / mealType
-  const q = params.get("q") ?? "";
+  const rawGroup = params.get("group") ?? "";
+  const group: Group = fixedGroup ?? (isCategoryGroup(rawGroup) ? rawGroup : "all");
+  const q = (params.get("q") ?? "").trim();
   const rawCategory = params.get("category") ?? "";
   const category = isRecipeCategory(rawCategory) ? rawCategory : "";
-  const mealTypes = useMemo(() => (params.get("mealType") ?? "").split(",").filter(isMealType), [params]);
+  const rawBadge = params.get("badge") ?? "";
+  const badge = isBadgeId(rawBadge) ? rawBadge : "";
+  const sort = params.get("sort") === "quickest" ? "quickest" : "newest";
 
-  const [searchInput, setSearchInput] = useState(q);
-  const debouncedSearch = useDebounce(searchInput);
-  const [sortBy, setSortBy] = useState("newest");
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [favorites, setFavorites] = useState<string[]>([]);
+  // The search box: typed text is local until the debounce pushes it into the URL.
+  // When the URL changes from elsewhere (search overlay, back button) the box follows it.
+  const [draft, setDraft] = useState(q);
+  const [seenQ, setSeenQ] = useState(q);
+  if (q !== seenQ) {
+    setSeenQ(q);
+    setDraft(q);
+  }
+  const debounced = useDebounce(draft);
+  const [showSaved, setShowSaved] = useState(false);
+  const favorites = useSyncExternalStore(subscribeFavorites, favoritesSnapshot, favoritesServer);
+  const savedSlugs = useMemo(() => favorites.split(",").filter(Boolean), [favorites]);
 
-  // Keep the input in sync when the URL changes from elsewhere (search overlay, back button)
-  useEffect(() => {
-    setSearchInput(q);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q]);
-
-  useEffect(() => {
-    const sync = () => setFavorites(getFavorites());
-    sync();
-    return onFavoritesChange(sync);
-  }, []);
-
-  const setParam = useCallback(
-    (key: string, value: string) => {
+  const setParams = useCallback(
+    (changes: Record<string, string>) => {
       const next = new URLSearchParams(params.toString());
-      if (value) next.set(key, value);
-      else next.delete(key);
+      for (const [key, value] of Object.entries(changes)) {
+        if (value) next.set(key, value);
+        else next.delete(key);
+      }
       const qs = next.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
     [params, pathname, router]
   );
 
-  // Push debounced search text into the URL
   useEffect(() => {
-    if (debouncedSearch !== q) setParam("q", debouncedSearch);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+    if (debounced !== draft) return; // still typing
+    if (debounced.trim() === q) return;
+    setParams({ q: debounced.trim() });
+  }, [debounced, draft, q, setParams]);
 
-  const toggleMealType = (value: string) => {
-    const current: string[] = mealTypes;
-    const next = current.includes(value) ? current.filter((m) => m !== value) : [...current, value];
-    setParam("mealType", next.join(","));
-  };
+  const pool = useMemo(() => recipes.filter((r) => inGroup(r, group)), [recipes, group]);
 
-  const activeBox = useMemo(() => {
-    if (category) return { param: "category" as const, value: category };
-    if (mealTypes.length === 1) {
-      const box = WHAT_TO_EAT.find((b) => b.param === "mealType" && b.value === mealTypes[0]);
-      if (box) return { param: "mealType" as const, value: mealTypes[0] };
-    }
-    return null;
-  }, [category, mealTypes]);
+  const tabs = useMemo(
+    () =>
+      [
+        { value: "all" as Group, label: "All", href: "/recipes" },
+        ...CATEGORY_GROUPS.map((g) => ({ value: g.value as Group, label: g.label, href: g.href })),
+      ].filter((t) => t.value === "all" || t.value === "bakes" || recipes.some((r) => inGroup(r, t.value))),
+    [recipes]
+  );
+  const categories = useMemo(
+    () => RECIPE_CATEGORIES.filter((c) => (group === "all" || c.group === group) && pool.some((r) => (r.category as string[]).includes(c.value))),
+    [pool, group]
+  );
+  const badges = useMemo(() => BADGES.filter((b) => pool.some((r) => (r.badges as string[]).includes(b.id))), [pool]);
 
-  const filteredRecipes = useMemo(() => {
-    let result = [...initialRecipes];
-
+  const results = useMemo(() => {
+    let list = pool;
+    if (category) list = list.filter((r) => (r.category as string[]).includes(category));
+    if (badge) list = list.filter((r) => (r.badges as string[]).includes(badge));
+    if (showSaved) list = list.filter((r) => savedSlugs.includes(r.slug));
     if (q) {
-      const query = q.toLowerCase();
-      result = result.filter(
+      const needle = q.toLowerCase();
+      list = list.filter(
         (r) =>
-          r.title.toLowerCase().includes(query) ||
-          r.description.toLowerCase().includes(query) ||
-          r.tags.some((t) => t.toLowerCase().includes(query)) ||
-          r.ingredients.some((i) => i.name.toLowerCase().includes(query))
+          r.title.toLowerCase().includes(needle) ||
+          r.description.toLowerCase().includes(needle) ||
+          r.tags.some((t) => t.toLowerCase().includes(needle)) ||
+          r.ingredients.some((i) => i.name.toLowerCase().includes(needle))
       );
     }
+    return [...list].sort(sort === "quickest" ? byQuickest : byNewest);
+  }, [pool, category, badge, showSaved, savedSlugs, q, sort]);
 
-    if (category) result = result.filter((r) => (r.category as string[]).includes(category));
-    if (mealTypes.length > 0) result = result.filter((r) => mealTypes.some((mt) => (r.mealType as string[]).includes(mt)));
-    if (showFavorites) result = result.filter((r) => favorites.includes(r.slug));
+  const hasFilters = Boolean(category || badge || q || showSaved);
 
-    switch (sortBy) {
-      case "popular":
-        result.sort((a, b) => b.viewCount - a.viewCount);
-        break;
-      case "quickest":
-        result.sort((a, b) => a.prepTime + a.cookTime - (b.prepTime + b.cookTime));
-        break;
-      default:
-        result.sort(
-          (a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
-        );
-    }
-
-    return result;
-  }, [initialRecipes, q, category, mealTypes, showFavorites, favorites, sortBy]);
-
-  const activeFilterCount = (category ? 1 : 0) + mealTypes.length + (showFavorites ? 1 : 0) + (q ? 1 : 0);
-
-  const clearFilters = () => {
-    setSearchInput("");
-    setSortBy("newest");
-    setShowFavorites(false);
-    router.replace(pathname, { scroll: false });
+  const clearAll = () => {
+    setShowSaved(false);
+    setDraft("");
+    const keepGroup = !fixedGroup && group !== "all" ? `?group=${group}` : "";
+    router.replace(`${pathname}${keepGroup}`, { scroll: false });
   };
 
-  const heading = category ? getCategoryLabel(category) : mealTypes.length === 1 ? getMealTypeLabel(mealTypes[0]) : "";
+  const emptyBody = q ? (
+    <div className="flex flex-wrap items-center gap-4 mt-4">
+      <ButtonLink href={`/contact?subject=${encodeURIComponent(`Recipe request: ${q}`)}`}>{COPY.searchEmptyAction}</ButtonLink>
+      <Link href="/bakes" className="link text-[var(--color-text-2)] hover:text-[var(--color-cheek)]">
+        All the bakes
+      </Link>
+    </div>
+  ) : hasFilters ? (
+    <button type="button" onClick={clearAll} className="link link-cheek mt-2">
+      Clear the filters
+    </button>
+  ) : null;
 
   return (
     <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-      <div className="mb-8">
-        <p className="eyebrow mb-2">Recipes</p>
-        <h1 className="h-page text-[var(--color-text-primary)] mb-2">What to eat?</h1>
-        <p className="text-[var(--color-text-secondary)] text-lg">Pick a craving, or search for something specific.</p>
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <h1 className="h-page text-[var(--color-text)]">{TITLES[group]}</h1>
+        <div role="search" className="w-full sm:w-auto sm:min-w-[320px]">
+          <label htmlFor="recipe-search" className="sr-only">
+            Search recipes
+          </label>
+          <input
+            id="recipe-search"
+            type="search"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Search by name or ingredient"
+            autoComplete="off"
+            className="field h-12 w-full rounded-full px-5 text-base"
+          />
+        </div>
       </div>
 
-      <WhatToEatGrid active={activeBox} className="mb-6" />
+      {tabs.length > 2 && (
+        <nav aria-label="Recipe groups" className="flex flex-wrap gap-2 mb-4">
+          {tabs.map((t) => (
+            <Link key={t.value} href={t.href} className={tabClass(t.value === group)} aria-current={t.value === group ? "page" : undefined}>
+              {t.label}
+            </Link>
+          ))}
+        </nav>
+      )}
 
-      <div className="mb-4">
-        <Input
-          type="search"
-          placeholder="Search recipes, ingredients…"
-          aria-label="Search recipes"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-        />
-      </div>
+      {categories.length > 1 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {categories.map((c) => (
+            <FilterPill key={c.value} label={c.label} selected={category === c.value} onClick={() => setParams({ category: category === c.value ? "" : c.value })} />
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 mb-8">
-        <span className="eyebrow mr-1">Meal</span>
-        {MEAL_TYPES.map((m) => (
-          <FilterPill key={m.value} label={m.label} selected={mealTypes.includes(m.value)} onClick={() => toggleMealType(m.value)} />
+        {badges.map((b) => (
+          <Charm key={b.id} badge={b.id} as="button" selected={badge === b.id} onClick={() => setParams({ badge: badge === b.id ? "" : b.id })} className="charm-filter" />
         ))}
-
-        <span className="hidden sm:block w-px h-6 bg-[var(--color-border)] mx-1" aria-hidden="true" />
-
-        <Select options={SORT_OPTIONS} value={sortBy} onChange={setSortBy} aria-label="Sort recipes" />
-
-        <FilterPill
-          label={showFavorites ? "♥ Favourites" : "♡ Favourites"}
-          selected={showFavorites}
-          onClick={() => setShowFavorites(!showFavorites)}
-        />
-
-        {activeFilterCount > 0 && (
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="link h-9 px-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
-          >
-            Clear all
+        {savedSlugs.length > 0 && <FilterPill label="Saved" selected={showSaved} onClick={() => setShowSaved((v) => !v)} />}
+        <Select options={SORT_OPTIONS} value={sort} onChange={(v) => setParams({ sort: v === "newest" ? "" : v })} aria-label="Sort recipes" className="ml-auto" />
+        {hasFilters && (
+          <button type="button" onClick={clearAll} className="link h-11 px-2 text-sm text-[var(--color-text-2)] hover:text-[var(--color-cheek)]">
+            Clear
           </button>
         )}
-
-        <span className="ml-auto text-sm text-[var(--color-text-tertiary)]">
-          {heading && <span className="font-medium text-[var(--color-text-secondary)]">{heading} · </span>}
-          {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? "s" : ""}
-        </span>
       </div>
 
-      <RecipeGrid recipes={filteredRecipes} />
+      <RecipeGrid recipes={results} variant="index" emptyTitle={q ? COPY.searchEmpty : COPY.nothingInTin} emptyBody={emptyBody} />
     </div>
   );
 }

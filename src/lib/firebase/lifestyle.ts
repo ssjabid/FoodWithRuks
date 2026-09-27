@@ -11,6 +11,7 @@ function docToPost(doc: FirebaseFirestore.QueryDocumentSnapshot): LifestylePost 
     excerpt: data.excerpt || "",
     content: data.content || "",
     coverImage: data.coverImage || "",
+    coverImageAlt: data.coverImageAlt || "",
     category: (data.category || "") as LifestyleCategory,
     readingTime: data.readingTime || 0,
     status: data.status || "draft",
@@ -21,28 +22,17 @@ function docToPost(doc: FirebaseFirestore.QueryDocumentSnapshot): LifestylePost 
 }
 
 export async function getPublishedPosts(): Promise<LifestylePost[]> {
-  const snapshot = await adminDb
-    .collection("lifestylePosts")
-    .where("status", "==", "published")
-    .orderBy("publishedAt", "desc")
-    .get();
-
+  const snapshot = await adminDb.collection("lifestylePosts").where("status", "==", "published").orderBy("publishedAt", "desc").get();
   return snapshot.docs.map(docToPost);
 }
 
 export async function getPostBySlug(slug: string): Promise<LifestylePost | null> {
-  const snapshot = await adminDb
-    .collection("lifestylePosts")
-    .where("slug", "==", slug)
-    .where("status", "==", "published")
-    .limit(1)
-    .get();
-
+  const snapshot = await adminDb.collection("lifestylePosts").where("slug", "==", slug).where("status", "==", "published").limit(1).get();
   if (snapshot.empty) return null;
   return docToPost(snapshot.docs[0]);
 }
 
-/** Any status — for signed draft previews only. */
+/** Any status: for signed draft previews only. */
 export async function getPostBySlugAnyStatus(slug: string): Promise<LifestylePost | null> {
   const snapshot = await adminDb.collection("lifestylePosts").where("slug", "==", slug).limit(1).get();
   if (snapshot.empty) return null;
@@ -55,14 +45,9 @@ export async function postSlugExists(slug: string, excludeId?: string): Promise<
   return snapshot.docs.some((d) => d.id !== excludeId);
 }
 
-/** Slug + updatedAt for every published document — used by sitemap.xml. */
+/** Slug + updatedAt for every published document, used by sitemap.xml. */
 export async function getPostSitemapEntries(): Promise<{ slug: string; updatedAt: Date }[]> {
-  const snapshot = await adminDb
-    .collection("lifestylePosts")
-    .where("status", "==", "published")
-    .select("slug", "updatedAt")
-    .get();
-
+  const snapshot = await adminDb.collection("lifestylePosts").where("status", "==", "published").select("slug", "updatedAt").get();
   return snapshot.docs.map((doc) => ({
     slug: doc.data().slug as string,
     updatedAt: doc.data().updatedAt?.toDate?.() ?? new Date(),
@@ -70,23 +55,14 @@ export async function getPostSitemapEntries(): Promise<{ slug: string; updatedAt
 }
 
 export async function getAllPostSlugs(): Promise<string[]> {
-  const snapshot = await adminDb
-    .collection("lifestylePosts")
-    .where("status", "==", "published")
-    .select("slug")
-    .get();
-
+  const snapshot = await adminDb.collection("lifestylePosts").where("status", "==", "published").select("slug").get();
   return snapshot.docs.map((doc) => doc.data().slug);
 }
 
 // Admin CRUD
 
 export async function getAllPosts(): Promise<LifestylePost[]> {
-  const snapshot = await adminDb
-    .collection("lifestylePosts")
-    .orderBy("updatedAt", "desc")
-    .get();
-
+  const snapshot = await adminDb.collection("lifestylePosts").orderBy("updatedAt", "desc").get();
   return snapshot.docs.map(docToPost);
 }
 

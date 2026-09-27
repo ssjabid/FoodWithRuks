@@ -1,52 +1,71 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/Badge";
-import { StarRating } from "@/components/ui/StarRating";
-import { FavoriteButton } from "@/components/shared/FavoriteButton";
+import { cn } from "@/lib/utils";
 import { Photo } from "@/components/shared/Photo";
-import { formatCookTime } from "@/lib/utils";
-import { getCategoryLabel } from "@/lib/constants";
+import { Charm } from "@/components/brand/Charm";
+import { factsLine } from "@/lib/facts";
+import { COPY } from "@/lib/copy";
 import type { Recipe } from "@/types";
 
 interface RecipeCardProps {
   recipe: Recipe;
-  /** landscape (default) for grids, square for compact rows */
-  ratio?: "landscape" | "square";
+  /** large = the newest bake on home / first on an index; default = grid card; small = a compact row */
+  size?: "large" | "default" | "small";
+  priority?: boolean;
 }
 
-export function RecipeCard({ recipe, ratio = "landscape" }: RecipeCardProps) {
-  const totalTime = recipe.prepTime + recipe.cookTime;
+/** Photo, name, one plain fact, at most two charms. No stars, no dots. */
+export function RecipeCard({ recipe, size = "default", priority = false }: RecipeCardProps) {
+  const charms = recipe.badges.slice(0, 2);
+
+  if (size === "small") {
+    return (
+      <article className="group">
+        <Link href={`/recipes/${recipe.slug}`} className="grid grid-cols-[96px_1fr] sm:grid-cols-[120px_1fr] gap-4 items-start">
+          <Photo
+            src={recipe.heroImage}
+            alt={recipe.heroImageAlt || recipe.title}
+            ratio="square"
+            sizes="120px"
+            caption={false}
+            className="w-full group-hover:opacity-90 transition-opacity"
+          />
+          <div className="min-w-0 pt-0.5">
+            {recipe.sample && <p className="text-xs font-medium text-[var(--color-cheek)] mb-1">{COPY.exampleLabel}</p>}
+            <h3 className="h-card text-[var(--color-text)] group-hover:underline underline-offset-[3px] decoration-1">{recipe.title}</h3>
+            <p className="text-sm text-[var(--color-text-2)] mt-1">{factsLine(recipe)}</p>
+          </div>
+        </Link>
+      </article>
+    );
+  }
 
   return (
-    <article className="group relative h-full">
-      <Link href={`/recipes/${recipe.slug}`} className="block h-full rounded-[var(--radius-md)]">
-        <div className="relative">
-          <Photo src={recipe.heroImage} alt={recipe.title} ratio={ratio} className="w-full group-hover:opacity-90 transition-opacity" />
-        </div>
-
+    <article className="group h-full">
+      <Link href={`/recipes/${recipe.slug}`} className="block h-full">
+        <Photo
+          src={recipe.heroImage}
+          alt={recipe.heroImageAlt || recipe.title}
+          label={recipe.title}
+          ratio={size === "large" ? "landscape" : "portrait"}
+          priority={priority}
+          sizes={size === "large" ? "(min-width: 1024px) 800px, 100vw" : "(min-width: 1024px) 400px, 50vw"}
+          className="w-full group-hover:opacity-90 transition-opacity"
+        />
         <div className="pt-3">
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            {recipe.category.slice(0, 1).map((cat) => (
-              <Badge key={cat} variant="accent">{getCategoryLabel(cat)}</Badge>
-            ))}
-            <span className="text-xs text-[var(--color-text-tertiary)]">{formatCookTime(totalTime)}</span>
-          </div>
-
-          <h3 className="h-card text-[var(--color-text-primary)] group-hover:underline underline-offset-[3px] decoration-1 line-clamp-2">
+          {recipe.sample && <p className="text-xs font-medium text-[var(--color-cheek)] mb-1">{COPY.exampleLabel}</p>}
+          <h3 className={cn("text-[var(--color-text)] group-hover:underline underline-offset-[3px] decoration-1", size === "large" ? "h-section" : "h-card")}>
             {recipe.title}
           </h3>
-
-          {recipe.rating.count > 0 && (
-            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
-              <StarRating rating={Math.round(recipe.rating.average)} size="sm" />
-              <span>({recipe.rating.count})</span>
+          <p className="text-[var(--color-text-2)] mt-1 text-[15px]">{factsLine(recipe)}</p>
+          {charms.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2.5">
+              {charms.map((b) => (
+                <Charm key={b} badge={b} as="chip" />
+              ))}
             </div>
           )}
         </div>
       </Link>
-
-      <div className="absolute top-2 right-2">
-        <FavoriteButton slug={recipe.slug} />
-      </div>
     </article>
   );
 }

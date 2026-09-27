@@ -1,16 +1,30 @@
-/* ————————————————————————
-   RECIPE TAXONOMY
-   ———————————————————————— */
+/* ------------------------------------------------------------------
+   RECIPE TAXONOMY: bakes first. Every existing value is kept (documents
+   store them); new bake categories added; labels in sentence case.
+   ------------------------------------------------------------------ */
+
+export const CATEGORY_GROUPS = [
+  { value: "bakes", label: "Bakes", href: "/bakes" },
+  { value: "cooking", label: "Cooking", href: "/cooking" },
+  { value: "little-ones", label: "Little ones", href: "/recipes?group=little-ones" },
+] as const;
+export type CategoryGroup = (typeof CATEGORY_GROUPS)[number]["value"];
 
 export const RECIPE_CATEGORIES = [
-  { value: "starters", label: "Starters", nav: true },
-  { value: "mains", label: "Main Courses", nav: true },
-  { value: "sides", label: "Side Dishes", nav: true },
-  { value: "snacks", label: "Snacks", nav: false },
-  { value: "desserts", label: "Desserts", nav: true },
-  { value: "bread", label: "Bread", nav: true },
-  { value: "drinks", label: "Drinks", nav: true },
-  { value: "baby-weaning", label: "Baby Weaning", nav: true },
+  { value: "cookies-biscuits", label: "Cookies and biscuits", group: "bakes" },
+  { value: "brownies-traybakes", label: "Brownies and traybakes", group: "bakes" },
+  { value: "cakes", label: "Cakes", group: "bakes" },
+  { value: "cheesecakes", label: "Cheesecakes", group: "bakes" },
+  { value: "pastries-tarts", label: "Pastries and tarts", group: "bakes" },
+  { value: "pancakes-breakfast", label: "Pancakes and breakfast", group: "bakes" },
+  { value: "bread", label: "Bread", group: "bakes" },
+  { value: "desserts", label: "Puddings", group: "bakes" },
+  { value: "starters", label: "Starters", group: "cooking" },
+  { value: "mains", label: "Mains", group: "cooking" },
+  { value: "sides", label: "Sides", group: "cooking" },
+  { value: "snacks", label: "Snacks", group: "cooking" },
+  { value: "drinks", label: "Drinks", group: "cooking" },
+  { value: "baby-weaning", label: "Little ones", group: "little-ones" },
 ] as const;
 export type RecipeCategory = (typeof RECIPE_CATEGORIES)[number]["value"];
 
@@ -22,21 +36,15 @@ export const MEAL_TYPES = [
 ] as const;
 export type MealType = (typeof MEAL_TYPES)[number]["value"];
 
-export const DIETARY_TAGS = [
-  "Vegetarian",
-  "Vegan",
-  "Gluten-Free",
-  "Halal",
-  "Dairy-Free",
-  "Keto",
-] as const;
+/** Free-text tags stored on the document. Halal is the baseline here, not a badge. */
+export const DIETARY_TAGS = ["Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Nut-free", "Egg-free"] as const;
 
 export const SPECIAL_OCCASIONS = [
   { value: "eid", label: "Eid" },
   { value: "ramadan", label: "Ramadan" },
   { value: "christmas", label: "Christmas" },
-  { value: "date-night", label: "Date Night" },
-  { value: "quick-weeknight", label: "Quick Weeknight" },
+  { value: "date-night", label: "Date night" },
+  { value: "quick-weeknight", label: "Quick weeknight" },
 ] as const;
 
 export const DIFFICULTY_OPTIONS = [
@@ -45,96 +53,98 @@ export const DIFFICULTY_OPTIONS = [
   { value: "hard", label: "Hard" },
 ] as const;
 
+/** Public sort options (quickest = prep + cook). */
 export const SORT_OPTIONS = [
   { value: "newest", label: "Newest" },
-  { value: "popular", label: "Most Popular" },
   { value: "quickest", label: "Quickest" },
 ] as const;
 
 export const UNIT_OPTIONS = [
-  "cup", "cups", "tbsp", "tsp", "oz", "lb", "g", "kg", "ml", "l",
-  "piece", "pieces", "whole", "pinch", "dash", "to taste", "handful",
-  "bunch", "clove", "cloves", "slice", "slices", "can", "package",
+  "g", "kg", "ml", "l", "tsp", "tbsp", "cup", "cups",
+  "piece", "pieces", "whole", "pinch", "handful", "clove", "cloves",
+  "slice", "slices", "tin", "sheet", "sheets", "to taste",
 ] as const;
 
-/* ————————————————————————
-   LIFESTYLE TAXONOMY
-   ———————————————————————— */
+export const YIELD_KINDS = [
+  { value: "serves", label: "Serves" },
+  { value: "makes", label: "Makes" },
+] as const;
+export type YieldKind = (typeof YIELD_KINDS)[number]["value"];
+
+/* ------------------------------------------------------------------
+   BADGES (charms). Each drives a collection.
+   ------------------------------------------------------------------ */
+
+export const BADGES = [
+  { id: "first-try", label: "First try", blurb: "Her first go at it, published honestly.", collection: "first-tries" },
+  { id: "travels-well", label: "Travels well", blurb: "Posts, packs and survives a car journey.", collection: "care-packages" },
+  { id: "little-helpers", label: "Little helpers", blurb: "Good to make with a small child.", collection: "little-helpers" },
+  { id: "trail-tested", label: "Trail-tested", blurb: "Survives a rucksack.", collection: "trail-tested" },
+  { id: "make-ahead", label: "Make ahead", blurb: "Better the next day, or freezes well.", collection: "make-ahead" },
+  { id: "taste-testers-pick", label: "Taste-tester's pick", blurb: "The taste-tester's favourites.", collection: "taste-testers-picks" },
+] as const;
+export type BadgeId = (typeof BADGES)[number]["id"];
+
+/* ------------------------------------------------------------------
+   STORIES (the existing lifestyle section, relabelled)
+   ------------------------------------------------------------------ */
 
 export const LIFESTYLE_CATEGORIES = [
-  { value: "days-out", label: "Days Out" },
-  { value: "eating-out", label: "Eating Out" },
+  { value: "days-out", label: "Days out" },
+  { value: "eating-out", label: "Eating out" },
   { value: "travel", label: "Travel" },
   { value: "parenting", label: "Parenting" },
-  { value: "craft-hobbies", label: "Craft & Hobbies" },
+  { value: "craft-hobbies", label: "Craft and hobbies" },
 ] as const;
 export type LifestyleCategory = (typeof LIFESTYLE_CATEGORIES)[number]["value"];
 
-/* ————————————————————————
-   "WHAT TO EAT?" QUICK-LINK BOXES
-   Mixes recipe categories and meal types; each box knows which
-   query param it drives on /recipes.
-   ———————————————————————— */
+/* ------------------------------------------------------------------
+   NAVIGATION: Bakes, Cooking, Stories, About
+   ------------------------------------------------------------------ */
 
-export type WhatToEatIcon =
-  | "starter" | "main" | "side" | "snack" | "breakfast"
-  | "dinner" | "dessert" | "drink" | "bread" | "baby";
+export interface NavItem {
+  label: string;
+  href: string;
+  /** Hidden while there is nothing published behind it */
+  hideWhenEmpty?: "cooking";
+}
 
-export type WhatToEatItem =
-  | { key: string; label: string; icon: WhatToEatIcon; param: "category"; value: RecipeCategory }
-  | { key: string; label: string; icon: WhatToEatIcon; param: "mealType"; value: MealType };
-
-export const WHAT_TO_EAT: readonly WhatToEatItem[] = [
-  { key: "starters", label: "Starters", icon: "starter", param: "category", value: "starters" },
-  { key: "mains", label: "Main Course", icon: "main", param: "category", value: "mains" },
-  { key: "sides", label: "Side Dishes", icon: "side", param: "category", value: "sides" },
-  { key: "snacks", label: "Snacks", icon: "snack", param: "category", value: "snacks" },
-  { key: "breakfast", label: "Breakfast", icon: "breakfast", param: "mealType", value: "breakfast" },
-  { key: "dinner", label: "Dinner", icon: "dinner", param: "mealType", value: "dinner" },
-  { key: "desserts", label: "Desserts", icon: "dessert", param: "category", value: "desserts" },
-  { key: "drinks", label: "Drinks", icon: "drink", param: "category", value: "drinks" },
-  { key: "bread", label: "Bread", icon: "bread", param: "category", value: "bread" },
-  { key: "baby", label: "Baby Weaning", icon: "baby", param: "category", value: "baby-weaning" },
+export const NAV_ITEMS: readonly NavItem[] = [
+  { label: "Bakes", href: "/bakes" },
+  { label: "Cooking", href: "/cooking", hideWhenEmpty: "cooking" },
+  { label: "Stories", href: "/lifestyle" },
+  { label: "About", href: "/about" },
 ];
 
-/* ————————————————————————
-   NAVIGATION
-   ———————————————————————— */
-
-export interface NavChild { label: string; href: string }
-export interface NavNode { label: string; href: string; children?: readonly NavChild[] }
-
-export const NAV_TREE: readonly NavNode[] = [
-  {
-    label: "Recipes",
-    href: "/recipes",
-    children: RECIPE_CATEGORIES.filter((c) => c.nav).map((c) => ({
-      label: c.label,
-      href: `/recipes?category=${c.value}`,
-    })),
-  },
-  {
-    label: "Lifestyle",
-    href: "/lifestyle",
-    children: LIFESTYLE_CATEGORIES.map((c) => ({
-      label: c.label,
-      href: `/lifestyle?category=${c.value}`,
-    })),
-  },
-  { label: "About Me", href: "/about" },
-  { label: "Newsletter", href: "/newsletter" },
-  { label: "Contact", href: "/contact" },
+export const FOOTER_LINKS: readonly NavItem[] = [
+  ...NAV_ITEMS,
+  { label: "Say hello", href: "/contact" },
+  { label: "New bakes by email", href: "/newsletter" },
+  { label: "Privacy", href: "/privacy" },
 ];
 
-/** Flat top-level nav (footer, simple lists). */
-export const NAV_ITEMS: readonly NavChild[] = NAV_TREE.map(({ label, href }) => ({ label, href }));
-
-/* ————————————————————————
+/* ------------------------------------------------------------------
    HELPERS
-   ———————————————————————— */
+   ------------------------------------------------------------------ */
 
 export function getCategoryLabel(value: string): string {
   return RECIPE_CATEGORIES.find((c) => c.value === value)?.label ?? value;
+}
+
+export function getCategoryGroup(value: string): CategoryGroup | undefined {
+  return RECIPE_CATEGORIES.find((c) => c.value === value)?.group;
+}
+
+export function categoriesInGroup(group: CategoryGroup) {
+  return RECIPE_CATEGORIES.filter((c) => c.group === group);
+}
+
+export function getGroupLabel(value: string): string {
+  return CATEGORY_GROUPS.find((g) => g.value === value)?.label ?? value;
+}
+
+export function isCategoryGroup(value: string): value is CategoryGroup {
+  return CATEGORY_GROUPS.some((g) => g.value === value);
 }
 
 export function getMealTypeLabel(value: string): string {
@@ -143,6 +153,10 @@ export function getMealTypeLabel(value: string): string {
 
 export function getLifestyleCategoryLabel(value: string): string {
   return LIFESTYLE_CATEGORIES.find((c) => c.value === value)?.label ?? value;
+}
+
+export function getBadge(id: string) {
+  return BADGES.find((b) => b.id === id);
 }
 
 export function isRecipeCategory(value: string): value is RecipeCategory {
@@ -157,6 +171,13 @@ export function isLifestyleCategory(value: string): value is LifestyleCategory {
   return LIFESTYLE_CATEGORIES.some((c) => c.value === value);
 }
 
+export function isBadgeId(value: string): value is BadgeId {
+  return BADGES.some((b) => b.id === value);
+}
+
+export function isYieldKind(value: unknown): value is YieldKind {
+  return value === "serves" || value === "makes";
+}
+
 // Re-exported so existing imports keep working; canonical home is src/lib/site.ts
 export { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "./site";
-

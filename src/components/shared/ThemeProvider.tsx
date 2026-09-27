@@ -1,72 +1,40 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import type { PaletteId, ResolvedMode, ThemeMode } from "@/lib/theme";
-import {
-  getServerSnapshot,
-  getSnapshot,
-  resolveMode,
-  setStoredMode,
-  setStoredPalette,
-  subscribe,
-} from "@/lib/themeStore";
+import type { ResolvedMode, ThemeMode } from "@/lib/theme";
+import { getServerSnapshot, getSnapshot, resolveMode, setStoredMode, subscribe } from "@/lib/themeStore";
 
 interface ThemeContextValue {
-  /** Palette in effect (visitor choice, else the site default). */
-  palette: PaletteId;
-  /** Site default chosen in admin. */
-  defaultPalette: PaletteId;
   mode: ThemeMode;
   resolvedMode: ResolvedMode;
-  showPicker: boolean;
-  setPalette: (palette: PaletteId) => void;
   setMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-interface ThemeProviderProps {
-  defaultPalette: PaletteId;
-  showPicker: boolean;
-  children: React.ReactNode;
-}
-
-export function ThemeProvider({ defaultPalette, showPicker, children }: ThemeProviderProps) {
+/** Applies the light/dark class to <html> and exposes useTheme(). The no-FOUC script in layout.tsx runs first. */
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  // With the picker hidden the palette is locked to the site default (a choice stored during the
-  // evaluation phase would otherwise leave a visitor stuck on it with no UI to change it).
-  const palette = (showPicker ? snap.palette : null) ?? defaultPalette;
   const resolvedMode = resolveMode(snap.mode, snap.systemDark);
   const firstRun = useRef(true);
 
-  // Apply to <html>. The inline no-FOUC script already did this before paint;
-  // this keeps it in sync after user changes and system changes.
   useEffect(() => {
     const root = document.documentElement;
-    const changed = root.dataset.palette !== palette || root.classList.contains("dark") !== (resolvedMode === "dark");
-    if (!firstRun.current && changed) {
+    const isDark = root.classList.contains("dark");
+    const wantDark = resolvedMode === "dark";
+    if (!firstRun.current && isDark !== wantDark) {
       root.classList.add("theme-transition");
       const t = window.setTimeout(() => root.classList.remove("theme-transition"), 320);
-      root.dataset.palette = palette;
-      root.classList.toggle("dark", resolvedMode === "dark");
+      root.classList.toggle("dark", wantDark);
       return () => window.clearTimeout(t);
     }
     firstRun.current = false;
-    root.dataset.palette = palette;
-    root.classList.toggle("dark", resolvedMode === "dark");
-  }, [palette, resolvedMode]);
+    root.classList.toggle("dark", wantDark);
+  }, [resolvedMode]);
 
   const value = useMemo<ThemeContextValue>(
-    () => ({
-      palette,
-      defaultPalette,
-      mode: snap.mode,
-      resolvedMode,
-      showPicker,
-      setPalette: (p) => setStoredPalette(p === defaultPalette ? null : p),
-      setMode: setStoredMode,
-    }),
-    [palette, defaultPalette, snap.mode, resolvedMode, showPicker]
+    () => ({ mode: snap.mode, resolvedMode, setMode: setStoredMode }),
+    [snap.mode, resolvedMode]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

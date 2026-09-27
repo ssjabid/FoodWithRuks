@@ -1,5 +1,7 @@
-import type { RecipeCategory, MealType, LifestyleCategory } from "@/lib/constants";
-import type { PaletteId } from "@/lib/theme";
+import type { RecipeCategory, MealType, LifestyleCategory, BadgeId, YieldKind } from "@/lib/constants";
+
+/* Every field added by the redesign is optional and gets a default when read
+   (docToRecipe and friends), so older documents keep working without a migration. */
 
 export interface Recipe {
   id: string;
@@ -15,11 +17,29 @@ export interface Recipe {
   specialOccasion: string[];
   prepTime: number;
   cookTime: number;
+  /** The number: serves 4, or makes 12 */
   servings: number;
+  /** "Serves 4" or "Makes 12 cookies" */
+  yieldKind: YieldKind;
+  /** What it makes: { one: "cookie", other: "cookies" } */
+  yieldNoun?: YieldNoun;
+  /** Chilling, proving, setting, resting: shown up front ("plus overnight chilling") */
+  extraTime?: ExtraTime | null;
+  /** Oven setting as she uses it; null / undefined for no-bake */
+  oven?: Oven | null;
+  /** Her handwritten line by the title ("third time lucky") */
+  ruksNote?: string;
+  badges: BadgeId[];
+  verdicts?: Verdicts;
+  /** "Inspired by a holiday breakfast." */
+  inspiredBy?: string;
+  /** "Keeps three days in a tin." */
+  keeps?: string;
   difficulty: "easy" | "medium" | "hard";
   ingredients: Ingredient[];
   instructions: Instruction[];
   heroImage: string;
+  heroImageAlt?: string;
   tips: string;
   nutrition?: Nutrition;
   seo?: SEO;
@@ -27,10 +47,33 @@ export interface Recipe {
   featured: boolean;
   rating: { average: number; count: number };
   viewCount: number;
+  /** Development fixture, never real content */
+  sample?: boolean;
   createdAt: Date;
   updatedAt: Date;
   publishedAt?: Date;
   scheduledAt?: Date;
+}
+
+export interface YieldNoun {
+  one: string;
+  other: string;
+}
+
+export interface ExtraTime {
+  minutes: number;
+  /** "chilling", "proving", "setting", "resting" (24 chars max) */
+  label: string;
+}
+
+export interface Oven {
+  tempC: number;
+  fan: boolean;
+}
+
+export interface Verdicts {
+  tasteTester?: string;
+  agooh?: string;
 }
 
 export interface Ingredient {
@@ -45,6 +88,7 @@ export interface Instruction {
   step: number;
   text: string;
   image?: string;
+  imageAlt?: string;
 }
 
 export interface Nutrition {
@@ -94,17 +138,19 @@ export interface ContactMessage {
 }
 
 export interface SiteSettings {
-  /** Slug of the recipe pinned as "New Recipe of the Week"; empty = latest published. */
+  /** Slug of the recipe pinned as the Offering on the home page; empty = newest published. */
   recipeOfTheWeekSlug: string;
   instagramHandle: string;
-  /** Site-wide default palette (visitors can override in the drawer). */
-  defaultPalette: PaletteId;
-  /** Whether the Appearance picker is shown to visitors. */
-  showThemePicker: boolean;
+  /** Handwritten line on the Offering; falls back to the recipe's ruksNote */
+  heroNote: string;
+  /** Collection slug the home page leads with (e.g. a seasonal one); empty = none */
+  activeCollection: string;
+  /** The hidden Someday bakery page */
+  showBakery: boolean;
   updatedAt?: Date;
 }
 
-export type SubscriberSource = "home" | "footer" | "newsletter-page";
+export type SubscriberSource = "home" | "footer" | "newsletter-page" | "bakery";
 
 export interface Subscriber {
   id: string;
@@ -112,6 +158,15 @@ export interface Subscriber {
   source: SubscriberSource;
   status: "subscribed" | "unsubscribed";
   createdAt: Date;
+}
+
+/** The Currently card: four short lines she updates from her phone. Empty rows hide. */
+export interface Currently {
+  baking: string;
+  craving: string;
+  lastWalk: string;
+  latestParcel: string;
+  updatedAt?: Date;
 }
 
 /** Editable copy for the fixed pages (siteSettings/pages). */
@@ -123,6 +178,8 @@ export interface PageContent {
   /** HTML from the editor */
   aboutBody: string;
   aboutPhoto: string;
+  aboutPhotoAlt: string;
+  currently: Currently;
   updatedAt?: Date;
 }
 
@@ -134,6 +191,7 @@ export interface LifestylePost {
   content: string;
   /** Cover photo URL (uploaded or pasted); empty = placeholder */
   coverImage?: string;
+  coverImageAlt?: string;
   category: LifestyleCategory;
   readingTime: number;
   status: "draft" | "published";

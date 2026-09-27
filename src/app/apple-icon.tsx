@@ -1,8 +1,10 @@
 import { ImageResponse } from "next/og";
+import { OG, markDataUrl } from "@/lib/og";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
+/** The squish on blush. iOS rounds the corners itself. */
 export default function AppleIcon() {
   return new ImageResponse(
     (
@@ -13,18 +15,11 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#825540",
-          borderRadius: 40,
-          color: "#F7F1EE",
-          fontSize: 84,
-          fontWeight: 600,
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          letterSpacing: -2,
+          background: OG.blush,
         }}
       >
-        <span>A</span>
-        <span style={{ color: "#E9DBD3" }}>&amp;</span>
-        <span>R</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={markDataUrl()} width={132} height={132} alt="" />
       </div>
     ),
     { ...size }

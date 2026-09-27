@@ -24,7 +24,7 @@ export default async function PreviewPage({ params }: Props) {
   if ((type !== "recipe" && type !== "post") || !verifyPreviewToken(type, slug, token)) notFound();
 
   const banner = (label: string) => (
-    <div className="bg-[var(--color-warning)] text-[var(--color-text-primary)]">
+    <div className="bg-[var(--color-warning-bg)] text-[var(--color-text)]">
       <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8 py-2 text-sm font-medium">
         Draft preview: this {label} is not published. Only people with this link can see it.
       </div>

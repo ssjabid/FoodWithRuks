@@ -1,166 +1,146 @@
 # CLAUDE.md — Agooh & Ruks Project State
 
-> This file is the single source of truth for Claude Code. Read before every task. Update after every completed task.
+> This file is the single source of truth for Claude Code. Read before every task. Update after every completed task. Design decisions follow the redesign brief (private, git-ignored `redesign/`); this file wins on how the code works.
 
 ## Project
 
-**Agooh & Ruks** (formerly FoodWithRuks) — a recipe and lifestyle blog for an Instagram food creator. Byline "Pass the Butter, Ruks". Taglines "Pure comfort, cooked simply" and "Warmth in every bite". Food that is easy to follow, wholesome, and full of flavour; plus days out, eating out, travel, parenting and crafts.
+**Agooh & Ruks** (formerly FoodWithRuks) is Ruks's recipe site: bakes first, some cooking, and the odd story. Byline "Pass the Butter, Ruks". The design idea is **a care package from Ruks**: the home page hands you a bake, the recipe is the note inside, every tool looks after the reader. Principles: "Here, I made you something"; crisp outside, soft inside; one or two rings on (gold rationed); alive, not animated; real over generic. Halal-conscious defaults everywhere. No AI images. Nothing invented in her voice: every line written for her is marked `// DRAFT: needs Ruks` and listed in `redesign/NOTES.md` until she approves it.
 
 ## Current State
 
-**Phase**: Phase 10 — production audit: server-side validation, comments + ratings end to end, view counts, draft previews, RSS, hardened public forms, e2e test script
-**Last Updated**: 2026-09-20
-**Last Task Completed**: Production audit (branch `feat/production-audit`): every admin write goes through `src/lib/validation.ts` (whitelist, caps, enums, slug uniqueness 409, protected fields), public comments UI + moderation recomputes recipe ratings, view counter feeds Most loved, signed draft previews, `/feed.xml`, contact/comment honeypot + rate limit, `npm run e2e` exercises the whole admin → Firestore → public chain through the real routes (26 checks). Previously: rich-text editor (Tiptap 3) for lifestyle posts + About page, and editable page copy (`siteSettings/pages`: home intro, footer blurb, About title/subtitle/photo/body) via `/admin/pages`. Photo uploads are LIVE (token verified for real 2026-09-20). Previously: photo uploads (branch `feat/github-photos`): admin forms get an `ImageUpload` field (hero, per-step, lifestyle cover); the browser resizes to 1600/800px WebP, `POST /api/admin/upload` commits both files to the repo in one commit via the Git Data API, the public site renders real photos through `Photo` (plain `<img>` + srcset, placeholder fallback). Live test 2026-09-20: the fine-grained token (user ssjabid) committed two files in one commit to a throwaway branch and the raw preview served them; branch deleted. The token itself is never stored in the repo or memory. Needs `GITHUB_UPLOAD_TOKEN` in Vercel before the first upload. Previously: Ruks chose **Clay**. `DEFAULT_PALETTE = "clay"`, picker hidden by default, palette locked when the picker is hidden (stored visitor choices ignored), OG image / apple icon / icon.svg recoloured to Clay, admin private-key parsing hardened. Merged and LIVE 2026-09-20. The other four palettes remain in globals.css and in /admin/settings; re-enable the picker there to compare again. Page transitions + Appearance panel live since 2026-09-20.
+**Phase**: Redesign, branch `redesign/care-package`. Phases 0 to 4 built (foundations, content model, home, recipe, every other page, admin fields). Next: gate screenshots and e2e on this branch, then Phase 5 (signature moments), Phase 6 (admin at 390px + HOW-TO-POST.md), Phase 7 (QA, PR the owner merges).
+**Last Updated**: 2026-09-27
+**Last Task Completed**: Phases 2 to 4 of the care-package redesign in one sweep: one palette with semantic tokens (Daylight / After hours, device-following), Lora + Inter + Kalam, the squish mark and brand parts, Bakes / Cooking / Stories / About navigation with a top menu sheet, the Offering home page (kitchen-time line, Currently card, New out of the oven, collections, stories, email line), the recipe page (facts line, scaler, oven line, tappable method, cook mode, print card, verdicts, keeps, click-to-load Instagram, comments with a 3-rating floor), recipes index with group tabs / category chips / charm filters, `/bakes`, `/cooking`, `/collections/[slug]`, `/privacy`, `/bakery` (hidden), new 404, About with the pair mark, admin recipe form with the new fields and "The personal bits", settings (front-page bake, her line, lead collection, bakery switch), pages (Currently + photo alt), dashboard Currently card, new icons and OG cards, fixtures policy (dev: six example bakes; production: one labelled example), e2e extended. Previously (all live on `main`): production audit, rich-text editor + editable pages, photo uploads to the GitHub repo, Clay palette lock, page transitions.
 
-## Redesign in progress (2026-09-26)
+## Redesign in progress (2026-09-26 onwards)
 
-A visual and content redesign is being built on the branch `redesign/care-package`, phase by phase, with the owner reviewing at every stop. Working notes and the brief live in the git-ignored `redesign/` folder (read `redesign/NOTES.md` first if it exists; nothing from that folder is ever committed). Gate screenshots go in the git-ignored `.snapshots/<label>/` (`npm run snap <label>`, needs `npx playwright install chromium` once). The branch is never merged by Claude; the owner merges the pull request at the end.
+Built on `redesign/care-package`, phase by phase, with the owner reviewing at every stop. Working notes and the private brief live in the git-ignored `redesign/` folder (read `redesign/NOTES.md` first; nothing from that folder, the pack zips or `START-HERE_redesign.md` is ever committed or quoted). Gate screenshots go in the git-ignored `.snapshots/<label>/` (`npm run snap <label>`; `npx playwright install chromium` once; Playwright browsers may live in `PLAYWRIGHT_BROWSERS_PATH`). **Claude never pushes to or merges into `main`**; the owner merges the pull request at the end. Push the branch only when asked. Session start: `git fetch origin` and `git merge origin/main` (admin photo uploads commit to `main`).
 
 ## Live deployment (important)
 
-- **Production**: https://foodwithruks.vercel.app — Vercel Git integration, **every push to `main` deploys to production**.
+- **Production**: https://foodwithruks.vercel.app, Vercel Git integration, **every push to `main` deploys to production**.
 - Work on a branch; Vercel builds a preview per branch (URL on the commit's deployment status in GitHub; previews are behind Vercel login, so the account owner opens them). Merge to `main` only after the preview is verified.
 - `foodwithruks.com` is NOT registered. `SITE_URL` (src/lib/site.ts) resolves `NEXT_PUBLIC_SITE_URL` → Vercel production URL → `https://foodwithruks.vercel.app`.
-- Firestore rules + composite indexes are deployed (2026-09-07). Firestore is empty (0 recipes, 0 posts, no `siteSettings/general` doc as of 2026-09-20), so the public site shows sample content until recipes/posts are published in `/admin`.
-- Local dev: `.env.local` has the service-account key pasted with a mix of escaped and real newlines; `admin.ts` normalises it. Scratch scripts that use the Admin SDK must do the same (see the inspection script pattern: `@next/env` loadEnvConfig + collapse newlines).
+- Firestore rules + composite indexes are deployed (2026-09-07). Firestore is empty (0 recipes, 0 posts as of 2026-09-20). With an empty database production shows the honest empty state plus **one** example bake labelled "Example: not one of Ruks's yet" (excluded from sitemap, feed, JSON-LD and indexing); development and preview deployments show six example bakes and two placeholder stories (`src/lib/content.ts`). Fixtures disappear as soon as one real recipe is published.
+- Local dev: `.env.local` has the service-account key pasted with a mix of escaped and real newlines; `admin.ts` normalises it. Scratch scripts that use the Admin SDK must do the same (`@next/env` default import + collapse newlines).
 
 ## Tech Stack
 
 - Next.js 16 (App Router) + React 19 + TypeScript strict
-- Tailwind CSS v4 (CSS-first `@theme` in `src/styles/globals.css`, no tailwind.config)
-- Fonts: **Lora** (headings, italic accents) + **Inter** (body, eyebrows) via next/font, variables on `<html>`
+- Tailwind CSS v4 (CSS-first `@theme` / `@utility` in `src/styles/globals.css`, no tailwind.config)
+- Fonts via next/font: **Lora** (display and headings), **Inter** (text), **Kalam** (her handwriting layer, `.note`). Variables on `<html>`, `lang="en-GB"`.
 - Firebase: Firestore via Admin SDK (server only), Auth (Google sign-in, client SDK auth only)
-- **No animation library on the public site** (CSS transitions only). `framer-motion` is still installed for `/admin` only — do not import it in public components.
-- Vercel hosting; react-social-media-embed (Instagram embed on recipe pages)
+- **No animation library on the public site** (CSS only). `framer-motion` is still installed for a few `/admin` pages; do not import it in public components.
+- Vercel hosting; react-social-media-embed (Instagram, click-to-load on recipe pages); Playwright + axe for gate screenshots; node:test for the small libraries.
 
-## Motion policy (personal-blog calm, research-backed)
+## Design system (v2, the care package)
 
-- Only user-initiated, functional motion: drawer slide 220ms, overlay/backdrop fade 150ms, popover 150ms, accordion 200ms, `.fade-in` 120ms for swapped labels/status, hover/focus colour changes 150ms. Tokens: `--dur-fast`, `--dur-base`, `--dur-drawer`, `--dur-page`, `--ease-out`.
-- **Page transitions** (`src/components/shared/PageTransition.tsx`, no library, no experimental flags): `PageEnter` wraps `{children}` in the root layout and replays `.page-enter` (280ms fade + 4px settle) when the pathname changes — never on first load (LCP) and never under `/admin`. `PageTransitionListener` (capture-phase click listener) sets `<html data-navigating>` for internal links to a *different* pathname so `main` softens to 50% until the new page commits (1.5s safety timeout). `beginPageTransition(href)` is called by HeroSearch/SearchOverlay for programmatic pushes. Same-page query/hash links (filters, jump links) do not transition. Add `data-no-transition` to a link to opt out.
-- **Never** add: scroll-reveal / staggered entrances, card lift or photo zoom, button lift/fill wipes, bounces, pulses, progress bars, parallax. Hover on cards = title underline + image opacity 0.9.
-- `prefers-reduced-motion: reduce` zeroes every transition/animation; smooth scroll only under `no-preference`.
-- The old global `* { transition … }` rule is gone; the colour crossfade on theme change is scoped to `html.theme-transition` (added for 300ms by `ThemeProvider`).
-- Tailwind default transition = 150ms ease-out (`@theme --default-transition-*`). Never use `transition-all`.
+- **One palette, two modes.** Tokens live on `:root` (Daylight) and `.dark` (After hours) in `globals.css`; the visitor's device decides (`DEFAULT_MODE = "system"`), the header toggle overrides per visitor (`localStorage` `ar_mode`). There is **no palette picker** any more; `ar_palette` and `ar_picker_seen` are removed on first load.
+- **Semantic tokens**: `--color-ground` (page), `surface`, `elevated`, `text`, `text-2`, `text-3`, `blush` + `on-blush` (the signature: Currently card, charms, cheeks; never text), `cheek` + `cheek-hover` + `on-cheek` (links, buttons, focus, selected), `gold` (shapes only, at most two per screen, each tagged `data-gold`), `clay` (hairlines, strokes, the parcel tag; never text), `line` + `line-strong`, `sage` + `sage-ink` + `sage-soft` (outdoor content only: Trail-tested), `success`, `error`, `warning-bg`, `placeholder-bg/ink`, `mark-body/ink/cheek`. Light values: ground #FFFAF8, surface #F8EFEC, text #2B1E1B / #5E4843 / #7A625C, blush #EECFCA, cheek #9E3A53, gold #B08A3C, clay #C7A491, sage #919682. Dark: ground #1E1614, surface #2A201D, text #FBEFEB / #D9C3BD / #B39B94, blush #4A2F30, cheek #F2A5B6 (on-cheek cocoa), gold #D9B56A. Legacy aliases (`--color-primary`, `--color-text-primary`, `--color-border`, …) remain defined **for the admin only**. `node scripts/check-contrast.mjs` checks every pair in both modes.
+- **Type**: `h-display` (40–64px, the bake's name), `h-page` (32–44), `h-section` (24–30), `h-card` (20), `text-body` (17px/1.65), `.note` (Kalam, 22px). Sentence case everywhere. **No** eyebrows, uppercase labels, italic accent word, middle-dot metas, arrows on links, keyboard-shortcut hints or bracket counts; `npm run tells` fails the build on them and on the banned words (allow a genuine exception with a `tells-ok` comment).
+- **Brand parts** (`src/components/brand/`): `Mark` (the squish: a round bake with closed smiling eyes, rosy cheeks and a bite out of the top right; states `squished` / `open` / `asleep`; variants `single` / `pair`; `crumbs` for the 404; geometry in `src/lib/mark.ts`, static files via `npm run gen:mark`), `Wordmark` (cheek ampersand), `Necklace` (hairline with a gold pendant, one or two per page), `Note` (her handwriting, real text, never for essential information), `Charm` (badge chips with tiny line icons; Trail-tested in sage; `as="link" | "chip" | "button"`), `Placeholder` (honest "photo coming" frame, used by `Photo` when `src` is empty).
+- **Flat**: no shadows, hairline borders, radii 6/8/12px, round buttons and fields (48px tall on mobile, 44px minimum targets). Focus: 2px cheek outline. Fields `.field` / `.field-bare`, links `.link` / `.link-cheek`.
+- **Motion ceiling**: the Squish on save (`.squish-btn[data-squish]`, 360ms), page fade 280ms (`PageEnter`, never on first load, never under `/admin`), drawer/sheet 220ms, state changes 120–200ms, hover = colour only, cards = title underline + image opacity 0.9. Nothing on scroll, no entrances, no lifts. `prefers-reduced-motion` zeroes everything.
+- **Copy**: every line in Ruks's voice is in `src/lib/copy.ts` (`COPY`) or marked `// DRAFT: needs Ruks` where it lives (collections intros, kitchen-time lines, About default). British spelling, dates "26 September 2026".
 
-## Brand + Design System
+## Navigation and chrome
 
-- **Swatches**: clay `#C7A491`, blush `#EECFCA`, sage `#919682`, light sage `#C7CDBF`, olive `#595E48`.
-- **Palettes** (`data-palette` on `<html>`, each with light + `.dark`): `clay` (**site default since 2026-09-20, Ruks's choice**), `cream` (Cream & Olive), `sage`, `blush`, `olive` (Evening Olive). Token sets live in `globals.css` (light blocks first, then `[data-palette].dark` blocks). 21 tokens each: primary, primary-hover, on-primary, secondary, accent, accent-soft, accent-text, background, surface, elevated, text-primary/secondary/tertiary, border, success, warning, error, placeholder-bg, placeholder-icon, band, on-band. Run `node scripts/check-contrast.mjs` after touching them.
-- Rules: `--color-accent` is decorative only in light modes; text on clay/blush/sage tints uses `text-primary`; links use `--color-accent-text` or `--color-primary`; anything on a primary background uses `--color-on-primary`. No shadows anywhere (flat, hairline borders). Radii 6/8/12px.
-- **Typography scale** (`:root` tokens + `@utility`): `h-display` (48–72px hero, Lora 500), `h-page` (36–48), `h-section` (26–32), `h-card` (18), `eyebrow` (12px Inter 500 uppercase 0.16em), `accent-italic` (Lora italic in accent-text), `text-body` (17px/1.65 article text). Body 16px/1.6. Headings weight 500.
-- **Focus**: global `:focus-visible` 2px primary outline for keyboard (never sets `border-radius` — that squared off round buttons); inputs use `.field` (border darkens + 1px inset on focus, no glow) and `.field-bare` inside wrappers. Links use `.link` (underline that brightens on hover). Inputs/selects are 16px+ on mobile (iOS zoom); `input[type=search]` has native appearance removed.
-- Containers: `max-w-wide` (1240px) for chrome/grids, `max-w-prose` (720px) for articles. Section rhythm `py-12 sm:py-16`; `SectionHeader` = eyebrow + heading + quiet "View all".
-
-## Theming (visitor + admin)
-
-- `src/lib/theme.ts` (PALETTES metadata incl. `shortLabel` + `preview.{light,dark}.{bg,text,primary,accent}`, ids, modes, guards) · `src/lib/themeStore.ts` (external store: localStorage `ar_palette` / `ar_mode`, `matchMedia` for system; migrates legacy `ar_theme`) · `ThemeProvider` (applies `data-palette` + `.dark`, exposes `useTheme()`).
-- Pickers (`src/components/shared/ThemePicker.tsx`): `PaletteSwatches` (5 mini-page tiles: ground, headline bar, button pill, accent dot) + `ModeSwitch` (Light/Dark/System with icons) + `ThemePicker` (drawer "Appearance" accordion, **open by default**, inside the drawer's scroll area).
-- **Header**: while `showThemePicker` is on, `ThemePanel` replaces the sun/moon toggle — a live conic swatch of the current palette (with a "new" dot until first opened, `ar_picker_seen`) that opens a popover (`.popover-panel`, transparent backdrop so the page recolours visibly behind it, Escape/focus trap/`inert`). When the picker is hidden, the plain `ThemeToggle` returns.
-- Root layout reads `siteSettings/general.defaultPalette` (server) and renders `<html data-palette>` plus an inline no-FOUC script that applies the stored choice before paint.
-- Admin `/admin/settings`: default palette + "show theme picker to visitors" (`siteSettings.showThemePicker`, **default false**). While the picker is hidden the palette is **locked**: `ThemeProvider` and the no-FOUC script ignore `ar_palette` and use the site default (`DEFAULT_PALETTE` in `theme.ts` = `clay`, or `siteSettings.defaultPalette` once that doc exists). Light/dark still follows the visitor.
-- `opengraph-image.tsx` / `apple-icon.tsx` / `icon.svg` are hardcoded to the **clay** palette — update by hand if the default changes.
-
-## Navigation
-
-- Hamburger drawer at **all** breakpoints, slides from the **left** (`src/components/layout/NavDrawer.tsx`: always-mounted portal, `data-state` + `inert`, focus trap, Escape, `.accordion` groups, Appearance picker in the scrollable area (`overscroll-contain`), tagline + Instagram footer).
-- Header (56px, sticky, hairline): hamburger left · Logo centre · search button + palette button (or theme toggle) right. Ctrl/Cmd+K opens `SearchOverlay` (routes to `/recipes?q=`).
-- Nav tree (`NAV_TREE` in `src/lib/constants.ts`): Recipes ▸ Starters, Main Courses, Side Dishes, Desserts, Bread, Drinks, Baby Weaning · Lifestyle ▸ Days Out, Eating Out, Travel, Parenting, Craft & Hobbies · About Me · Newsletter · Contact.
+- Header (56px, sticky, hairline): `Wordmark` left, visible nav **Bakes · Cooking · Stories · About** from 768px (Cooking hidden while nothing is published in the cooking group; the root layout computes `showCooking`), search button, light/dark `ThemeToggle`, menu button below 768px. The menu is a top sheet (`MenuSheet` in `NavDrawer.tsx`: nav items + Say hello + New bakes by email). `SearchOverlay` searches recipes and links to Bakes / Cooking / Stories. Skip link to `#main`. `FaviconNod` swaps the favicon to the asleep mark when the tab is hidden (`EASTER_EGGS.faviconNodsOff`).
+- Footer: `Necklace`, "Baked by Ruks. Tested by Agooh." (DRAFT), the footer line from `/admin/pages`, `FOOTER_LINKS` (nav + Say hello, New bakes by email, Privacy), Instagram, RSS.
 
 ## Taxonomy (src/lib/constants.ts)
 
-- `RECIPE_CATEGORIES`: starters, mains ("Main Courses"), sides, snacks (not in nav), desserts, bread, drinks, baby-weaning. Type `RecipeCategory`.
-- `MEAL_TYPES`: breakfast, brunch, lunch, dinner. Type `MealType`. **Only public recipe filter.**
-- `WHAT_TO_EAT`: 10 boxes (Starters, Main Course, Side Dishes, Snacks, Breakfast, Dinner, Desserts, Drinks, Bread, Baby Weaning); each maps to `?category=` or `?mealType=`. `getCategoryCounts()` (src/lib/categoryCounts.ts) counts published recipes per box for the home list.
-- `LIFESTYLE_CATEGORIES`: days-out, eating-out, travel, parenting, craft-hobbies (stored as slugs; `getLifestyleCategoryLabel` falls back to raw value for legacy docs).
-- `DIETARY_TAGS`, `SPECIAL_OCCASIONS` remain in the data model + admin, not public filters.
+- `CATEGORY_GROUPS`: bakes (`/bakes`), cooking (`/cooking`), little-ones (`/recipes?group=little-ones`). `RECIPE_CATEGORIES` carry a `group`: cookies-biscuits, brownies-traybakes, cakes, cheesecakes, pastries-tarts, pancakes-breakfast, bread, desserts ("Puddings") in bakes; starters, mains, sides, snacks, drinks in cooking; baby-weaning ("Little ones"). Every old value is kept.
+- `MEAL_TYPES`, `DIETARY_TAGS` (no Halal tag: halal is the baseline), `SPECIAL_OCCASIONS` (eid, ramadan, christmas, date-night, quick-weeknight), `DIFFICULTY_OPTIONS`, `UNIT_OPTIONS`, `YIELD_KINDS` (serves | makes), `SORT_OPTIONS` (newest | quickest = prep + cook).
+- `BADGES` (charms): first-try, travels-well, little-helpers, trail-tested, make-ahead, taste-testers-pick; each drives a collection (`src/lib/collections.ts`: care-packages with "How to pack a tin" tips, first-tries, trail-tested (sage), little-helpers, make-ahead, taste-testers-picks, plus the seasonal ramadan and eid by occasion). Collections are filters over the cached published list; empty ones are never linked and 404 in production.
+- `LIFESTYLE_CATEGORIES` (Stories): days-out, eating-out, travel, parenting, craft-hobbies. `NAV_ITEMS`, `FOOTER_LINKS`.
 
 ## Pages
 
 | Route | Notes |
 |---|---|
-| `/` | Hero (byline, "Pure comfort, *cooked simply*", tagline, search, Browse/About) + "New this week" featured recipe · Currently cooking (3) · Explore by category (list with counts) · Most loved (4 rows, hidden under 3) · Beyond the kitchen (3 posts) · Instagram band · Newsletter |
-| `/recipes` | "What to eat?" compact grid, search, Meal Type pills, native `Select` sort, favourites. URL is source of truth (`q`, `category`, `mealType`). Suspense-wrapped. |
-| `/recipes/[slug]` | Prose measure; Instagram embed beside hero when `instagramUrl` set; native ingredient checkboxes; `.accordion` nutrition; JSON-LD Recipe |
-| `/lifestyle`, `/lifestyle/[slug]` | `?category=` deep links; flat cards |
-| `/about` | Server page from `siteSettings/pages` (title, subtitle, portrait photo beside the text on desktop, HTML body via `.prose`) |
-| `/contact` (server page + `ContactClient`), `/newsletter` (real form), `not-found` |
-| `/shop` | Removed; permanent redirect to `/` in next.config.ts |
-| `/admin/*` | Dashboard, recipes, lifestyle, **pages** (home intro, footer blurb, About), comments, messages, subscribers (CSV), settings (featured recipe, Instagram handle, default palette, picker toggle) |
-| Metadata routes | `icon.svg`, `apple-icon.tsx`, `opengraph-image.tsx`, `robots.ts`, `sitemap.ts` (Firestore + sample fallback) |
+| `/` | `KitchenTime` line (client, Europe/London slots; asleep mark late at night) · honest `EmptyKitchen` in production while nothing is published · the **Offering** (pinned or newest bake: photo, name as `h1`, her line in Kalam from `siteSettings.heroNote` or the recipe's `ruksNote`, the facts line, optional intro from `/admin/pages`, "Get the recipe") · **New out of the oven** (newest large + two small) beside the blush **Currently** card (hidden when all four rows are empty) · collections row (non-empty only, the admin's lead collection first) · "The ones people come back for" only with ≥12 real recipes and views · Stories teaser (3) · `EmailLine` (Instagram link + newsletter). `revalidate = 3600`. |
+| `/recipes`, `/bakes`, `/cooking` | `RecipesClient`: group tabs (All / Bakes / Cooking / Little ones, empty groups hidden), category chips for the group, charm filters, Saved toggle, sort Newest / Quickest, search box. URL is the source of truth (`group`, `category`, `badge`, `sort`, `q`). First card large from four results. Empty search → "Nothing by that name yet. Ruks takes requests." with a button to `/contact?subject=Recipe request: …`. Fallback mirrors the header. |
+| `/recipes/[slug]` | `RecipePageClient`: portrait photo, name, her note, charms, facts line, Jump to recipe + **Save** (the squish, `aria-pressed`, `ar_favorites`), short story (first paragraph + "Read the rest" past 150 words), ingredients with the **scaler** (serves: stepper; makes: ½× 1× 2× 3× with the batch line) and fraction glyphs, **oven line** (fan/conventional/°F/gas from `src/lib/oven.ts` + "Ovens vary. Yours knows best."), tappable numbered method + **Keep the screen on** (Wake Lock, feature-detected), keeps / tips / verdicts (The taste-tester, Agooh) / inspired by, click-to-load `InstagramCard`, print + share (Copy link, WhatsApp), comments (average shown only from 3 ratings), More like this (`moreLikeThis`: same badge or group). JSON-LD Recipe with `recipeYield`, ISO times incl. extra time, `aggregateRating` only with ≥3 real ratings; the example bake is `noindex` with a banner and no JSON-LD. Per-recipe OG image (`opengraph-image.tsx`: photo + name, mark fallback). |
+| `/collections/[slug]` | Intro (DRAFT), tips block with the parcel tag (care packages), sage header (trail-tested), `RecipeGrid`. Static params for all collections. |
+| `/lifestyle`, `/lifestyle/[slug]` | Stories: `StoryCard` (photo, category, title, date), chips only for categories with posts, `?category=`; post = category, title, date + read time, wide photo, `.prose`, share, More stories. |
+| `/about` | Server page from `siteSettings/pages` (title, subtitle, HTML body, photo + alt; the pair mark on blush until her photo), sign-off "Ruks x" (DRAFT), All the bakes + Say hello + Instagram. |
+| `/contact` | "Say hello." `ContactClient` reads `?subject=` (Suspense-wrapped). `/newsletter` "New bakes by email". `/privacy` plain-English page. `not-found` "Someone's eaten this page." with the crumbs pair. |
+| `/bakery` | Hidden waitlist ("The someday bakery"): 404 + noindex unless `siteSettings.showBakery`; newsletter source `bakery`. |
+| `/admin/*` | Dashboard (Currently card first, editable in place), recipes (form with yield kind/noun, oven, extra time, photo descriptions, collapsed "The personal bits": her note, charms, verdicts, inspired by, keeps), stories (cover alt), **pages** (Currently rows with a 30-day nudge, front-page line, footer line, About incl. photo alt), comments, messages, subscribers (CSV; source labels incl. Bakery waitlist), settings (front-page bake, her line, lead collection, Instagram handle, bakery switch). |
+| Metadata routes | `icon.svg` + `public/icon-asleep.svg` (generated from the mark), `apple-icon.tsx` (mark on blush), `opengraph-image.tsx` (mark + wordmark + byline), `robots.ts` (disallows /admin, /api, /preview, /bakery), `sitemap.ts` (real content + non-empty collections; never fixtures), `feed.xml` (real content only). |
+
+## Content model additions (all optional, defaults at read time, no migration)
+
+- Recipe: `yieldKind` ("serves" | "makes"), `yieldNoun {one, other}`, `extraTime {minutes, label} | null` (chilling, proving…; counted in JSON-LD totalTime, shown as "plus overnight chilling"), `oven {tempC, fan} | null`, `ruksNote`, `badges[]`, `verdicts {tasteTester?, agooh?}`, `inspiredBy`, `keeps`, `heroImageAlt`, `instructions[].imageAlt`, `sample` (fixtures only, never settable).
+- `SiteSettings {recipeOfTheWeekSlug, instagramHandle, heroNote, activeCollection, showBakery}` (old palette fields are ignored if present). `PageContent` + `aboutPhotoAlt` + `currently {baking, craving, lastWalk, latestParcel, updatedAt}`. `LifestylePost.coverImageAlt`. `SubscriberSource` + `"bakery"`.
+- Libraries with `node:test` coverage (`npm test`): `facts.ts` (formatMinutes, formatExtraTime, yieldText, timeText, factsLine, jsonLdYield, totalMinutes, isoDuration, formatDateLong, formatMonth), `oven.ts` (UK table incl. 110/120°C, fan + 20 rule, snap ±5), `scale.ts` (fractions, rounding rules, BATCH_OPTIONS), `kitchenTime.ts` (Europe/London slots), `collections.ts`.
+- Fixtures: `src/lib/sampleData.ts` (six example bakes + two placeholder stories, all `sample: true`, ratings 0, no photos) chosen by `src/lib/content.ts` (`recipesOrFixtures`, `postsOrFixtures`, `fixtureRecipeBySlug`, `IS_PRODUCTION`). `src/lib/recipePool.ts` is the shared cached read for index pages.
 
 ## Photo uploads (GitHub as the image store)
 
-- Photos are committed into the repo at `public/images/uploads/<folder>/<yyyy>/<mm>/<slug>-<id>-w<width>.webp` (folders: recipes, lifestyle, steps, misc) and served as static files by the next production deploy (every push to `main` redeploys, so a photo is live ~1–2 min after upload). Until then the admin previews it from `raw.githubusercontent.com` (`rawContentUrl()` in `site.ts`).
-- Client: `src/lib/imageResize.ts` (`createImageBitmap` with EXIF orientation → canvas → WebP q0.82, widths `PHOTO_WIDTHS = [1600, 800]`) and `src/components/admin/ImageUpload.tsx` (choose/replace/remove, "paste a link" fallback, status line). Used in `RecipeForm` (hero + each step) and `LifestyleForm` (cover → new optional `LifestylePost.coverImage`).
-- Server: `src/lib/github.ts` (`commitFiles()` = ref → commit → blobs → tree → commit → ref PATCH, retries once on 422 when the branch moved; `isUploadConfigured()`, `rawUrlFor()`) and `src/app/api/admin/upload/route.ts` (admin token check, validates data URLs and sizes, 503 when the token is missing). Env: `GITHUB_UPLOAD_TOKEN` (fine-grained PAT, only this repo, Contents read+write), `GITHUB_REPO`, `GITHUB_BRANCH`.
-- Public rendering: `src/components/shared/Photo.tsx` — plain `<img loading=lazy>` (no Vercel image-optimisation quota), `srcset` derived from the `-w1600/-w800` naming, `ratio` (square/landscape/portrait) or `fit="natural"`, falls back to `FoodPlaceholder` when `src` is empty. Used by RecipeCard, FeaturedRecipe, MostLoved, LifestyleTeaser, LifestyleClient, LifestylePostClient, InstructionStep, RecipePageClient.
-- Uploads from the admin move `main`; always `git pull --ff-only` before pushing. Repo growth: ~300 KB per photo pair.
+- Photos are committed into the repo at `public/images/uploads/<folder>/<yyyy>/<mm>/<slug>-<id>-w<width>.webp` (folders: recipes, lifestyle, steps, misc) and served as static files by the next production deploy. Until then the admin previews from `raw.githubusercontent.com` (`rawContentUrl()` in `site.ts`).
+- Client: `src/lib/imageResize.ts` (EXIF-aware resize to 1600/800px WebP) and `src/components/admin/ImageUpload.tsx`. Server: `src/lib/github.ts` (`commitFiles()`), `src/app/api/admin/upload/route.ts` (admin token check, 503 when `GITHUB_UPLOAD_TOKEN` is missing). Env: `GITHUB_UPLOAD_TOKEN`, `GITHUB_REPO`, `GITHUB_BRANCH`.
+- Public rendering: `src/components/shared/Photo.tsx` (plain `<img loading=lazy>`, srcset from the `-w1600/-w800` naming, `ratio` square/landscape/portrait/wide or `fit="natural"`, `priority`, `label` for the placeholder caption, falls back to `Placeholder`). Uploads move `main`; always merge `origin/main` before pushing.
 
 ## Editor + editable pages
 
-- `src/components/admin/RichTextEditor.tsx`: Tiptap 3 (`@tiptap/react`, `starter-kit` with link, `extension-image`, `extension-placeholder`; `immediatelyRender: false`, toolbar state via `useEditorState`). Toolbar: Text/H2/H3, bold, italic, link (prompt), bullet/numbered list, quote, Photo (uploads through `/api/admin/upload`, inserts the raw GitHub preview URL), undo/redo. Output is HTML rendered by `.prose` (which now styles img/blockquote/strong/hr). Admin-only; do not import on the public site.
-- Forms rewrite `rawContentUrl("public")` → "" on save so stored HTML uses site paths (`/images/uploads/...`).
-- `LifestyleForm` uses the editor for `content` (reading time from stripped text). The old HTML textarea is gone.
-- Page copy: `src/lib/firebase/pageContent.ts` (`DEFAULT_PAGE_CONTENT` = the original hardcoded copy; `getPageContentSafe()`), `PageContent` type, `GET/PUT /api/admin/pages` (per-field length caps, revalidates layout + /about), `/admin/pages` (hero intro, footer blurb, About title/subtitle/photo/body). Consumers: `page.tsx` → `HeroSection intro`, async `Footer`, `src/app/about/page.tsx` (AboutPageClient deleted).
+- `src/components/admin/RichTextEditor.tsx`: Tiptap 3, admin only. Output is HTML rendered by `.prose`. Forms strip `rawContentUrl("public")` on save so stored HTML uses site paths.
+- `src/lib/firebase/pageContent.ts`: `DEFAULT_PAGE_CONTENT` (minimal, true, DRAFT About body), `EMPTY_CURRENTLY`, `currentlyFrom`, `currentlyIsEmpty`, `getPageContentSafe()`. `GET/PUT /api/admin/pages` (per-field caps, `currently` via `normaliseCurrently`, revalidates layout).
 
-## Content pipeline guarantees (audit 2026-09-20)
+## Content pipeline guarantees (audit 2026-09-20, extended 2026-09-27)
 
-- **Validation at the API boundary** (`src/lib/validation.ts`): `normaliseRecipeInput` / `normalisePostInput` return a complete, safe payload: unknown fields dropped, strings trimmed + capped, enums checked against `constants.ts`, numbers coerced, ingredients/steps cleaned (blank rows removed, steps renumbered), slug derived from the title when empty, `rating`/`viewCount`/timestamps never settable. Errors are `ValidationError` → 400 with a human message the forms show. Slug collisions → 409. Reading time is computed server-side. `adminDb.settings({ ignoreUndefinedProperties: true })`; empty nutrition/seo are removed on update via `FieldValue.delete()`.
-- **Comments + ratings**: `POST /api/comments` {recipeSlug, name, text, rating, website(honeypot)} → validates, looks the recipe up server-side (404 if not published), rate-limits 5/10 min per IP, stores `pending` with an `ipHash`. `CommentsSection` (recipe page) lists approved comments (`getApprovedComments`, index recipeSlug+status+createdAt desc — deployed) and hosts the form. Approving/unapproving/deleting in `/admin/comments` calls `recomputeRecipeRating` (average to 1dp + count from approved comments) and revalidates the recipe page, /recipes and /. `Comment.name` is new; older docs show "Reader".
-- **Views**: `ViewPing` posts once per session to `POST /api/recipes/view` (1 per IP per slug per hour, `FieldValue.increment`). Feeds "Most loved" and the Popular sort. Skipped on draft previews.
-- **Draft previews**: `/preview/{recipe|post}/{slug}/{token}` (`force-dynamic`, noindex; token = HMAC-SHA256 of type:slug with `REVALIDATION_SECRET`, `src/lib/previewToken.ts`). Admin forms have a Preview button (edit mode) that fetches `GET /api/admin/preview` and opens the link. Public pages are untouched (no searchParams, still ISR).
-- **Public form hardening**: `src/lib/rateLimit.ts` (`rateLimited`, `clientIp`, `honeypotTripped`) used by comments and contact; contact validates lengths/email and reads the `website` honeypot the form already had.
-- **RSS**: `/feed.xml` (recipes + stories, 40 newest, ISR 1h, sample fallback), advertised via `alternates.types` in the layout metadata. `robots.ts` also disallows `/preview`.
-- **End-to-end test**: `npm run e2e` (`scripts/e2e-admin.mjs`) against a running server (`E2E_BASE_URL`, default localhost:3000). It creates a Firebase Auth user `e2e-admin@agoohandruks.test`, mints a custom token, exchanges it for an ID token and drives the real routes: auth refusal, validation 400s, create/duplicate 409/publish/delete recipe, public 404 vs 200, preview link + tampered token, home/sitemap/feed listing, view ping, comment honeypot/404/pending/approve → rating + public render, post create/409, contact + newsletter → admin inboxes, settings pin + pages edit (restored), upload guard. Everything it creates is deleted in `finally`. Locally the test address must be in `.env.development.local` (`ADMIN_EMAIL=...,e2e-admin@agoohandruks.test`, git-ignored). Do not add it to the Vercel allow-list.
+- **Validation at the API boundary** (`src/lib/validation.ts`): `normaliseRecipeInput` / `normalisePostInput` / `normaliseCurrently` return complete, safe payloads: unknown fields dropped, strings trimmed and capped (`LIMITS`: yieldNoun 24, ruksNote 120, verdict 140, inspiredBy 80, keeps 140, alt 160, extraTime label 24 / minutes ≤7200, oven 50–300°C, heroNote 80, currently 60), enums checked against `constants.ts`, slugs derived and unique (409), `rating` / `viewCount` / `sample` / timestamps never settable. `ValidationError` → 400 with a human message the forms show.
+- **Comments + ratings**: `POST /api/comments` (honeypot, 5 per 10 min per IP, recipe must be published) → pending; approving in `/admin/comments` recomputes the recipe rating and revalidates. The public average only shows from 3 ratings.
+- **Views**: `ViewPing` once per session (`POST /api/recipes/view`, 1 per IP per slug per hour); skipped on previews and the example bake. Feeds "The ones people come back for" (gated) and the admin.
+- **Draft previews**: `/preview/{recipe|post}/{slug}/{token}` (HMAC token, `src/lib/previewToken.ts`), Preview buttons in the admin forms.
+- **Revalidation**: `src/lib/revalidate.ts` (`revalidateRecipes` → /, /recipes, /bakes, /cooking, every collection, the recipe, sitemap, feed; `revalidatePosts`; `revalidateSiteCopy` → layout).
+- **RSS** `/feed.xml`, robots, sitemap: real published content only.
+- **End-to-end test** `npm run e2e` (`scripts/e2e-admin.mjs`) against a running server: auth, validation 400s incl. the new limits, create (new fields round-trip) / 409 / publish / delete, public page (facts line, oven line, note, charm, keeps), `/bakes` and the collection, home / sitemap / feed, view ping, comments (honeypot, 404, pending, approve → rating + render), stories, contact + newsletter → admin inboxes, front-page bake + her line + limits, home intro + Currently card + limits, bakery switch + robots, upload guard. Everything it creates is deleted and settings/pages restored in `finally`. Locally the test address must be in `.env.development.local` (`ADMIN_EMAIL=...,e2e-admin@agoohandruks.test`). Do not add it to the Vercel allow-list.
 
 ## Newsletter
 
-- `POST /api/newsletter` → Firestore `subscribers` (doc id = normalised email; honeypot `website`; best-effort rate limit; always `{ok:true}` on success/duplicate).
-- `NewsletterForm` variants inline (home), compact (footer), stacked (/newsletter). Admin: `/admin/subscribers`, CSV export, count in stats.
+- `POST /api/newsletter` → Firestore `subscribers` (doc id = normalised email; honeypot; sources home | footer | newsletter-page | bakery; always `{ok:true}` on success/duplicate). `NewsletterForm` variants inline (home), compact (footer), stacked (/newsletter, /bakery) with `buttonLabel`. Admin: `/admin/subscribers`, CSV export.
 
 ## Site settings
 
-- Firestore `siteSettings/general` `{ recipeOfTheWeekSlug, instagramHandle, defaultPalette, showThemePicker, updatedAt }` (`src/lib/firebase/siteSettings.ts`, `getSiteSettingsSafe()` for the layout).
-- `getRecipeOfTheWeek()` uses the pinned slug if published, else latest published. `PUT /api/admin/settings` validates and calls `revalidatePath("/", "layout")`.
-- Admin create/update/delete routes call `revalidatePath` for `/`, `/recipes` or `/lifestyle`, the item page and `/sitemap.xml`.
+- Firestore `siteSettings/general` `{ recipeOfTheWeekSlug, instagramHandle, heroNote, activeCollection, showBakery, updatedAt }` (`src/lib/firebase/siteSettings.ts`, `getSiteSettingsSafe()`). `getRecipeOfTheWeek()` uses the pinned slug if published, else latest published. `PUT /api/admin/settings` validates and revalidates the layout.
 
 ## Key Files
 
 | File | Purpose |
 |---|---|
-| `src/lib/site.ts` | Brand strings, SITE_URL resolution, SOCIAL_LINKS, STORAGE_KEYS (`ar_palette`, `ar_mode`, `ar_favorites`) |
-| `src/lib/constants.ts` | Taxonomy, WHAT_TO_EAT, NAV_TREE, label/guard helpers |
-| `src/lib/theme.ts`, `src/lib/themeStore.ts` | Palette metadata + client theme store |
-| `src/styles/globals.css` | Tokens, 10 palette sets, motion/focus/field/link rules, type utilities, drawer/accordion CSS, print |
-| `src/components/layout/{Header,NavDrawer,SearchOverlay,Footer}.tsx` | Site chrome |
-| `src/components/shared/{ThemeProvider,ThemePicker,ThemePanel,ThemeToggle,PageTransition,SectionHeader,NewsletterForm,FoodPlaceholder}.tsx` | Shared |
-| `src/components/ui/{Button (+ButtonLink, buttonClasses),Card,Badge,FilterPill,Select,Chevron,Input,Logo,Modal,Skeleton,StarRating}.tsx` | Primitives (no motion) |
-| `src/components/home/*` | HeroSection + HeroSearch + FeaturedRecipe, CurrentlyCooking, ExploreByCategory, MostLoved, LifestyleTeaser, InstagramBlock, NewsletterSection |
-| `src/lib/firebase/{recipes,lifestyle,subscribers,siteSettings,comments,messages}.ts` | Admin-SDK data access |
-| `src/lib/github.ts`, `src/app/api/admin/upload/route.ts`, `src/lib/imageResize.ts`, `src/components/admin/ImageUpload.tsx`, `src/components/shared/Photo.tsx` | Photo uploads (GitHub) + rendering |
-| `src/components/admin/RichTextEditor.tsx`, `src/lib/firebase/pageContent.ts`, `src/app/api/admin/pages/route.ts`, `src/app/admin/pages/page.tsx` | Editor + editable page copy |
-| `src/lib/validation.ts`, `src/lib/rateLimit.ts`, `src/lib/previewToken.ts` | API boundary: input normalisation, public-form limits, signed previews |
-| `src/components/recipe/{CommentsSection,ViewPing}.tsx`, `src/app/api/comments/route.ts`, `src/app/api/recipes/view/route.ts`, `src/app/preview/[type]/[slug]/[token]/page.tsx`, `src/app/feed.xml/route.ts` | Comments, views, previews, RSS |
-| `scripts/e2e-admin.mjs` | End-to-end admin → site test (`npm run e2e`) |
-| `scripts/check-contrast.mjs` | Contrast gate for every palette × mode |
+| `src/lib/site.ts` | Brand strings, SITE_URL, SOCIAL_LINKS, CONTENT_REPO, STORAGE_KEYS (`ar_mode`, `ar_favorites`), EASTER_EGGS |
+| `src/lib/constants.ts`, `src/lib/collections.ts` | Taxonomy, badges, nav, collections |
+| `src/lib/copy.ts` | Every line in her voice (DRAFT until approved) |
+| `src/lib/theme.ts`, `src/lib/themeStore.ts`, `ThemeProvider.tsx`, `ThemeToggle.tsx` | Light / dark / system only |
+| `src/styles/globals.css` | Tokens (`:root` + `.dark`), type utilities, `.note`, `.charm`, `.necklace`, `.placeholder`, `.squish-btn`, `.step-done`, drawer / sheet / overlay, `.prose`, print card |
+| `src/lib/{mark,facts,oven,scale,kitchenTime,content,recipePool,og}.ts` | Mark geometry, facts line, oven table, scaler, kitchen-time slots, fixtures policy, shared reads, OG helpers |
+| `src/components/brand/*` | Mark, Wordmark, Necklace, Note, Charm, Placeholder |
+| `src/components/layout/{Header,NavDrawer (MenuSheet),SearchOverlay,Footer}.tsx` | Chrome |
+| `src/components/home/*` | KitchenTime, Offering, CurrentlyCard, NewOutOfTheOven, CollectionsRow, ComeBackFor, StoriesTeaser, EmailLine, EmptyKitchen |
+| `src/components/recipe/*` | RecipeCard, RecipeGrid, SaveButton, IngredientList, ServingsAdjuster, OvenLine, MethodSteps, CookModeToggle, InstagramCard (+ InstagramEmbed), ShareButtons, PrintButton, JumpToRecipe, CommentsSection, ExampleBanner, ViewPing |
+| `src/components/lifestyle/StoryCard.tsx`, `src/components/shared/{Photo,SectionHeader,NewsletterForm,PageTransition,FaviconNod,InstagramIcon,BackToTop}.tsx`, `src/components/ui/*` | Shared pieces and primitives (Button/ButtonLink, Badge, FilterPill, Select, Input, StarRating, Skeleton, Modal, Chevron) |
+| `src/lib/firebase/{recipes,lifestyle,subscribers,siteSettings,comments,messages,pageContent}.ts` | Admin-SDK data access with read-time defaults |
+| `src/lib/validation.ts`, `src/lib/rateLimit.ts`, `src/lib/previewToken.ts`, `src/lib/revalidate.ts` | API boundary |
+| `src/components/admin/{RecipeForm,LifestyleForm,ImageUpload,RichTextEditor,AdminBrand}.tsx`, `src/app/admin/*` | Admin |
+| `scripts/{e2e-admin,snap,tells,gen-mark,check-contrast}.mjs`, `src/lib/__tests__/*` | Gates |
 | `firestore.rules`, `firestore.indexes.json`, `firebase.json` | Firestore config (deployed) |
 
 ## Firebase Services Status
 
 - **Firestore**: enabled; rules deny all client access; indexes deployed.
-- **Auth**: Google sign-in; `ADMIN_EMAIL` allow-list, **comma-separated** (`authCheck.ts`, `api/admin/verify`). Verified 2026-09-20: Google provider enabled; authorized domains = localhost, foodwithruks-site.firebaseapp.com, foodwithruks-site.web.app, foodwithruks.vercel.app. Local `.env.local` lists two emails; the **Vercel** `ADMIN_EMAIL` must list the same (only the account owner can check).
-- **Storage**: not enabled (Blaze plan). Photos are committed to the GitHub repo instead (see Photo uploads). `FoodPlaceholder` remains the fallback when a document has no photo.
+- **Auth**: Google sign-in; `ADMIN_EMAIL` allow-list, comma-separated (`authCheck.ts`, `api/admin/verify`). Authorized domains: localhost, foodwithruks-site.firebaseapp.com, foodwithruks-site.web.app, foodwithruks.vercel.app (add the Vercel preview domain if the owner wants to sign in on a preview).
+- **Storage**: not enabled (Blaze plan). Photos are committed to the GitHub repo instead.
 
 ## Known Issues / Follow-ups
 
-- Public comments are live (pending → approve in /admin/comments). Ratings only come from approved comments.
-- Photo uploads are live (`GITHUB_UPLOAD_TOKEN` set on Vercel).
-- `framer-motion` still bundled for `/admin` only; convert admin to CSS and `npm uninstall` later.
-- `npm run lint` passes with ~8 warnings (React Compiler rules downgraded to warn); `RecipesClient` still syncs input state from the URL in an effect.
-- Automated screenshots in the hidden browser pane are stale after scrolling (harness limitation, not a site bug); `:focus` styles cannot be verified there because the document lacks focus.
-- Suspense fallbacks on /recipes and /lifestyle mirror the real page header + container so there is no jump when the client component mounts.
-- Admin routes still get the public Header/Footer from the root layout (pre-existing); page transitions deliberately skip `/admin`.
-- Dev-only: `next dev` logs a hydration mismatch at the top of <body> on some routes (/contact, /about) while home, /recipes and /newsletter are clean; production shows no console errors on the same routes (checked 2026-09-20). Ignore unless it appears in production.
+- Every line in Ruks's voice is a draft (`grep -rn "DRAFT: needs Ruks" src`); she approves or rewrites before launch (launch gate in the redesign plan).
+- The per-recipe OG card inlines the uploaded WebP; confirm it renders once the first real photo exists (fallback is the mark-only card).
+- `framer-motion` remains in a few admin pages (layout sidebar, list pages); remove in Phase 6.
+- `npm run lint` passes with 5 pre-existing admin warnings (React Compiler rules on `loadRecipes` / `loadMessages`, admin `<img>`).
+- Automated screenshots in the hidden browser pane are stale after scrolling (harness limitation); `:focus` styles cannot be verified there.
+- Dev-only hydration mismatch at the top of `<body>` on some routes under `next dev`; production is clean.
 
 ## Commands
 
@@ -169,9 +149,13 @@ npm run dev          # http://localhost:3000
 npm run build        # production build
 npm run lint
 npm run typecheck
+npm test             # node:test for facts, oven, scale, kitchenTime
+npm run tells        # template-tell + banned-word guard for public code
 node scripts/check-contrast.mjs
+npm run gen:mark     # regenerate src/app/icon.svg + public/icon-asleep.svg from src/lib/mark.ts
+npm run snap <label> # gate screenshots + axe into .snapshots/<label>/ (needs a running server)
+npm run e2e          # end-to-end admin -> site test against a running server
 npx firebase-tools deploy --only firestore   # rules + indexes
-npm run e2e          # end-to-end admin -> site test against a running server (see Content pipeline guarantees)
 ```
 
 ---

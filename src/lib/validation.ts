@@ -3,12 +3,15 @@ import {
   MEAL_TYPES,
   LIFESTYLE_CATEGORIES,
   DIFFICULTY_OPTIONS,
+  BADGES,
+  isYieldKind,
   type RecipeCategory,
   type MealType,
   type LifestyleCategory,
+  type BadgeId,
 } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
-import type { Ingredient, Instruction, Nutrition, Recipe, SEO, LifestylePost } from "@/types";
+import type { Ingredient, Instruction, Nutrition, Recipe, SEO, LifestylePost, YieldNoun, Oven, ExtraTime, Verdicts } from "@/types";
 
 /**
  * Server-side normalisation for everything the admin can write. The forms
@@ -75,8 +78,24 @@ const STATUSES = ["draft", "published"] as const;
 const status = (v: unknown): "draft" | "published" =>
   (STATUSES as readonly string[]).includes(v as string) ? (v as "draft" | "published") : "draft";
 
-/** A complete, safe recipe payload. nutrition/seo are undefined when empty (cleared on update). */
-export type RecipeInput = Omit<Recipe, "id" | "createdAt" | "updatedAt" | "publishedAt" | "scheduledAt" | "rating" | "viewCount">;
+/** Field limits shared with the admin form counters. */
+export const LIMITS = {
+  yieldNoun: 24,
+  ruksNote: 120,
+  verdict: 140,
+  inspiredBy: 80,
+  keeps: 140,
+  alt: 160,
+  extraTimeLabel: 24,
+  extraTimeMinutes: 7200,
+  ovenMin: 50,
+  ovenMax: 300,
+  heroNote: 80,
+  currently: 60,
+} as const;
+
+/** A complete, safe recipe payload. Optional sections are undefined when empty (cleared on update). */
+export type RecipeInput = Omit<Recipe, "id" | "createdAt" | "updatedAt" | "publishedAt" | "scheduledAt" | "rating" | "viewCount" | "sample">;
 
 export function normaliseRecipeInput(body: unknown): RecipeInput {
   if (!body || typeof body !== "object") fail("Invalid request body.");
@@ -90,7 +109,7 @@ export function normaliseRecipeInput(body: unknown): RecipeInput {
     RECIPE_CATEGORIES.map((c) => c.value),
     "Category"
   );
-  if (category.length === 0) fail("Select at least one category.");
+  if (category.length === 0) fail("Choose at least one category.");
 
   const ingredientsRaw = Array.isArray(b.ingredients) ? (b.ingredients as unknown[]) : [];
   if (ingredientsRaw.length > 200) fail("Too many ingredients (max 200).");
@@ -118,7 +137,8 @@ export function normaliseRecipeInput(body: unknown): RecipeInput {
       const text = str(o.text, 3000, `Step ${i + 1}`);
       if (!text) return null;
       const image = url(o.image, `Step ${i + 1} photo`);
-      return { step: 0, text, ...(image ? { image } : {}) };
+      const imageAlt = str(o.imageAlt, LIMITS.alt, `Step ${i + 1} photo description`);
+      return { step: 0, text, ...(image ? { image } : {}), ...(image && imageAlt ? { imageAlt } : {}) };
     })
     .filter((x): x is Instruction => x !== null)
     .map((s, i) => ({ ...s, step: i + 1 }));
@@ -143,24 +163,63 @@ export function normaliseRecipeInput(body: unknown): RecipeInput {
   const difficultyRaw = typeof b.difficulty === "string" ? b.difficulty : "medium";
   const difficulty = DIFFICULTY_OPTIONS.some((d) => d.value === difficultyRaw) ? (difficultyRaw as Recipe["difficulty"]) : "medium";
 
+  // Yield: "Serves 4" or "Makes 12 cookies"
+  const yieldKind = isYieldKind(b.yieldKind) ? b.yieldKind : "serves";
+  const yn = (b.yieldNoun && typeof b.yieldNoun === "object" ? b.yieldNoun : {}) as Record<string, unknown>;
+  const one = str(yn.one, LIMITS.yieldNoun, "What it makes (singular)");
+  const other = str(yn.other, LIMITS.yieldNoun, "What it makes (plural)");
+  const yieldNoun: YieldNoun | undefined = yieldKind === "makes" && (one || other) ? { one: one || other, other: other || one } : undefined;
+
+  // Oven: null for no-bake
+  let oven: Oven | null = null;
+  if (b.oven && typeof b.oven === "object") {
+    const o = b.oven as Record<string, unknown>;
+    if (o.tempC !== undefined && o.tempC !== null && o.tempC !== "") {
+      oven = { tempC: int(o.tempC, "Oven temperature", { min: LIMITS.ovenMin, max: LIMITS.ovenMax }), fan: o.fan === true };
+    }
+  }
+
+  // Extra time: chilling, proving, setting, resting
+  let extraTime: ExtraTime | null = null;
+  if (b.extraTime && typeof b.extraTime === "object") {
+    const e = b.extraTime as Record<string, unknown>;
+    const minutes = int(e.minutes, "Extra time", { max: LIMITS.extraTimeMinutes });
+    if (minutes > 0) extraTime = { minutes, label: str(e.label, LIMITS.extraTimeLabel, "Extra time label") || "resting" };
+  }
+
+  const v = (b.verdicts && typeof b.verdicts === "object" ? b.verdicts : {}) as Record<string, unknown>;
+  const tasteTester = str(v.tasteTester, LIMITS.verdict, "The taste-tester's verdict");
+  const agooh = str(v.agooh, LIMITS.verdict, "Agooh's verdict");
+  const verdicts: Verdicts | undefined = tasteTester || agooh ? { ...(tasteTester ? { tasteTester } : {}), ...(agooh ? { agooh } : {}) } : undefined;
+
   return {
     title,
     slug,
     description: str(b.description, 1000, "Description"),
-    personalStory: str(b.personalStory, 3000, "Personal story"),
+    personalStory: str(b.personalStory, 3000, "Story"),
     instagramUrl,
     category,
     mealType: enumList<MealType>(b.mealType, MEAL_TYPES.map((m) => m.value), "Meal type"),
     dietaryTags: strList(b.dietaryTags, "Dietary tags", { maxItems: 20, maxLen: 40 }),
-    specialOccasion: strList(b.specialOccasion, "Special occasion", { maxItems: 20, maxLen: 40 }),
+    specialOccasion: strList(b.specialOccasion, "Occasion", { maxItems: 20, maxLen: 40 }),
     tags: strList(b.tags, "Tags", { maxItems: 30, maxLen: 30 }),
     difficulty,
     prepTime: int(b.prepTime, "Prep time", { max: 10000 }),
     cookTime: int(b.cookTime, "Cook time", { max: 10000 }),
-    servings: int(b.servings, "Servings", { min: 1, max: 500, fallback: 4 }),
+    servings: int(b.servings, yieldKind === "makes" ? "Makes how many" : "Serves", { min: 1, max: 500, fallback: 4 }),
+    yieldKind,
+    yieldNoun,
+    oven,
+    extraTime,
+    ruksNote: str(b.ruksNote, LIMITS.ruksNote, "Your note"),
+    badges: enumList<BadgeId>(b.badges, BADGES.map((x) => x.id), "Charms"),
+    verdicts,
+    inspiredBy: str(b.inspiredBy, LIMITS.inspiredBy, "Inspired by"),
+    keeps: str(b.keeps, LIMITS.keeps, "Keeps"),
     ingredients,
     instructions,
     heroImage: url(b.heroImage, "Hero photo"),
+    heroImageAlt: str(b.heroImageAlt, LIMITS.alt, "Photo description"),
     tips: str(b.tips, 3000, "Tips"),
     nutrition,
     seo,
@@ -194,9 +253,21 @@ export function normalisePostInput(body: unknown): PostInput {
     slug,
     excerpt: str(b.excerpt, 500, "Excerpt"),
     coverImage: url(b.coverImage, "Cover photo"),
+    coverImageAlt: str(b.coverImageAlt, LIMITS.alt, "Cover photo description"),
     content,
     category: categoryRaw as LifestyleCategory,
     readingTime: readingTimeFromHtml(content),
     status: status(b.status),
+  };
+}
+
+/** Currently card rows (admin Pages). */
+export function normaliseCurrently(body: unknown): { baking: string; craving: string; lastWalk: string; latestParcel: string } {
+  const c = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
+  return {
+    baking: str(c.baking, LIMITS.currently, "Baking"),
+    craving: str(c.craving, LIMITS.currently, "Craving"),
+    lastWalk: str(c.lastWalk, LIMITS.currently, "Last walk"),
+    latestParcel: str(c.latestParcel, LIMITS.currently, "Latest parcel"),
   };
 }

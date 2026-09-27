@@ -1,34 +1,49 @@
 import { adminDb } from "./admin";
-import { SITE_NAME, TAGLINE_SECONDARY } from "@/lib/site";
-import type { PageContent } from "@/types";
+import type { Currently, PageContent } from "@/types";
 
 /**
- * Editable copy for the fixed pages (home intro, footer blurb, About page).
- * Stored in siteSettings/pages; the defaults below are the original hardcoded
- * copy, so the site reads the same until Ruks edits it in /admin/pages.
+ * Editable copy for the fixed pages (About, home intro, footer blurb) and the
+ * Currently card. Stored in siteSettings/pages. The defaults are minimal and
+ * true; the words are hers to write in /admin/pages.
  */
 
 const DOC = { collection: "siteSettings", id: "pages" } as const;
 
+export const EMPTY_CURRENTLY: Currently = { baking: "", craving: "", lastWalk: "", latestParcel: "" };
+
+// DRAFT: needs Ruks (aboutTitle, aboutBody)
 export const DEFAULT_PAGE_CONTENT: PageContent = {
-  heroIntro: `Wholesome, easy-to-follow recipes and family life from ${SITE_NAME}.`,
-  footerBlurb: `${TAGLINE_SECONDARY}. Wholesome, easy-to-follow recipes and family life, shared with love.`,
-  aboutTitle: "Hi, I'm Ruks!",
-  aboutSubtitle: `The home cook behind ${SITE_NAME}`,
-  aboutBody: [
-    `<p>Welcome to ${SITE_NAME}, my little corner of the internet where food meets love. Agooh is our little one, and most of what you will find here has been tested on a very honest audience of one before it ever reaches you.</p>`,
-    `<p>My cooking journey started in my family's kitchen, watching my mum create magic with simple ingredients. Every dish had a story, every spice had a purpose, and every meal brought the family together.</p>`,
-    `<p>Today I share those recipes with the same energy: food that is easy to follow, wholesome, and full of flavour. Pure comfort, cooked simply. Nothing complicated, nothing you cannot find in a normal supermarket, and always enough for seconds.</p>`,
-    `<p>Beyond the kitchen you will find our days out, the places we love to eat, our travels with a toddler in tow, and the crafts that keep rainy afternoons cheerful. Thank you for being here. ${TAGLINE_SECONDARY}.</p>`,
-  ].join("\n"),
+  heroIntro: "",
+  footerBlurb: "",
+  aboutTitle: "About Ruks",
+  aboutSubtitle: "",
+  aboutBody: "<p>Ruks bakes. This is where the recipes live, written the way she makes them.</p><p>More from her here soon.</p>",
   aboutPhoto: "",
+  aboutPhotoAlt: "",
+  currently: { ...EMPTY_CURRENTLY },
 };
 
 const str = (v: unknown, fallback: string) => (typeof v === "string" ? v : fallback);
 
+export function currentlyFrom(raw: unknown): Currently {
+  const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const updatedAt = (d.updatedAt as { toDate?: () => Date } | undefined)?.toDate?.();
+  return {
+    baking: str(d.baking, ""),
+    craving: str(d.craving, ""),
+    lastWalk: str(d.lastWalk, ""),
+    latestParcel: str(d.latestParcel, ""),
+    updatedAt: updatedAt instanceof Date ? updatedAt : d.updatedAt instanceof Date ? d.updatedAt : undefined,
+  };
+}
+
+export function currentlyIsEmpty(c: Currently): boolean {
+  return !c.baking && !c.craving && !c.lastWalk && !c.latestParcel;
+}
+
 export async function getPageContent(): Promise<PageContent> {
   const snap = await adminDb.collection(DOC.collection).doc(DOC.id).get();
-  if (!snap.exists) return { ...DEFAULT_PAGE_CONTENT };
+  if (!snap.exists) return { ...DEFAULT_PAGE_CONTENT, currently: { ...EMPTY_CURRENTLY } };
   const d = snap.data() ?? {};
   const D = DEFAULT_PAGE_CONTENT;
   return {
@@ -38,20 +53,24 @@ export async function getPageContent(): Promise<PageContent> {
     aboutSubtitle: str(d.aboutSubtitle, D.aboutSubtitle),
     aboutBody: str(d.aboutBody, D.aboutBody),
     aboutPhoto: str(d.aboutPhoto, D.aboutPhoto),
+    aboutPhotoAlt: str(d.aboutPhotoAlt, D.aboutPhotoAlt),
+    currently: currentlyFrom(d.currently),
     updatedAt: d.updatedAt?.toDate?.() ?? undefined,
   };
 }
 
-/** Never rejects — for the layout, home and About page. */
+/** Never rejects: for the layout, home and About page. */
 export async function getPageContentSafe(): Promise<PageContent> {
   try {
     return await getPageContent();
   } catch (error) {
     console.error("[pageContent] read failed, using defaults:", error);
-    return { ...DEFAULT_PAGE_CONTENT };
+    return { ...DEFAULT_PAGE_CONTENT, currently: { ...EMPTY_CURRENTLY } };
   }
 }
 
-export async function updatePageContent(data: Partial<Omit<PageContent, "updatedAt">>): Promise<void> {
-  await adminDb.collection(DOC.collection).doc(DOC.id).set({ ...data, updatedAt: new Date() }, { merge: true });
+export async function updatePageContent(data: Partial<Omit<PageContent, "updatedAt" | "currently">> & { currently?: Omit<Currently, "updatedAt"> }): Promise<void> {
+  const payload: Record<string, unknown> = { ...data, updatedAt: new Date() };
+  if (data.currently) payload.currently = { ...data.currently, updatedAt: new Date() };
+  await adminDb.collection(DOC.collection).doc(DOC.id).set(payload, { merge: true });
 }

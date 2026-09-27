@@ -1,6 +1,6 @@
 /**
- * Brand + site configuration — the single source of truth for everything
- * that identifies the site (name, taglines, URL, socials, storage keys).
+ * Brand + site configuration: the single source of truth for everything
+ * that identifies the site (name, byline, URL, socials, storage keys).
  * Safe to import from both server and client code.
  */
 
@@ -8,15 +8,15 @@ export const SITE_NAME = "Agooh & Ruks";
 export const SITE_BYLINE = "Pass the Butter, Ruks";
 export const TAGLINE_PRIMARY = "Pure comfort, cooked simply";
 export const TAGLINE_SECONDARY = "Warmth in every bite";
-export const SITE_DESCRIPTION =
-  "Pure comfort, cooked simply. Wholesome, easy-to-follow recipes and family life from Agooh & Ruks.";
+/** Used in metadata only. */
+export const SITE_DESCRIPTION = "Recipes from Ruks's kitchen: bakes first, some cooking, and the odd story. Pass the Butter, Ruks.";
 export const AUTHOR_NAME = "Ruks";
 
 /**
  * Canonical site origin (no trailing slash).
  * Resolution order:
- *  1. NEXT_PUBLIC_SITE_URL   — set this in Vercel once a custom domain exists
- *  2. VERCEL_PROJECT_PRODUCTION_URL — provided automatically by Vercel
+ *  1. NEXT_PUBLIC_SITE_URL   (set this in Vercel once a custom domain exists)
+ *  2. VERCEL_PROJECT_PRODUCTION_URL (provided automatically by Vercel)
  *  3. The current production host
  */
 function resolveSiteUrl(): string {
@@ -42,18 +42,25 @@ export const SOCIAL_LINKS = {
  */
 export const CONTENT_REPO = { repo: "ssjabid/FoodWithRuks", branch: "main" } as const;
 
-/** Raw GitHub URL for a repo path, e.g. "public/images/uploads/..." — available seconds after upload. */
+/** Raw GitHub URL for a repo path, e.g. "public/images/uploads/...", available seconds after upload. */
 export function rawContentUrl(repoPath: string): string {
   return `https://raw.githubusercontent.com/${CONTENT_REPO.repo}/${CONTENT_REPO.branch}/${repoPath}`;
 }
 
-/** localStorage keys — namespaced so a future rebrand can't collide. */
+/** localStorage keys. `ar_favorites` is kept for compatibility (the UI says "Saved"). */
 export const STORAGE_KEYS = {
   /** legacy light|dark key, migrated to mode on first read */
   theme: "ar_theme",
   mode: "ar_mode",
-  palette: "ar_palette",
   favorites: "ar_favorites",
-  /** set once the visitor has opened the palette panel (hides the "new" dot) */
-  pickerSeen: "ar_picker_seen",
+} as const;
+
+/** Small, optional, never in the way. Each respects reduced motion. */
+export const EASTER_EGGS = {
+  /** Swap the favicon to the asleep mark while the tab is hidden */
+  faviconNodsOff: true,
+  /** The asleep mark sits next to the late-night kitchen line */
+  sleepyLateLine: true,
+  /** Off until both of them approve the wording */
+  complaintRecord: false,
 } as const;

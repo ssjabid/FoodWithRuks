@@ -1,18 +1,15 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import { verifyAdminRequest } from "@/lib/firebase/authCheck";
 import { getSiteSettings, updateSiteSettings } from "@/lib/firebase/siteSettings";
 import { getRecipeBySlug } from "@/lib/firebase/recipes";
-import { isPaletteId } from "@/lib/theme";
+import { isCollectionSlug } from "@/lib/collections";
+import { LIMITS } from "@/lib/validation";
+import { revalidateSiteCopy } from "@/lib/revalidate";
 
 const HANDLE_RE = /^@?[A-Za-z0-9._]{1,30}$/;
 
 export async function GET(request: Request) {
-  const isAdmin = await verifyAdminRequest(request);
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-  }
-
+  if (!(await verifyAdminRequest(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   try {
     return NextResponse.json(await getSiteSettings());
   } catch (error) {
@@ -22,32 +19,28 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const isAdmin = await verifyAdminRequest(request);
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-  }
-
+  if (!(await verifyAdminRequest(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   try {
     const body = (await request.json()) as {
       recipeOfTheWeekSlug?: unknown;
       instagramHandle?: unknown;
-      defaultPalette?: unknown;
-      showThemePicker?: unknown;
+      heroNote?: unknown;
+      activeCollection?: unknown;
+      showBakery?: unknown;
     };
     const update: {
       recipeOfTheWeekSlug?: string;
       instagramHandle?: string;
-      defaultPalette?: "cream" | "sage" | "blush" | "clay" | "olive";
-      showThemePicker?: boolean;
+      heroNote?: string;
+      activeCollection?: string;
+      showBakery?: boolean;
     } = {};
 
     if (typeof body.recipeOfTheWeekSlug === "string") {
       const slug = body.recipeOfTheWeekSlug.trim();
       if (slug) {
         const recipe = await getRecipeBySlug(slug);
-        if (!recipe) {
-          return NextResponse.json({ error: "That recipe is not published (or does not exist)." }, { status: 400 });
-        }
+        if (!recipe) return NextResponse.json({ error: "That recipe is not published (or does not exist)." }, { status: 400 });
       }
       update.recipeOfTheWeekSlug = slug;
     }
@@ -60,22 +53,26 @@ export async function PUT(request: Request) {
       update.instagramHandle = handle.startsWith("@") ? handle : `@${handle}`;
     }
 
-    if (body.defaultPalette !== undefined) {
-      if (!isPaletteId(body.defaultPalette)) {
-        return NextResponse.json({ error: "Unknown palette." }, { status: 400 });
-      }
-      update.defaultPalette = body.defaultPalette;
+    if (body.heroNote !== undefined) {
+      if (typeof body.heroNote !== "string") return NextResponse.json({ error: "The home note must be text." }, { status: 400 });
+      if (body.heroNote.length > LIMITS.heroNote) return NextResponse.json({ error: `The home note is too long (max ${LIMITS.heroNote} characters).` }, { status: 400 });
+      update.heroNote = body.heroNote.trim();
     }
 
-    if (body.showThemePicker !== undefined) {
-      if (typeof body.showThemePicker !== "boolean") {
-        return NextResponse.json({ error: "showThemePicker must be true or false." }, { status: 400 });
+    if (body.activeCollection !== undefined) {
+      if (body.activeCollection !== "" && !isCollectionSlug(body.activeCollection)) {
+        return NextResponse.json({ error: "Unknown collection." }, { status: 400 });
       }
-      update.showThemePicker = body.showThemePicker;
+      update.activeCollection = body.activeCollection as string;
+    }
+
+    if (body.showBakery !== undefined) {
+      if (typeof body.showBakery !== "boolean") return NextResponse.json({ error: "showBakery must be true or false." }, { status: 400 });
+      update.showBakery = body.showBakery;
     }
 
     await updateSiteSettings(update);
-    revalidatePath("/", "layout");
+    revalidateSiteCopy();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Settings update error:", error);

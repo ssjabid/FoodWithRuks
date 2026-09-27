@@ -8,20 +8,12 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: "bg-[var(--color-secondary)] text-[var(--color-text-primary)]",
-  accent: "bg-[var(--color-accent-soft)] text-[var(--color-accent-text)]",
-  outline: "border border-[var(--color-border)] text-[var(--color-text-secondary)]",
+  default: "bg-[var(--color-surface)] text-[var(--color-text)]",
+  accent: "bg-[var(--color-blush)] text-[var(--color-on-blush)]",
+  outline: "border border-[var(--color-line-strong)] text-[var(--color-text-2)]",
 };
 
+/** Small round-ended label. Sentence case is the caller's job. */
 export function Badge({ className, variant = "default", ...props }: BadgeProps) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-[var(--radius-badge)]",
-        variantStyles[variant],
-        className
-      )}
-      {...props}
-    />
-  );
+  return <span className={cn("inline-flex items-center h-7 px-2.5 text-xs font-medium rounded-full", variantStyles[variant], className)} {...props} />;
 }

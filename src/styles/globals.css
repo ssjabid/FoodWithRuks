@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
-/* ————————————————————————
-   DESIGN TOKENS — non-colour (static, safe in @theme)
-   ———————————————————————— */
+/* ------------------------------------------------------------------
+   DESIGN TOKENS: static values that are safe inside @theme
+   ------------------------------------------------------------------ */
 @theme {
+  /* Crisp outside (photos, panels), round where you touch (buttons, charms, the save control) */
+  --radius-none: 0px;
+  --radius-crisp: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -12,316 +15,142 @@
   --container-wide: 1240px;
   --container-prose: 45rem;
 
-  /* Every Tailwind transition-* utility uses these by default */
   --default-transition-duration: 150ms;
   --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Fonts are loaded by next/font in src/app/layout.tsx and exposed as
-   --font-lora / --font-inter on <html>. */
+/* Fonts come from next/font (src/app/layout.tsx) as CSS variables on <html>. */
 @theme inline {
   --font-heading: var(--font-lora), Georgia, "Times New Roman", serif;
   --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: var(--font-kalam), "Segoe Print", "Bradley Hand", cursive;
 }
 
-/* ————————————————————————
+/* ------------------------------------------------------------------
    MOTION + TYPE SCALE (runtime tokens)
-   ———————————————————————— */
+   ------------------------------------------------------------------ */
 :root {
   --ease-out: cubic-bezier(0.2, 0, 0, 1);
   --dur-fast: 120ms;
   --dur-base: 200ms;
   --dur-drawer: 220ms;
-  --dur-page: 280ms;   /* page enter fade */
+  --dur-page: 280ms;
+  --dur-squish: 360ms;
 
-  --text-display: clamp(3rem, 2.25rem + 3.2vw, 4.5rem);   /* 48–72 hero */
-  --text-h1: clamp(2.25rem, 1.9rem + 1.5vw, 3rem);        /* 36–48 page titles */
-  --text-h2: clamp(1.625rem, 1.45rem + 0.8vw, 2rem);      /* 26–32 sections */
-  --text-h3: 1.125rem;                                     /* 18 card titles */
-  --text-body: 1.0625rem;                                  /* 17 article body */
+  /* The bake's name is the headline on home and recipe pages */
+  --text-display: clamp(2.5rem, 1.9rem + 2.6vw, 4rem);      /* 40-64 */
+  --text-h1: clamp(2rem, 1.7rem + 1.4vw, 2.75rem);           /* 32-44 */
+  --text-h2: clamp(1.5rem, 1.35rem + 0.7vw, 1.875rem);       /* 24-30 */
+  --text-h3: 1.25rem;                                        /* 20 */
+  --text-body: 1.0625rem;                                    /* 17: recipe text, stories */
   --text-ui: 1rem;
   --text-small: 0.875rem;
-  --text-eyebrow: 0.75rem;
-  --text-nav: 1.25rem;
-
-  --palette-clay: #C7A491;
-  --palette-blush: #EECFCA;
-  --palette-sage: #919682;
-  --palette-sage-light: #C7CDBF;
-  --palette-olive: #595E48;
+  --text-note: 1.375rem;                                     /* handwriting */
+  --text-nav: 1.0625rem;
 }
 
-/* ————————————————————————
-   PALETTES — five arrangements of the same swatches, each light + dark.
-   Order matters: light blocks first, then dark blocks (compound
-   [data-palette].dark selectors outrank the single-class blocks).
-   ———————————————————————— */
-
-/* Cream & Olive — light (default) */
-:root,
-[data-palette="cream"] {
+/* ------------------------------------------------------------------
+   PALETTE. One palette, light ("Daylight") and dark ("After hours").
+   Semantic names; the roles are documented in CLAUDE.md.
+   ------------------------------------------------------------------ */
+:root {
   color-scheme: light;
-  --color-primary: #595E48;
-  --color-primary-hover: #474B3A;
-  --color-on-primary: #FFFFFF;
-  --color-secondary: #E4E8DD;
-  --color-accent: #C7A491;
-  --color-accent-soft: #EECFCA;
-  --color-accent-text: #79533F;
-  --color-background: #FCFBF8;
-  --color-surface: #F5F3EE;
-  --color-elevated: #FFFFFF;
-  --color-text-primary: #2A2D22;
-  --color-text-secondary: #595E48;
-  --color-text-tertiary: #62675A;
-  --color-border: #DDE1D6;
-  --color-success: #5E6E4F;
-  --color-warning: #B98230;
-  --color-error: #9E4A3F;
-  --color-placeholder-bg: #E4E8DD;
-  --color-placeholder-icon: #919682;
-  --color-band: #F5F3EE;
-  --color-on-band: #2A2D22;
+
+  --color-ground: #FFFAF8;        /* page: a warm white with a breath of pink */
+  --color-surface: #F8EFEC;       /* bands, cards, input fills */
+  --color-elevated: #FFFFFF;      /* panels over the surface */
+  --color-text: #2B1E1B;          /* cocoa */
+  --color-text-2: #5E4843;
+  --color-text-3: #7A625C;
+
+  --color-blush: #EECFCA;         /* the signature: Currently card, charms, cheeks. Never text. */
+  --color-on-blush: #2B1E1B;
+  --color-cheek: #9E3A53;         /* links, buttons, focus, selected */
+  --color-cheek-hover: #85304A;
+  --color-on-cheek: #FFFFFF;
+  --color-gold: #B08A3C;          /* jewellery: two per screen, shapes only */
+  --color-clay: #C7A491;          /* hairlines, strokes, the parcel tag. Never text. */
+
+  --color-line: #EBDAD4;          /* hairline dividers */
+  --color-line-strong: #D9C2BA;   /* borders that need to be seen */
+
+  --color-sage: #919682;          /* outdoor / trail content only */
+  --color-sage-ink: #56604A;
+  --color-sage-soft: #E6E9E0;
+
+  --color-success: #56604A;
+  --color-error: #A63A32;
+  --color-warning-bg: #FBE6D6;
+
+  --color-placeholder-bg: #F8EFEC;
+  --color-placeholder-ink: #C7A491;
+
+  /* The mark */
+  --color-mark-body: #E3C4A6;
+  --color-mark-ink: #2B1E1B;
+  --color-mark-cheek: #EBB2B0;
+
+  /* Legacy aliases: the admin still uses these names. Public components must use the tokens above. */
+  --color-primary: var(--color-cheek);
+  --color-primary-hover: var(--color-cheek-hover);
+  --color-on-primary: var(--color-on-cheek);
+  --color-secondary: var(--color-surface);
+  --color-accent: var(--color-clay);
+  --color-accent-soft: var(--color-blush);
+  --color-accent-text: var(--color-cheek);
+  --color-background: var(--color-ground);
+  --color-text-primary: var(--color-text);
+  --color-text-secondary: var(--color-text-2);
+  --color-text-tertiary: var(--color-text-3);
+  --color-border: var(--color-line-strong);
+  --color-warning: #8A5A1B;
+  --color-placeholder-icon: var(--color-placeholder-ink);
+  --color-band: var(--color-surface);
+  --color-on-band: var(--color-text);
 }
 
-/* Sage — light */
-[data-palette="sage"] {
-  color-scheme: light;
-  --color-primary: #595E48;
-  --color-primary-hover: #474B3A;
-  --color-on-primary: #FFFFFF;
-  --color-secondary: #DDE1D9;
-  --color-accent: #919682;
-  --color-accent-soft: #EECFCA;
-  --color-accent-text: #79533F;
-  --color-background: #F1F2EF;
-  --color-surface: #E9EBE5;
-  --color-elevated: #FFFFFF;
-  --color-text-primary: #24261D;
-  --color-text-secondary: #474B3A;
-  --color-text-tertiary: #62675A;
-  --color-border: #C7CDBF;
-  --color-success: #5E6E4F;
-  --color-warning: #B98230;
-  --color-error: #9E4A3F;
-  --color-placeholder-bg: #DDE1D9;
-  --color-placeholder-icon: #919682;
-  --color-band: #DDE1D9;
-  --color-on-band: #24261D;
-}
-
-/* Blush — light */
-[data-palette="blush"] {
-  color-scheme: light;
-  --color-primary: #595E48;
-  --color-primary-hover: #474B3A;
-  --color-on-primary: #FFFFFF;
-  --color-secondary: #F3DDDA;
-  --color-accent: #C7A491;
-  --color-accent-soft: #EECFCA;
-  --color-accent-text: #79533F;
-  --color-background: #FAF1EF;
-  --color-surface: #F5E2DF;
-  --color-elevated: #FFFFFF;
-  --color-text-primary: #322924;
-  --color-text-secondary: #5A4A41;
-  --color-text-tertiary: #6F5B50;
-  --color-border: #EECFCA;
-  --color-success: #5E6E4F;
-  --color-warning: #B98230;
-  --color-error: #9E4A3F;
-  --color-placeholder-bg: #F5E2DF;
-  --color-placeholder-icon: #C7A491;
-  --color-band: #EECFCA;
-  --color-on-band: #322924;
-}
-
-/* Clay — light */
-[data-palette="clay"] {
-  color-scheme: light;
-  --color-primary: #825540;
-  --color-primary-hover: #6E4735;
-  --color-on-primary: #FFFFFF;
-  --color-secondary: #E9DBD3;
-  --color-accent: #919682;
-  --color-accent-soft: #E4E8DD;
-  --color-accent-text: #595E48;
-  --color-background: #F7F1EE;
-  --color-surface: #EEE4DE;
-  --color-elevated: #FFFFFF;
-  --color-text-primary: #322924;
-  --color-text-secondary: #5A4A41;
-  --color-text-tertiary: #6F5B50;
-  --color-border: #E3D2C8;
-  --color-success: #5E6E4F;
-  --color-warning: #B98230;
-  --color-error: #9E4A3F;
-  --color-placeholder-bg: #E9DBD3;
-  --color-placeholder-icon: #C7A491;
-  --color-band: #C7A491;
-  --color-on-band: #322924;
-}
-
-/* Evening Olive — light (sage ground with olive bands) */
-[data-palette="olive"] {
-  color-scheme: light;
-  --color-primary: #595E48;
-  --color-primary-hover: #474B3A;
-  --color-on-primary: #FFFFFF;
-  --color-secondary: #D2D7CC;
-  --color-accent: #C7A491;
-  --color-accent-soft: #EECFCA;
-  --color-accent-text: #79533F;
-  --color-background: #E9EBE5;
-  --color-surface: #DDE1D9;
-  --color-elevated: #F1F2EF;
-  --color-text-primary: #24261D;
-  --color-text-secondary: #474B3A;
-  --color-text-tertiary: #595E48;
-  --color-border: #B9BFB2;
-  --color-success: #595E48;
-  --color-warning: #8F6A2A;
-  --color-error: #9E4A3F;
-  --color-placeholder-bg: #DDE1D9;
-  --color-placeholder-icon: #919682;
-  --color-band: #595E48;
-  --color-on-band: #FCFBF8;
-}
-
-/* Cream & Olive — dark (default dark) */
-.dark,
-[data-palette="cream"].dark {
+.dark {
   color-scheme: dark;
-  --color-primary: #C7CDBF;
-  --color-primary-hover: #DDE1D9;
-  --color-on-primary: #1B1D17;
-  --color-secondary: #333828;
-  --color-accent: #C7A491;
-  --color-accent-soft: #3A2E2A;
-  --color-accent-text: #D8BFB2;
-  --color-background: #1B1D17;
-  --color-surface: #22251D;
-  --color-elevated: #2B2F25;
-  --color-text-primary: #F1EEE7;
-  --color-text-secondary: #B9BDAF;
-  --color-text-tertiary: #9FA491;
-  --color-border: #3A3F32;
-  --color-success: #A7B894;
-  --color-warning: #D9B27A;
-  --color-error: #E39383;
-  --color-placeholder-bg: #22251D;
-  --color-placeholder-icon: #6E7362;
-  --color-band: #22251D;
-  --color-on-band: #F1EEE7;
-}
 
-/* Sage — dark */
-[data-palette="sage"].dark {
-  color-scheme: dark;
-  --color-primary: #C7CDBF;
-  --color-primary-hover: #DDE1D9;
-  --color-on-primary: #24261D;
-  --color-secondary: #3A3D2F;
-  --color-accent: #C7A491;
-  --color-accent-soft: #3C312C;
-  --color-accent-text: #D8BFB2;
-  --color-background: #24261D;
-  --color-surface: #2D2F24;
-  --color-elevated: #35382B;
-  --color-text-primary: #F1F2EF;
-  --color-text-secondary: #C7CDBF;
-  --color-text-tertiary: #9FA491;
-  --color-border: #474B3A;
-  --color-success: #A7B894;
-  --color-warning: #D9B27A;
-  --color-error: #E39383;
-  --color-placeholder-bg: #2D2F24;
-  --color-placeholder-icon: #6E7362;
-  --color-band: #2D2F24;
-  --color-on-band: #F1F2EF;
-}
+  --color-ground: #1E1614;        /* warm cocoa, never neutral black */
+  --color-surface: #2A201D;
+  --color-elevated: #342925;
+  --color-text: #FBEFEB;
+  --color-text-2: #D9C3BD;
+  --color-text-3: #B39B94;
 
-/* Blush — dark */
-[data-palette="blush"].dark {
-  color-scheme: dark;
-  --color-primary: #EECFCA;
-  --color-primary-hover: #F5E2DF;
-  --color-on-primary: #241E1A;
-  --color-secondary: #3C312C;
-  --color-accent: #C7A491;
-  --color-accent-soft: #50423A;
-  --color-accent-text: #D8BFB2;
-  --color-background: #241E1A;
-  --color-surface: #2E2621;
-  --color-elevated: #3A302A;
-  --color-text-primary: #F8ECEA;
-  --color-text-secondary: #D8BFB2;
-  --color-text-tertiary: #B39786;
-  --color-border: #4C3E37;
-  --color-success: #A7B894;
-  --color-warning: #D9B27A;
-  --color-error: #E39383;
-  --color-placeholder-bg: #2E2621;
-  --color-placeholder-icon: #7B665A;
-  --color-band: #2E2621;
-  --color-on-band: #F8ECEA;
-}
+  --color-blush: #4A2F30;
+  --color-on-blush: #FBEFEB;
+  --color-cheek: #F2A5B6;
+  --color-cheek-hover: #F7BCC9;
+  --color-on-cheek: #2B1E1B;
+  --color-gold: #D9B56A;
+  --color-clay: #C7A491;
 
-/* Clay — dark */
-[data-palette="clay"].dark {
-  color-scheme: dark;
-  --color-primary: #C7A491;
-  --color-primary-hover: #D8BFB2;
-  --color-on-primary: #241E1A;
-  --color-secondary: #3C312C;
-  --color-accent: #C7CDBF;
-  --color-accent-soft: #3A3D2F;
-  --color-accent-text: #C7CDBF;
-  --color-background: #1E1916;
-  --color-surface: #2A221E;
-  --color-elevated: #362C27;
-  --color-text-primary: #F7F1EE;
-  --color-text-secondary: #D8BFB2;
-  --color-text-tertiary: #B39786;
-  --color-border: #4C3E37;
-  --color-success: #A7B894;
-  --color-warning: #D9B27A;
-  --color-error: #E39383;
-  --color-placeholder-bg: #2A221E;
-  --color-placeholder-icon: #7B665A;
-  --color-band: #2A221E;
-  --color-on-band: #F7F1EE;
-}
+  --color-line: #3E302C;
+  --color-line-strong: #55433E;
 
-/* Evening Olive — dark (olive itself is the ground) */
-[data-palette="olive"].dark {
-  color-scheme: dark;
-  --color-primary: #EECFCA;
-  --color-primary-hover: #F5E2DF;
-  --color-on-primary: #24261D;
-  --color-secondary: #595E48;
-  --color-accent: #C7A491;
-  --color-accent-soft: #5A4A41;
-  --color-accent-text: #E9DBD3;
-  --color-background: #474B3A;
-  --color-surface: #595E48;
-  --color-elevated: #3E4232;
-  --color-text-primary: #F9FAF9;
-  --color-text-secondary: #E9EBE5;
-  --color-text-tertiary: #DDE1D9;
-  --color-border: #6A6E5A;
-  --color-success: #E9EBE5;
+  --color-sage: #AEB89F;
+  --color-sage-ink: #AEB89F;
+  --color-sage-soft: #2F3328;
+
+  --color-success: #AEB89F;
+  --color-error: #F0A297;
+  --color-warning-bg: #4A3324;
+
+  --color-placeholder-bg: #2A201D;
+  --color-placeholder-ink: #8F7466;
+
+  --color-mark-body: #B08A6A;
+  --color-mark-ink: #1E1614;
+  --color-mark-cheek: #E08A98;
+
   --color-warning: #EAD2A8;
-  --color-error: #F5CFC8;
-  --color-placeholder-bg: #595E48;
-  --color-placeholder-icon: #C7CDBF;
-  --color-band: #2A2D22;
-  --color-on-band: #F9FAF9;
 }
 
-/* ————————————————————————
+/* ------------------------------------------------------------------
    BASE
-   ———————————————————————— */
+   ------------------------------------------------------------------ */
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
@@ -337,10 +166,11 @@
     font-family: var(--font-body);
     font-size: var(--text-ui);
     line-height: 1.6;
-    background-color: var(--color-background);
-    color: var(--color-text-primary);
+    background-color: var(--color-ground);
+    color: var(--color-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-variant-numeric: lining-nums;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -351,13 +181,16 @@
     text-wrap: balance;
   }
 
-  /* Keyboard focus only. Inputs opt out via .field (they always match :focus-visible). */
+  /* Keyboard focus only. Inputs opt out via .field. */
   :focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-cheek);
     outline-offset: 2px;
   }
 
-  /* Search inputs: drop the native iOS inset/rounded styling and the stray cancel button */
+  ::selection {
+    background: color-mix(in srgb, var(--color-blush) 70%, transparent);
+  }
+
   input[type="search"] {
     -webkit-appearance: none;
     appearance: none;
@@ -368,8 +201,6 @@
     display: none;
   }
 
-  /* Page transitions (see components/shared/PageTransition.tsx). The outgoing page
-     softens while the next one loads; the incoming page fades and settles in. */
   main {
     transition: opacity var(--dur-fast) var(--ease-out);
   }
@@ -379,11 +210,7 @@
     }
   }
 
-  ::selection {
-    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
-  }
-
-  /* Colour crossfade — only while the theme is being switched (ThemeProvider adds the class for 300ms) */
+  /* Colour crossfade only while the mode is being switched (ThemeProvider adds the class briefly) */
   html.theme-transition,
   html.theme-transition *,
   html.theme-transition *::before,
@@ -405,18 +232,9 @@
   }
 }
 
-/* ————————————————————————
-   TYPOGRAPHY UTILITIES
-   ———————————————————————— */
-@utility eyebrow {
-  font-family: var(--font-body);
-  font-size: var(--text-eyebrow);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--color-text-tertiary);
-}
-
+/* ------------------------------------------------------------------
+   TYPOGRAPHY UTILITIES. Sentence case everywhere; no eyebrows.
+   ------------------------------------------------------------------ */
 @utility h-display {
   font-family: var(--font-heading);
   font-size: var(--text-display);
@@ -429,8 +247,8 @@
   font-family: var(--font-heading);
   font-size: var(--text-h1);
   font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
 }
 
 @utility h-section {
@@ -448,78 +266,84 @@
   line-height: 1.3;
 }
 
-@utility accent-italic {
-  font-family: var(--font-heading);
-  font-style: italic;
-  font-weight: 400;
-  color: var(--color-accent-text);
-}
-
 @utility text-body {
   font-size: var(--text-body);
   line-height: 1.65;
 }
 
-/* ————————————————————————
+/* Her handwriting layer: short notes only, always real text */
+@utility note {
+  font-family: var(--font-hand);
+  font-size: var(--text-note);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--color-text-2);
+}
+
+/* ------------------------------------------------------------------
    COMPONENTS
-   ———————————————————————— */
+   ------------------------------------------------------------------ */
 @layer components {
-  /* Form fields: border darkens on focus, no glow. */
+  /* Form fields: border darkens on focus, no glow. 16px on phones so iOS does not zoom. */
   .field {
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-line-strong);
     background-color: var(--color-elevated);
-    color: var(--color-text-primary);
+    color: var(--color-text);
     transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
   }
   .field::placeholder {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-3);
   }
   .field:hover {
-    border-color: var(--color-text-tertiary);
+    border-color: var(--color-text-3);
   }
   .field:focus,
   .field:focus-within {
     outline: none;
-    border-color: var(--color-primary);
-    box-shadow: inset 0 0 0 1px var(--color-primary);
+    border-color: var(--color-cheek);
+    box-shadow: inset 0 0 0 1px var(--color-cheek);
   }
   .field-bare {
     background: transparent;
-    color: var(--color-text-primary);
+    color: var(--color-text);
   }
   .field-bare::placeholder {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-3);
   }
   .field-bare:focus {
     outline: none;
   }
 
-  /* Editorial links: underline, brightens on hover */
+  /* Text links */
   .link {
     color: inherit;
     text-decoration: underline;
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
-    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
     transition: text-decoration-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
   }
   .link:hover {
     text-decoration-color: currentColor;
   }
-  .link-primary {
-    color: var(--color-primary);
+  .link-cheek {
+    color: var(--color-cheek);
+  }
+  .link-cheek:hover {
+    color: var(--color-cheek-hover);
   }
 
   .fade-in {
     animation: fadeIn var(--dur-fast) var(--ease-out) both;
   }
 
-  /* Incoming page: one soft fade + 4px settle, applied by PageEnter on client navigations only */
+  /* Incoming page: one soft fade, client navigations only (PageEnter) */
   .page-enter {
     animation: pageEnter var(--dur-page) var(--ease-out) both;
   }
 
-  /* Height-animated disclosure without JS measuring */
+  /* Height-animated disclosure */
   .accordion {
     display: grid;
     grid-template-rows: 0fr;
@@ -533,7 +357,7 @@
     grid-template-rows: 1fr;
   }
 
-  /* Drawer + overlay: always mounted, visibility delayed so exit transitions run */
+  /* Menu sheet + search overlay: always mounted, visibility delayed so exits run */
   .drawer-backdrop {
     opacity: 0;
     visibility: hidden;
@@ -545,12 +369,14 @@
     transition-delay: 0s;
   }
   .drawer-panel {
-    transform: translateX(-100%);
+    transform: translateY(-8px);
+    opacity: 0;
     visibility: hidden;
-    transition: transform var(--dur-drawer) var(--ease-out), visibility 0s linear var(--dur-drawer);
+    transition: transform var(--dur-drawer) var(--ease-out), opacity var(--dur-drawer) var(--ease-out), visibility 0s linear var(--dur-drawer);
   }
   .drawer-panel[data-state="open"] {
     transform: none;
+    opacity: 1;
     visibility: visible;
     transition-delay: 0s;
   }
@@ -567,38 +393,104 @@
     transition-delay: 0s;
   }
 
-  /* Header popover (Appearance panel): transparent backdrop so the palette change is visible behind it */
-  .popover-backdrop {
-    position: fixed;
-    inset: 0;
-    visibility: hidden;
-  }
-  .popover-backdrop[data-state="open"] {
-    visibility: visible;
-  }
-  .popover-panel {
-    opacity: 0;
-    transform: translateY(-6px);
-    visibility: hidden;
-    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out), visibility 0s linear 150ms;
-  }
-  .popover-panel[data-state="open"] {
-    opacity: 1;
-    transform: none;
-    visibility: visible;
-    transition-delay: 0s;
-  }
-
-  /* Flat image placeholder */
-  .placeholder-icon {
+  /* The necklace: a fine line with a single pendant. One or two per page. */
+  .necklace {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: var(--color-placeholder-bg);
-    color: var(--color-placeholder-icon);
+    gap: 10px;
+    width: 100%;
+  }
+  .necklace::before,
+  .necklace::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-line-strong);
+  }
+  .necklace > i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-gold);
   }
 
-  /* Article prose (lifestyle posts) */
+  /* Charms: round-ended blush chips with a tiny icon */
+  .charm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px 0 10px;
+    border-radius: var(--radius-badge);
+    background: var(--color-blush);
+    color: var(--color-on-blush);
+    font-size: var(--text-small);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  a.charm:hover {
+    background: color-mix(in srgb, var(--color-blush) 80%, var(--color-cheek) 20%);
+  }
+  .charm-sage {
+    background: var(--color-sage-soft);
+    color: var(--color-sage-ink);
+  }
+  a.charm-sage:hover {
+    background: color-mix(in srgb, var(--color-sage-soft) 80%, var(--color-sage) 20%);
+  }
+  .charm[aria-pressed="true"],
+  .charm[data-selected="true"] {
+    box-shadow: 0 0 0 1.5px var(--color-gold);
+  }
+  /* As a filter (recipes index) the charm needs a fingertip-sized target */
+  .charm-filter {
+    height: 44px;
+    padding: 0 16px 0 14px;
+    font-size: var(--text-small);
+  }
+  button.charm:hover {
+    background: color-mix(in srgb, var(--color-blush) 80%, var(--color-cheek) 20%);
+  }
+  button.charm-sage:hover {
+    background: color-mix(in srgb, var(--color-sage-soft) 80%, var(--color-sage) 20%);
+  }
+
+  /* Honest photo placeholder: flour frame, the mark, a caption */
+  .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--color-placeholder-bg);
+    color: var(--color-text-3);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
+
+  /* The Squish: eyes close into arcs when a recipe is saved. Reduced motion = instant swap. */
+  .squish-btn .mark-eye {
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  .squish-btn[aria-pressed="true"] .mark {
+    animation: squish var(--dur-squish) var(--ease-out) both;
+  }
+  .squish-btn .mark-cheek {
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  /* Tick-off method steps (cook mode) */
+  .step-done {
+    opacity: 0.55;
+  }
+  .step-done .step-text {
+    text-decoration: line-through;
+    text-decoration-color: var(--color-text-3);
+  }
+
+  /* Article prose (stories, About, editor output) */
   .prose {
     font-size: var(--text-body);
     line-height: 1.65;
@@ -608,17 +500,17 @@
     font-size: 1.5rem;
     margin-top: 2rem;
     margin-bottom: 0.75rem;
-    color: var(--color-text-primary);
+    color: var(--color-text);
   }
   .prose h3 {
     font-size: 1.25rem;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
-    color: var(--color-text-primary);
+    color: var(--color-text);
   }
   .prose p {
     margin-bottom: 1.1rem;
-    color: var(--color-text-primary);
+    color: var(--color-text);
   }
   .prose ul, .prose ol {
     padding-left: 1.5rem;
@@ -628,7 +520,7 @@
     margin-bottom: 0.4rem;
   }
   .prose a {
-    color: var(--color-primary);
+    color: var(--color-cheek);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -636,37 +528,55 @@
     display: block;
     max-width: 100%;
     height: auto;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-crisp);
     margin: 1.5rem 0;
   }
   .prose blockquote {
     margin: 1.5rem 0;
     padding-left: 1rem;
-    border-left: 2px solid var(--color-accent);
+    border-left: 2px solid var(--color-clay);
     font-family: var(--font-heading);
     font-style: italic;
-    color: var(--color-text-secondary);
+    color: var(--color-text-2);
   }
   .prose strong {
     font-weight: 600;
   }
   .prose hr {
     border: 0;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-line);
     margin: 2rem 0;
   }
 
   /* Admin editor (Tiptap) */
   .rte .rte-content p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
-    color: var(--color-text-tertiary);
+    color: var(--color-text-3);
     float: left;
     height: 0;
     pointer-events: none;
   }
   .rte .rte-content img.ProseMirror-selectednode {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-cheek);
     outline-offset: 2px;
+  }
+
+  /* Skip link */
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -3rem;
+    z-index: 100;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-badge);
+    background: var(--color-cheek);
+    color: var(--color-on-cheek);
+    font-size: var(--text-small);
+    font-weight: 500;
+    transition: top var(--dur-fast) var(--ease-out);
+  }
+  .skip-link:focus {
+    top: 0.75rem;
   }
 }
 
@@ -681,29 +591,62 @@
   }
 }
 
-/* ————————————————————————
-   PRINT
-   ———————————————————————— */
+/* Eyes close, cheeks warm, the whole bake gives a little */
+@keyframes squish {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.12, 0.9); }
+  70%  { transform: scale(0.96, 1.04); }
+  100% { transform: scale(1); }
+}
+
+/* ------------------------------------------------------------------
+   PRINT: a recipe card that fits one page where it can
+   ------------------------------------------------------------------ */
 @media print {
-  header, footer, nav, .no-print,
-  .theme-toggle, .share-buttons, .comments-section,
-  .newsletter-section, .related-recipes, .back-to-top {
+  @page {
+    margin: 14mm;
+  }
+  header, footer, nav, .no-print, .comments-section, .share-buttons, .related-recipes,
+  .newsletter-section, .back-to-top, .print-hide {
     display: none !important;
   }
-
+  .print-only {
+    display: block !important;
+  }
   body {
     background: white;
     color: black;
-    font-size: 12pt;
+    font-size: 11pt;
+    line-height: 1.4;
   }
-
+  main {
+    opacity: 1 !important;
+  }
   a {
     text-decoration: none;
     color: black;
   }
-
+  .print-photo {
+    max-width: 55mm !important;
+    height: auto !important;
+    float: right;
+    margin: 0 0 6mm 6mm;
+  }
+  h1 {
+    font-size: 22pt;
+  }
+  h2 {
+    font-size: 14pt;
+    margin-top: 8pt;
+  }
+  .prose, .text-body {
+    font-size: 11pt;
+  }
   *, *::before, *::after {
     transition: none !important;
     animation: none !important;
   }
+}
+.print-only {
+  display: none;
 }

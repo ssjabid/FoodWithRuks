@@ -1,15 +1,18 @@
-import { HeroSection } from "@/components/home/HeroSection";
-import { CurrentlyCooking } from "@/components/home/CurrentlyCooking";
-import { ExploreByCategory } from "@/components/home/ExploreByCategory";
-import { MostLoved } from "@/components/home/MostLoved";
-import { LifestyleTeaser } from "@/components/home/LifestyleTeaser";
-import { InstagramBlock } from "@/components/home/InstagramBlock";
-import { NewsletterSection } from "@/components/home/NewsletterSection";
+import { KitchenTime } from "@/components/home/KitchenTime";
+import { Offering } from "@/components/home/Offering";
+import { CurrentlyCard } from "@/components/home/CurrentlyCard";
+import { NewOutOfTheOven } from "@/components/home/NewOutOfTheOven";
+import { CollectionsRow } from "@/components/home/CollectionsRow";
+import { ComeBackFor } from "@/components/home/ComeBackFor";
+import { StoriesTeaser } from "@/components/home/StoriesTeaser";
+import { EmailLine } from "@/components/home/EmailLine";
+import { EmptyKitchen } from "@/components/home/EmptyKitchen";
 import { getPublishedRecipes, getRecipeOfTheWeek } from "@/lib/firebase/recipes";
 import { getPublishedPosts } from "@/lib/firebase/lifestyle";
-import { getCategoryCounts } from "@/lib/categoryCounts";
-import { getPageContentSafe } from "@/lib/firebase/pageContent";
-import { SAMPLE_RECIPES, SAMPLE_LIFESTYLE_POSTS } from "@/lib/sampleData";
+import { getSiteSettingsSafe } from "@/lib/firebase/siteSettings";
+import { getPageContentSafe, currentlyIsEmpty } from "@/lib/firebase/pageContent";
+import { nonEmptyCollections } from "@/lib/collections";
+import { IS_PRODUCTION, postsOrFixtures, recipesOrFixtures } from "@/lib/content";
 import type { Recipe, LifestylePost } from "@/types";
 
 export const revalidate = 3600;
@@ -17,60 +20,67 @@ export const revalidate = 3600;
 const byNewest = (a: Recipe, b: Recipe) =>
   new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime();
 
-const byLoved = (a: Recipe, b: Recipe) =>
-  b.viewCount - a.viewCount || b.rating.count - a.rating.count || byNewest(a, b);
-
 export default async function HomePage() {
-  const [[rotwResult, recipesResult, postsResult], content] = await Promise.all([
-    Promise.allSettled([getRecipeOfTheWeek(), getPublishedRecipes({ limit: 100 }), getPublishedPosts()] as const),
+  const [rotwResult, recipesResult, postsResult, settings, content] = await Promise.all([
+    Promise.allSettled([getRecipeOfTheWeek()]).then((r) => r[0]),
+    Promise.allSettled([getPublishedRecipes({ limit: 100 })]).then((r) => r[0]),
+    Promise.allSettled([getPublishedPosts()]).then((r) => r[0]),
+    getSiteSettingsSafe(),
     getPageContentSafe(),
   ]);
 
-  let recipes: Recipe[];
-  if (recipesResult.status === "fulfilled" && recipesResult.value.length > 0) {
-    recipes = recipesResult.value;
-  } else {
-    if (recipesResult.status === "rejected") {
-      console.error("[home] recipes fetch failed, using sample data:", recipesResult.reason);
-    }
-    recipes = SAMPLE_RECIPES;
-  }
+  const realRecipes: Recipe[] = recipesResult.status === "fulfilled" ? recipesResult.value : [];
+  if (recipesResult.status === "rejected") console.error("[home] recipes fetch failed:", recipesResult.reason);
+  const recipes = recipesOrFixtures(realRecipes);
+  const standingIn = realRecipes.length === 0;
 
-  let featured: Recipe | null;
-  if (rotwResult.status === "fulfilled" && rotwResult.value) {
-    featured = rotwResult.value;
-  } else {
-    if (rotwResult.status === "rejected") {
-      console.error("[home] recipe of the week fetch failed, using latest:", rotwResult.reason);
-    }
-    featured = [...recipes].sort(byNewest)[0] ?? null;
-  }
+  const realPosts: LifestylePost[] = postsResult.status === "fulfilled" ? postsResult.value : [];
+  if (postsResult.status === "rejected") console.error("[home] stories fetch failed:", postsResult.reason);
+  const posts = postsOrFixtures(realPosts);
 
-  let posts: LifestylePost[];
-  if (postsResult.status === "fulfilled" && postsResult.value.length > 0) {
-    posts = postsResult.value;
-  } else {
-    if (postsResult.status === "rejected") {
-      console.error("[home] lifestyle posts fetch failed, using sample data:", postsResult.reason);
-    }
-    posts = SAMPLE_LIFESTYLE_POSTS;
-  }
+  let featured: Recipe | null = null;
+  if (!standingIn && rotwResult.status === "fulfilled" && rotwResult.value) featured = rotwResult.value;
+  if (rotwResult.status === "rejected") console.error("[home] pinned recipe fetch failed:", rotwResult.reason);
+  if (!featured) featured = [...recipes].sort(byNewest)[0] ?? null;
 
-  const notFeatured = recipes.filter((r) => r.slug !== featured?.slug);
-  const latest = [...notFeatured].sort(byNewest).slice(0, 3);
-  const latestSlugs = new Set(latest.map((r) => r.slug));
-  const mostLoved = [...notFeatured].filter((r) => !latestSlugs.has(r.slug)).sort(byLoved).slice(0, 4);
-  const counts = getCategoryCounts(recipes);
+  const rest = recipes.filter((r) => r.slug !== featured?.slug);
+  const latest = [...rest].sort(byNewest).slice(0, 3);
+  const collections = nonEmptyCollections(
+    recipes.filter((r) => !r.sample),
+    settings.activeCollection
+  );
+  // Only with real data: at least 12 published recipes and real views
+  const comeBackFor =
+    realRecipes.length >= 12 && realRecipes.some((r) => r.viewCount > 0)
+      ? [...realRecipes].sort((a, b) => b.viewCount - a.viewCount || b.rating.count - a.rating.count).slice(0, 4)
+      : [];
+  const showCurrently = !currentlyIsEmpty(content.currently);
 
   return (
-    <>
-      <HeroSection recipe={featured} intro={content.heroIntro} />
-      <CurrentlyCooking recipes={latest} />
-      <ExploreByCategory counts={counts} />
-      <MostLoved recipes={mostLoved} />
-      <LifestyleTeaser posts={posts.slice(0, 3)} />
-      <InstagramBlock />
-      <NewsletterSection />
-    </>
+    <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8">
+      <KitchenTime />
+
+      {standingIn && IS_PRODUCTION && <EmptyKitchen />}
+
+      {featured && <Offering recipe={featured} note={settings.heroNote || featured.ruksNote || ""} intro={content.heroIntro} />}
+
+      {latest.length > 0 ? (
+        <NewOutOfTheOven recipes={latest} aside={showCurrently ? <CurrentlyCard currently={content.currently} /> : null} />
+      ) : (
+        showCurrently && (
+          <section className="py-10 sm:py-14 max-w-md">
+            <CurrentlyCard currently={content.currently} />
+          </section>
+        )
+      )}
+
+      {collections.length > 0 && <CollectionsRow rows={collections} />}
+
+      {comeBackFor.length > 0 && <ComeBackFor recipes={comeBackFor} />}
+
+      {posts.length > 0 && <StoriesTeaser posts={posts.slice(0, 3)} />}
+
+      <EmailLine />
+    </div>
   );
 }
